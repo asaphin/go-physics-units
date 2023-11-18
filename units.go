@@ -4,10 +4,17 @@ import (
 	"fmt"
 )
 
+// MeasuredValue used to transfer and store measurements
+type MeasuredValue struct {
+	Value float64 `json:"value"`
+	Unit  string  `json:"unit"`
+}
+
 type Measurement interface {
 	Value() float64
 	Unit() string
 	ConvertTo(targetUnit string) (Measurement, error)
+	MeasuredValue() MeasuredValue
 	fmt.Stringer
 }
 
@@ -35,6 +42,10 @@ func (b *BaseMeasurement) ConvertTo(targetUnit string) (Measurement, error) {
 	}
 
 	return nil, fmt.Errorf("unit %s unspecified in conversionFactors", targetUnit)
+}
+
+func (b *BaseMeasurement) MeasuredValue() MeasuredValue {
+	return MeasuredValue{Value: b.value, Unit: b.unit}
 }
 
 func (b *BaseMeasurement) String() string {

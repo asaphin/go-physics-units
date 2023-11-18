@@ -30,11 +30,11 @@ func NewVelocity(value float64, unit string) (Velocity, error) {
 	return NewBaseMeasurement(value, unit, velocityConversionFactors)
 }
 
-func NewVelocityFromLengthAntTime(l Length, t Time) Velocity {
-	l, _ = l.ConvertTo(LengthBaseUnit)
+func NewVelocityFromDistanceAntTime(d Distance, t Time) Velocity {
+	d, _ = d.ConvertTo(DistanceBaseUnit)
 	t, _ = t.ConvertTo(TimeBaseUnit)
 
-	v, _ := NewVelocity(l.Value()/t.Value(), VelocityBaseUnit)
+	v, _ := NewVelocity(d.Value()/t.Value(), VelocityBaseUnit)
 
 	return v
 }

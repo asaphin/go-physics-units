@@ -15,10 +15,10 @@ const (
 	NauticalMile = "nmi"
 )
 
-const LengthBaseUnit = Meter
+const DistanceBaseUnit = Meter
 
-// lengthConversionFactors shows how many specified units in base unit of length - m (meter)
-var lengthConversionFactors = ConversionFactors{
+// distanceConversionFactors shows how many specified units in base unit of distance - m (meter)
+var distanceConversionFactors = ConversionFactors{
 	Millimeter:   0.0001,
 	Centimeter:   0.01,
 	Decimeter:    0.1,
@@ -31,14 +31,14 @@ var lengthConversionFactors = ConversionFactors{
 	NauticalMile: 1852,
 }
 
-type Length interface {
+type Distance interface {
 	Measurement
 }
 
-func NewLength(value float64, unit string) (Length, error) {
-	if _, ok := lengthConversionFactors[unit]; !ok {
-		return nil, fmt.Errorf("unknown length unit %s", unit)
+func NewDistance(value float64, unit string) (Distance, error) {
+	if _, ok := distanceConversionFactors[unit]; !ok {
+		return nil, fmt.Errorf("unknown Distance unit %s", unit)
 	}
 
-	return NewBaseMeasurement(value, unit, lengthConversionFactors)
+	return NewBaseMeasurement(value, unit, distanceConversionFactors)
 }

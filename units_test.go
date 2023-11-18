@@ -5,7 +5,7 @@ import (
 )
 
 func TestBaseMeasurement(t *testing.T) {
-	ln, err := NewBaseMeasurement(1, "m", lengthConversionFactors)
+	ln, err := NewBaseMeasurement(1, "m", distanceConversionFactors)
 	if err != nil {
 		t.Error(err)
 	}
