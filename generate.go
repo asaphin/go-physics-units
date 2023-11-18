@@ -1,0 +1,3 @@
+package units
+
+//go:generate golangci-lint run ./...

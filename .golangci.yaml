@@ -1,0 +1,46 @@
+linters:
+  # Enable all linters by default
+  enable-all: true
+  # Disable some specific linters
+  disable:
+    - gochecknoglobals
+    - gocyclo
+    - goimports
+    - deadcode
+    - interfacer
+    - structcheck
+    - golint
+    - ifshort
+    - varcheck
+    - exhaustivestruct
+    - nosnakecase
+    - maligned
+    - scopelint
+    - gomnd
+    - ireturn
+    - gci
+    - paralleltest
+    - gofumpt
+    - depguard
+    - goerr113
+
+issues:
+  # Set the severity level for different issues
+  severity:
+    default: error
+    style: warning
+    perf: warning
+
+workflow:
+  # Enable parallel linting
+  allow-parallel-runners: true
+
+# Additional configuration for specific linters
+gci:
+  - name: goimports
+    # Set the import order style
+    style: golangci-lint
+
+# Enable golangci-lint documentation linter
+docs:
+  enabled: true

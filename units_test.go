@@ -1,11 +1,12 @@
-package units
+package units_test
 
 import (
+	units "github.com/asaphin/go-physics-units"
 	"testing"
 )
 
 func TestBaseMeasurement(t *testing.T) {
-	ln, err := NewBaseMeasurement(1, "m", distanceConversionFactors)
+	ln, err := units.NewBaseMeasurement(1, "m", units.DistanceConversionFactors())
 	if err != nil {
 		t.Error(err)
 	}

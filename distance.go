@@ -17,7 +17,7 @@ const (
 
 const DistanceBaseUnit = Meter
 
-// distanceConversionFactors shows how many specified units in base unit of distance - m (meter)
+// distanceConversionFactors shows how many specified units in base unit of distance - m (meter).
 var distanceConversionFactors = ConversionFactors{
 	Millimeter:   0.0001,
 	Centimeter:   0.01,
@@ -29,6 +29,10 @@ var distanceConversionFactors = ConversionFactors{
 	Yard:         0.9144,
 	Mile:         1609.344,
 	NauticalMile: 1852,
+}
+
+func DistanceConversionFactors() ConversionFactors {
+	return copyConversionFactors(distanceConversionFactors)
 }
 
 type Distance interface {

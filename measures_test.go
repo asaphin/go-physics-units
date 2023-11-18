@@ -1,30 +1,32 @@
-package units
+package units //nolint: testpackage
 
 import (
-	"fmt"
+	"strings"
 	"testing"
 )
 
 func TestMeasuresSelfCheck(t *testing.T) {
-	uniqueUnits := make(map[string]struct{})
-	nonUniqueUnits := make(map[string]struct{})
+	uniqueUnitsMap := make(map[string]struct{})
+	nonUniqueUnitsMap := make(map[string]struct{})
 
 	for measureType := range measureToConversionFactorsMapping {
 		for unit := range measureToConversionFactorsMapping[measureType] {
-			if _, ok := uniqueUnits[unit]; !ok {
-				uniqueUnits[unit] = struct{}{}
+			if _, ok := uniqueUnitsMap[unit]; !ok {
+				uniqueUnitsMap[unit] = struct{}{}
 
 				continue
 			}
 
-			nonUniqueUnits[unit] = struct{}{}
+			nonUniqueUnitsMap[unit] = struct{}{}
 		}
 	}
 
+	nonUniqueUnits := make([]string, 0, len(nonUniqueUnitsMap))
+	for k := range nonUniqueUnitsMap {
+		nonUniqueUnits = append(nonUniqueUnits, k)
+	}
+
 	if len(nonUniqueUnits) != 0 {
-		t.Errorf("non unique units found")
-		for unit := range nonUniqueUnits {
-			fmt.Println(unit)
-		}
+		t.Errorf("non unique units found: %s", strings.Join(nonUniqueUnits, "; "))
 	}
 }

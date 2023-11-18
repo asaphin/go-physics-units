@@ -18,6 +18,10 @@ var velocityConversionFactors = ConversionFactors{
 	MilesPerHour:      2.23694,
 }
 
+func VelocityConversionFactors() ConversionFactors {
+	return copyConversionFactors(velocityConversionFactors)
+}
+
 type Velocity interface {
 	Measurement
 }

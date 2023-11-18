@@ -24,6 +24,10 @@ var massConversionFactors = ConversionFactors{
 	Ton:       1000,
 }
 
+func MassConversionFactors() ConversionFactors {
+	return copyConversionFactors(massConversionFactors)
+}
+
 type Mass interface {
 	Measurement
 }

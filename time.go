@@ -20,6 +20,10 @@ var timeConversionFactors = ConversionFactors{
 	Week:   604800,
 }
 
+func TimeConversionFactors() ConversionFactors {
+	return copyConversionFactors(timeConversionFactors)
+}
+
 type Time interface {
 	Measurement
 }
