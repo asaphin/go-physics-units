@@ -3,6 +3,8 @@ package units
 import (
 	"fmt"
 	"github.com/asaphin/go-physics-units/conversion-factors"
+	"strconv"
+	"strings"
 )
 
 type Measurement interface {
@@ -54,6 +56,20 @@ func NewMeasurement(value float64, unit string) (Measurement, error) {
 	}
 
 	return NewBaseMeasurement(value, unit, measureToConversionFactorsMapping[mt])
+}
+
+func ParseString(s string) (Measurement, error) {
+	parts := strings.Fields(s)
+	if len(parts) != 2 {
+		return nil, fmt.Errorf("invalid string format: %s", s)
+	}
+
+	value, err := strconv.ParseFloat(parts[0], 64)
+	if err != nil {
+		return nil, fmt.Errorf("failed to parse value %v: %v", parts[0], err)
+	}
+
+	return NewMeasurement(value, parts[1])
 }
 
 // NewBaseMeasurement is intended to create measurements based on your custom conversion factors.

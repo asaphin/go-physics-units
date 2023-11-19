@@ -12,6 +12,33 @@ type Time struct {
 	BaseMeasurement
 }
 
+func (t *Time) ConvertTo(unit string) (*Time, error) {
+	m, err := t.convertTo(unit)
+	if err != nil {
+		return nil, err
+	}
+
+	return &Time{*m}, nil
+}
+
+func (t *Time) MustConvertTo(unit string) *Time {
+	m, err := t.convertTo(unit)
+	if err != nil {
+		panic(err)
+	}
+
+	return &Time{*m}
+}
+
+func (t *Time) MustConvertToBaseUnits() *Time {
+	m, err := t.convertTo(time.BaseUnit)
+	if err != nil {
+		panic(err)
+	}
+
+	return &Time{*m}
+}
+
 func NewTime(value float64, unit string) (*Time, error) {
 	if _, ok := timeConversionFactors.HasFactor(unit); !ok {
 		return nil, fmt.Errorf("unknown Time unit %s", unit)
