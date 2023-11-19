@@ -30,6 +30,10 @@ func (b *BaseMeasurement) Unit() string {
 }
 
 func (b *BaseMeasurement) convertTo(targetUnit string) (*BaseMeasurement, error) {
+	if b.unit == targetUnit {
+		return newBaseMeasurement(b.value, targetUnit, b.conversionFactors)
+	}
+
 	initialFactor := b.conversionFactors.GetFactor(b.unit)
 
 	if targetFactor, ok := b.conversionFactors.HasFactor(targetUnit); ok {
