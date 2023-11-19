@@ -1,37 +1,36 @@
 package units
 
-import "fmt"
-
-const (
-	Second = "s"
-	Minute = "min"
-	Hour   = "h"
-	Day    = "d"
-	Week   = "wk"
+import (
+	"errors"
+	"fmt"
+	"github.com/asaphin/go-physics-units/time"
 )
 
-const TimeBaseUnit = Second
+var timeConversionFactors = newImmutableConversionFactors(time.ConversionFactors())
 
-var timeConversionFactors = ConversionFactors{
-	Second: 1,
-	Minute: 60,
-	Hour:   3600,
-	Day:    86400,
-	Week:   604800,
+type Time struct {
+	BaseMeasurement
 }
 
-func TimeConversionFactors() ConversionFactors {
-	return copyConversionFactors(timeConversionFactors)
-}
-
-type Time interface {
-	Measurement
-}
-
-func NewTime(value float64, unit string) (Time, error) {
-	if _, ok := timeConversionFactors[unit]; !ok {
-		return nil, fmt.Errorf("unknown time unit %s", unit)
+func NewTime(value float64, unit string) (*Time, error) {
+	if _, ok := timeConversionFactors.HasFactor(unit); !ok {
+		return nil, fmt.Errorf("unknown Time unit %s", unit)
 	}
 
-	return NewBaseMeasurement(value, unit, timeConversionFactors)
+	m, err := newBaseMeasurement(value, unit, timeConversionFactors)
+	if err != nil {
+		return nil, err
+	}
+
+	return &Time{*m}, nil
+}
+
+var timeConversionErr = errors.New("not a time measure")
+
+func ToTime(m Measurement) (*Time, error) {
+	if m.Type() == MeasureTime {
+		return m.(*Time), nil
+	}
+
+	return nil, timeConversionErr
 }

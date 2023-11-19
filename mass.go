@@ -1,41 +1,36 @@
 package units
 
-import "fmt"
-
-const (
-	Gram      = "g"
-	Kilogram  = "kg"
-	Milligram = "mg"
-	Microgram = "μg"
-	Pound     = "lb"
-	Ounce     = "oz"
-	Ton       = "ton"
+import (
+	"errors"
+	"fmt"
+	"github.com/asaphin/go-physics-units/mass"
 )
 
-const MassBaseUnit = Kilogram
+var massConversionFactors = newImmutableConversionFactors(mass.ConversionFactors())
 
-var massConversionFactors = ConversionFactors{
-	Gram:      0.001,
-	Kilogram:  1,
-	Milligram: 1e-6,
-	Microgram: 1e-9,
-	Pound:     0.453592,
-	Ounce:     0.0283495,
-	Ton:       1000,
+type Mass struct {
+	BaseMeasurement
 }
 
-func MassConversionFactors() ConversionFactors {
-	return copyConversionFactors(massConversionFactors)
-}
-
-type Mass interface {
-	Measurement
-}
-
-func NewMass(value float64, unit string) (Mass, error) {
-	if _, ok := massConversionFactors[unit]; !ok {
-		return nil, fmt.Errorf("unknown mass unit %s", unit)
+func NewMass(value float64, unit string) (*Mass, error) {
+	if _, ok := massConversionFactors.HasFactor(unit); !ok {
+		return nil, fmt.Errorf("unknown Mass unit %s", unit)
 	}
 
-	return NewBaseMeasurement(value, unit, massConversionFactors)
+	m, err := newBaseMeasurement(value, unit, massConversionFactors)
+	if err != nil {
+		return nil, err
+	}
+
+	return &Mass{*m}, nil
+}
+
+var massConversionErr = errors.New("not a mass measure")
+
+func ToMass(m Measurement) (*Mass, error) {
+	if m.Type() == MeasureMass {
+		return m.(*Mass), nil
+	}
+
+	return nil, massConversionErr
 }

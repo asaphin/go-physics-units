@@ -1,44 +1,50 @@
 package units
 
-import "fmt"
-
-const (
-	MetersPerSecond   = "m/s"
-	KilometersPerHour = "km/h"
-	FeetPerSecond     = "ft/s"
-	MilesPerHour      = "mph"
+import (
+	"errors"
+	"fmt"
+	"github.com/asaphin/go-physics-units/distance"
+	"github.com/asaphin/go-physics-units/time"
+	"github.com/asaphin/go-physics-units/velocity"
 )
 
-const VelocityBaseUnit = MetersPerSecond
+var velocityConversionFactors = newImmutableConversionFactors(velocity.ConversionFactors())
 
-var velocityConversionFactors = ConversionFactors{
-	MetersPerSecond:   1,
-	KilometersPerHour: 3.6,
-	FeetPerSecond:     3.28084,
-	MilesPerHour:      2.23694,
+type Velocity struct {
+	BaseMeasurement
 }
 
-func VelocityConversionFactors() ConversionFactors {
-	return copyConversionFactors(velocityConversionFactors)
-}
-
-type Velocity interface {
-	Measurement
-}
-
-func NewVelocity(value float64, unit string) (Velocity, error) {
-	if _, ok := velocityConversionFactors[unit]; !ok {
-		return nil, fmt.Errorf("unknown velocity unit %s", unit)
+func NewVelocity(value float64, unit string) (*Velocity, error) {
+	if _, ok := velocityConversionFactors.HasFactor(unit); !ok {
+		return nil, fmt.Errorf("unknown Velocity unit %s", unit)
 	}
 
-	return NewBaseMeasurement(value, unit, velocityConversionFactors)
+	m, err := newBaseMeasurement(value, unit, velocityConversionFactors)
+	if err != nil {
+		return nil, err
+	}
+
+	return &Velocity{*m}, nil
 }
 
-func NewVelocityFromDistanceAntTime(d Distance, t Time) Velocity {
-	d, _ = d.ConvertTo(DistanceBaseUnit)
-	t, _ = t.ConvertTo(TimeBaseUnit)
+var velocityConversionErr = errors.New("not a velocity measure")
 
-	v, _ := NewVelocity(d.Value()/t.Value(), VelocityBaseUnit)
+func ToVelocity(m Measurement) (*Velocity, error) {
+	if m.Type() == MeasureVelocity {
+		return m.(*Velocity), nil
+	}
+
+	return nil, velocityConversionErr
+}
+
+func NewVelocityFromDistanceAndTime(d *Distance, t *Time) *Velocity {
+	newD, _ := d.convertTo(distance.BaseUnit)
+	newT, _ := t.convertTo(time.BaseUnit)
+
+	d, _ = ToDistance(newD)
+	t, _ = ToTime(newT)
+
+	v, _ := NewVelocity(d.Value()/t.Value(), velocity.BaseUnit)
 
 	return v
 }

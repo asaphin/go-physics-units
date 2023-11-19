@@ -1,48 +1,45 @@
 package units
 
-import "fmt"
-
-const (
-	Millimeter   = "mm"
-	Centimeter   = "cm"
-	Decimeter    = "dm"
-	Meter        = "m"
-	Kilometer    = "km"
-	Inch         = "in"
-	Feet         = "ft"
-	Yard         = "yd"
-	Mile         = "mi"
-	NauticalMile = "nmi"
+import (
+	"errors"
+	"fmt"
+	"github.com/asaphin/go-physics-units/distance"
 )
 
-const DistanceBaseUnit = Meter
+var distanceConversionFactors = newImmutableConversionFactors(distance.ConversionFactors())
 
-// distanceConversionFactors shows how many specified units in base unit of distance - m (meter).
-var distanceConversionFactors = ConversionFactors{
-	Millimeter:   0.0001,
-	Centimeter:   0.01,
-	Decimeter:    0.1,
-	Meter:        1,
-	Kilometer:    1000,
-	Inch:         0.0254,
-	Feet:         0.3048,
-	Yard:         0.9144,
-	Mile:         1609.344,
-	NauticalMile: 1852,
+type Distance struct {
+	BaseMeasurement
 }
 
-func DistanceConversionFactors() ConversionFactors {
-	return copyConversionFactors(distanceConversionFactors)
+func (d *Distance) ConvertTo(unit string) (*Distance, error) {
+	m, err := d.convertTo(unit)
+	if err != nil {
+		return nil, err
+	}
+
+	return &Distance{*m}, nil
 }
 
-type Distance interface {
-	Measurement
-}
-
-func NewDistance(value float64, unit string) (Distance, error) {
-	if _, ok := distanceConversionFactors[unit]; !ok {
+func NewDistance(value float64, unit string) (*Distance, error) {
+	if _, ok := distanceConversionFactors.HasFactor(unit); !ok {
 		return nil, fmt.Errorf("unknown Distance unit %s", unit)
 	}
 
-	return NewBaseMeasurement(value, unit, distanceConversionFactors)
+	m, err := newBaseMeasurement(value, unit, distanceConversionFactors)
+	if err != nil {
+		return nil, err
+	}
+
+	return &Distance{*m}, nil
+}
+
+var distanceConversionErr = errors.New("not a distance measure")
+
+func ToDistance(m Measurement) (*Distance, error) {
+	if m.Type() == MeasureDistance {
+		return &Distance{*(m.(*BaseMeasurement))}, nil
+	}
+
+	return nil, distanceConversionErr
 }
