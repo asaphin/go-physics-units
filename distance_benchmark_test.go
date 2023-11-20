@@ -67,7 +67,7 @@ func BenchmarkDistance_ConvertToBaseUnit(b *testing.B) {
 	for i := 0; i < b.N; i++ {
 		index = i % n
 
-		_ = distances[index].MustConvertToBaseUnits()
+		_ = distances[index].ConvertToBaseUnits()
 	}
 }
 

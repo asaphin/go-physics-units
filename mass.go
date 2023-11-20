@@ -8,11 +8,15 @@ import (
 
 var massConversionFactors = newImmutableConversionFactors(mass.ConversionFactors())
 
-type Mass struct {
-	BaseMeasurement
+type Mass interface {
+	Measurement
 }
 
-func NewMass(value float64, unit string) (*Mass, error) {
+type massImplementation struct {
+	baseMeasurement
+}
+
+func NewMass(value float64, unit string) (Mass, error) {
 	if _, ok := massConversionFactors.HasFactor(unit); !ok {
 		return nil, fmt.Errorf("unknown Mass unit %s", unit)
 	}
@@ -22,14 +26,14 @@ func NewMass(value float64, unit string) (*Mass, error) {
 		return nil, err
 	}
 
-	return &Mass{*m}, nil
+	return &massImplementation{*m}, nil
 }
 
 var massConversionErr = errors.New("not a mass measure")
 
-func ToMass(m Measurement) (*Mass, error) {
+func ToMass(m Measurement) (Mass, error) {
 	if m.Type() == MeasureMass {
-		return m.(*Mass), nil
+		return &massImplementation{*m.(*baseMeasurement)}, nil
 	}
 
 	return nil, massConversionErr

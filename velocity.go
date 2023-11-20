@@ -3,18 +3,20 @@ package units
 import (
 	"errors"
 	"fmt"
-	"github.com/asaphin/go-physics-units/distance"
-	"github.com/asaphin/go-physics-units/time"
 	"github.com/asaphin/go-physics-units/velocity"
 )
 
 var velocityConversionFactors = newImmutableConversionFactors(velocity.ConversionFactors())
 
-type Velocity struct {
-	BaseMeasurement
+type Velocity interface {
+	Measurement
 }
 
-func NewVelocity(value float64, unit string) (*Velocity, error) {
+type velocityImplenentation struct {
+	baseMeasurement
+}
+
+func NewVelocity(value float64, unit string) (Velocity, error) {
 	if _, ok := velocityConversionFactors.HasFactor(unit); !ok {
 		return nil, fmt.Errorf("unknown Velocity unit %s", unit)
 	}
@@ -24,27 +26,15 @@ func NewVelocity(value float64, unit string) (*Velocity, error) {
 		return nil, err
 	}
 
-	return &Velocity{*m}, nil
+	return &velocityImplenentation{*m}, nil
 }
 
 var velocityConversionErr = errors.New("not a velocity measure")
 
-func ToVelocity(m Measurement) (*Velocity, error) {
+func ToVelocity(m Measurement) (Velocity, error) {
 	if m.Type() == MeasureVelocity {
-		return m.(*Velocity), nil
+		return &velocityImplenentation{*m.(*baseMeasurement)}, nil
 	}
 
 	return nil, velocityConversionErr
-}
-
-func NewVelocityFromDistanceAndTime(d *Distance, t *Time) *Velocity {
-	newD, _ := d.convertTo(distance.BaseUnit)
-	newT, _ := t.convertTo(time.BaseUnit)
-
-	d, _ = ToDistance(newD)
-	t, _ = ToTime(newT)
-
-	v, _ := NewVelocity(d.Value()/t.Value(), velocity.BaseUnit)
-
-	return v
 }

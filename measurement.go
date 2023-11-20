@@ -10,28 +10,28 @@ import (
 type Measurement interface {
 	Value() float64
 	Unit() string
-	convertTo(targetUnit string) (*BaseMeasurement, error)
+	convertTo(targetUnit string) (*baseMeasurement, error)
 	Type() MeasureType
-	Mul(multiplier float64) *BaseMeasurement
-	Div(divisor float64) *BaseMeasurement
+	Mul(multiplier float64) *baseMeasurement
+	Div(divisor float64) *baseMeasurement
 	fmt.Stringer
 }
 
-type BaseMeasurement struct {
+type baseMeasurement struct {
 	value             float64
 	unit              string
 	conversionFactors *immutableConversionFactors
 }
 
-func (b *BaseMeasurement) Value() float64 {
+func (b *baseMeasurement) Value() float64 {
 	return b.value
 }
 
-func (b *BaseMeasurement) Unit() string {
+func (b *baseMeasurement) Unit() string {
 	return b.unit
 }
 
-func (b *BaseMeasurement) convertTo(targetUnit string) (*BaseMeasurement, error) {
+func (b *baseMeasurement) convertTo(targetUnit string) (*baseMeasurement, error) {
 	if b.unit == targetUnit {
 		return newBaseMeasurement(b.value, targetUnit, b.conversionFactors)
 	}
@@ -47,19 +47,19 @@ func (b *BaseMeasurement) convertTo(targetUnit string) (*BaseMeasurement, error)
 	return nil, fmt.Errorf("unit %s unspecified in conversionFactors", targetUnit)
 }
 
-func (b *BaseMeasurement) Type() MeasureType {
+func (b *baseMeasurement) Type() MeasureType {
 	return DetectMeasureType(b.unit)
 }
 
-func (b *BaseMeasurement) Mul(multiplier float64) *BaseMeasurement {
-	return &BaseMeasurement{value: b.value * multiplier, unit: b.unit, conversionFactors: b.conversionFactors}
+func (b *baseMeasurement) Mul(multiplier float64) *baseMeasurement {
+	return &baseMeasurement{value: b.value * multiplier, unit: b.unit, conversionFactors: b.conversionFactors}
 }
 
-func (b *BaseMeasurement) Div(divisor float64) *BaseMeasurement {
-	return &BaseMeasurement{value: b.value / divisor, unit: b.unit, conversionFactors: b.conversionFactors}
+func (b *baseMeasurement) Div(divisor float64) *baseMeasurement {
+	return &baseMeasurement{value: b.value / divisor, unit: b.unit, conversionFactors: b.conversionFactors}
 }
 
-func (b *BaseMeasurement) String() string {
+func (b *baseMeasurement) String() string {
 	return fmt.Sprintf("%v %s", b.value, b.unit)
 }
 
@@ -99,10 +99,10 @@ func NewBaseMeasurement(value float64, unit string, conversionFactors conversion
 		return nil, fmt.Errorf("unit conversion factor can not be zero (%s)", unit)
 	}
 
-	return &BaseMeasurement{value: value, unit: unit, conversionFactors: newImmutableConversionFactors(conversionFactors)}, nil
+	return &baseMeasurement{value: value, unit: unit, conversionFactors: newImmutableConversionFactors(conversionFactors)}, nil
 }
 
-func newBaseMeasurement(value float64, unit string, conversionFactors *immutableConversionFactors) (*BaseMeasurement, error) {
+func newBaseMeasurement(value float64, unit string, conversionFactors *immutableConversionFactors) (*baseMeasurement, error) {
 	factor, ok := conversionFactors.HasFactor(unit)
 
 	if !ok {
@@ -113,5 +113,5 @@ func newBaseMeasurement(value float64, unit string, conversionFactors *immutable
 		return nil, fmt.Errorf("unit conversion factor can not be zero (%s)", unit)
 	}
 
-	return &BaseMeasurement{value: value, unit: unit, conversionFactors: conversionFactors}, nil
+	return &baseMeasurement{value: value, unit: unit, conversionFactors: conversionFactors}, nil
 }

@@ -15,7 +15,7 @@ func TestMeasurement_ImplicitConversion(t *testing.T) {
 		t.Error("not distance measure type")
 	}
 
-	_, ok := ln.(*units.Distance)
+	_, ok := ln.(units.Distance)
 	if ok {
 		t.Error("implicit conversion should be successful")
 	}
