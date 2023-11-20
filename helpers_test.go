@@ -38,6 +38,16 @@ func randFloat(min, max float64) float64 {
 	return min + rand.Float64()*(max-min)
 }
 
+func randFloats(min, max float64, n int) []float64 {
+	floats := make([]float64, n)
+
+	for i := range floats {
+		floats[i] = randFloat(min, max)
+	}
+
+	return floats
+}
+
 func randStringElement(arr []string) string {
 	if len(arr) == 0 {
 		panic("empty array")

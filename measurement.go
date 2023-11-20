@@ -12,6 +12,8 @@ type Measurement interface {
 	Unit() string
 	convertTo(targetUnit string) (*BaseMeasurement, error)
 	Type() MeasureType
+	Mul(multiplier float64) *BaseMeasurement
+	Div(divisor float64) *BaseMeasurement
 	fmt.Stringer
 }
 
@@ -47,6 +49,14 @@ func (b *BaseMeasurement) convertTo(targetUnit string) (*BaseMeasurement, error)
 
 func (b *BaseMeasurement) Type() MeasureType {
 	return DetectMeasureType(b.unit)
+}
+
+func (b *BaseMeasurement) Mul(multiplier float64) *BaseMeasurement {
+	return &BaseMeasurement{value: b.value * multiplier, unit: b.unit, conversionFactors: b.conversionFactors}
+}
+
+func (b *BaseMeasurement) Div(divisor float64) *BaseMeasurement {
+	return &BaseMeasurement{value: b.value / divisor, unit: b.unit, conversionFactors: b.conversionFactors}
 }
 
 func (b *BaseMeasurement) String() string {
