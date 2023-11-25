@@ -1,8 +1,9 @@
 package units
 
 import (
-	"github.com/asaphin/go-physics-units/conversion-factors"
+	"github.com/asaphin/go-physics-units/conversion"
 	"github.com/asaphin/go-physics-units/distance"
+	"github.com/asaphin/go-physics-units/internal/immutable"
 	"github.com/asaphin/go-physics-units/mass"
 	"github.com/asaphin/go-physics-units/time"
 	"github.com/asaphin/go-physics-units/velocity"
@@ -25,6 +26,13 @@ var measureToConversionFactorsMapping = map[MeasureType]conversion.Factors{
 	MeasureVelocity: velocity.ConversionFactors(),
 }
 
+var measureToConversionRatesMapping = map[MeasureType]immutable.Float64Map{
+	MeasureDistance: distance.ConversionRates(),
+	MeasureTime:     time.ConversionRates(),
+	MeasureMass:     mass.ConversionRates(),
+	MeasureVelocity: velocity.ConversionRates(),
+}
+
 func DetectMeasureType(unit string) MeasureType {
 	for measureType, factors := range measureToConversionFactorsMapping {
 		for k := range factors {
@@ -35,4 +43,8 @@ func DetectMeasureType(unit string) MeasureType {
 	}
 
 	return MeasureCustom
+}
+
+func getMeasureFactors(mt MeasureType) conversion.Factors {
+	return measureToConversionFactorsMapping[mt]
 }

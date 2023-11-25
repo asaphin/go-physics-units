@@ -1,7 +1,10 @@
 package distance
 
 import (
-	"github.com/asaphin/go-physics-units/conversion-factors"
+	"github.com/asaphin/go-physics-units/conversion"
+	"github.com/asaphin/go-physics-units/internal/immutable"
+	"github.com/asaphin/go-physics-units/internal/rates"
+	"sync"
 )
 
 const BaseUnit = Meter
@@ -28,7 +31,7 @@ const (
 	Parsec           = "pc"
 )
 
-var distanceConversionFactors = conversion.Factors{
+var conversionFactors = conversion.Factors{
 	PlankLength:      1.616255e-35,
 	Femtometer:       1e-15,
 	Picometer:        1e-12,
@@ -52,5 +55,18 @@ var distanceConversionFactors = conversion.Factors{
 
 // ConversionFactors shows how many base units (m) in specified unit.
 func ConversionFactors() conversion.Factors {
-	return conversion.CopyConversionFactors(distanceConversionFactors)
+	return conversion.CopyConversionFactors(conversionFactors)
+}
+
+var conversionRates immutable.Float64Map
+var conversionRatesSync sync.Once
+
+// ConversionRates returns pointer to conversion rates storage.
+// Rates stored by composite keys unitFrom + unitTo
+func ConversionRates() immutable.Float64Map {
+	conversionRatesSync.Do(func() {
+		conversionRates = immutable.MakeImmutable(rates.FactorsToRates(conversionFactors))
+	})
+
+	return conversionRates
 }

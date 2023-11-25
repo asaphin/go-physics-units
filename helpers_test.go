@@ -2,7 +2,7 @@ package units_test
 
 import (
 	units "github.com/asaphin/go-physics-units"
-	"github.com/asaphin/go-physics-units/conversion-factors"
+	"github.com/asaphin/go-physics-units/conversion"
 	"github.com/asaphin/go-physics-units/distance"
 	"github.com/asaphin/go-physics-units/time"
 	"math"

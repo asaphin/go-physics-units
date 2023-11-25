@@ -9,3 +9,5 @@ package units
 //go:generate golangci-lint run ./...
 
 //go:generate sh coverage.sh
+
+//go:generate go test -bench=./... -benchmem -cpuprofile profile.out

@@ -3,7 +3,9 @@ package units
 import (
 	"errors"
 	"fmt"
-	"github.com/asaphin/go-physics-units/conversion-factors"
+	"github.com/asaphin/go-physics-units/conversion"
+	"github.com/asaphin/go-physics-units/internal/immutable"
+	"github.com/asaphin/go-physics-units/internal/rates"
 	"strconv"
 	"strings"
 )
@@ -19,9 +21,9 @@ type Measurement interface {
 }
 
 type baseMeasurement struct {
-	value             float64
-	unit              string
-	conversionFactors *immutableConversionFactors
+	value           float64
+	unit            string
+	conversionRates immutable.Float64Map
 }
 
 var errBaseMeasurementConversion = errors.New("not a *baseMeasurement type")
@@ -36,18 +38,25 @@ func (b *baseMeasurement) Unit() string {
 
 func (b *baseMeasurement) convertTo(targetUnit string) (*baseMeasurement, error) {
 	if b.unit == targetUnit {
-		return newBaseMeasurement(b.value, targetUnit, b.conversionFactors)
+		return newBaseMeasurement(b.value, targetUnit, b.conversionRates)
 	}
 
-	initialFactor := b.conversionFactors.GetFactor(b.unit)
+	factor, ok := b.conversionRates.Has(b.unit + targetUnit)
+	if !ok {
+		measureFactors := getMeasureFactors(b.Type())
 
-	if targetFactor, ok := b.conversionFactors.HasFactor(targetUnit); ok {
-		factor := initialFactor / targetFactor
+		if _, ok = measureFactors[b.unit]; !ok {
+			return nil, fmt.Errorf("initial unit %s unspecified in conversionRates", b.unit)
+		}
 
-		return newBaseMeasurement(b.value*factor, targetUnit, b.conversionFactors)
+		if _, ok = measureFactors[targetUnit]; !ok {
+			return nil, fmt.Errorf("target unit %s unspecified in conversionRates", targetUnit)
+		}
+
+		return nil, errors.New("global conversion units error")
 	}
 
-	return nil, fmt.Errorf("unit %s unspecified in conversionFactors", targetUnit)
+	return newBaseMeasurement(b.value*factor, targetUnit, b.conversionRates)
 }
 
 func (b *baseMeasurement) Type() MeasureType {
@@ -55,11 +64,11 @@ func (b *baseMeasurement) Type() MeasureType {
 }
 
 func (b *baseMeasurement) Mul(multiplier float64) *baseMeasurement {
-	return &baseMeasurement{value: b.value * multiplier, unit: b.unit, conversionFactors: b.conversionFactors}
+	return &baseMeasurement{value: b.value * multiplier, unit: b.unit, conversionRates: b.conversionRates}
 }
 
 func (b *baseMeasurement) Div(divisor float64) *baseMeasurement {
-	return &baseMeasurement{value: b.value / divisor, unit: b.unit, conversionFactors: b.conversionFactors}
+	return &baseMeasurement{value: b.value / divisor, unit: b.unit, conversionRates: b.conversionRates}
 }
 
 func (b *baseMeasurement) String() string {
@@ -72,7 +81,7 @@ func NewMeasurement(value float64, unit string) (Measurement, error) {
 		return nil, fmt.Errorf("unknown unit %s", unit)
 	}
 
-	return NewBaseMeasurement(value, unit, measureToConversionFactorsMapping[mt])
+	return newBaseMeasurement(value, unit, measureToConversionRatesMapping[mt])
 }
 
 func ParseString(s string) (Measurement, error) {
@@ -95,7 +104,7 @@ func NewBaseMeasurement(value float64, unit string, conversionFactors conversion
 	factor, ok := conversionFactors[unit]
 
 	if !ok {
-		return nil, fmt.Errorf("unit %s unspecified in conversionFactors", unit)
+		return nil, fmt.Errorf("unit %s unspecified in conversionRates", unit)
 	}
 
 	if factor == 0 {
@@ -103,18 +112,16 @@ func NewBaseMeasurement(value float64, unit string, conversionFactors conversion
 	}
 
 	return &baseMeasurement{
-		value:             value,
-		unit:              unit,
-		conversionFactors: newImmutableConversionFactors(conversionFactors),
+		value:           value,
+		unit:            unit,
+		conversionRates: immutable.MakeImmutable(rates.FactorsToRates(conversionFactors)),
 	}, nil
 }
 
-func newBaseMeasurement(value float64, unit string,
-	conversionFactors *immutableConversionFactors) (*baseMeasurement, error) {
-	factor, ok := conversionFactors.HasFactor(unit)
-
+func newBaseMeasurement(value float64, unit string, conversionRates immutable.Float64Map) (*baseMeasurement, error) {
+	factor, ok := conversionRates.Has(unit + unit)
 	if !ok {
-		return nil, fmt.Errorf("unit %s unspecified in conversionFactors", unit)
+		return nil, fmt.Errorf("unit %s unspecified in conversionRates", unit)
 	}
 
 	if factor == 0 {
@@ -122,8 +129,8 @@ func newBaseMeasurement(value float64, unit string,
 	}
 
 	return &baseMeasurement{
-		value:             value,
-		unit:              unit,
-		conversionFactors: conversionFactors,
+		value:           value,
+		unit:            unit,
+		conversionRates: conversionRates,
 	}, nil
 }

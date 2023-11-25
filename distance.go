@@ -7,8 +7,6 @@ import (
 	"github.com/asaphin/go-physics-units/velocity"
 )
 
-var distanceConversionFactors = newImmutableConversionFactors(distance.ConversionFactors())
-
 // Distance interface represents a distance measurement.
 type Distance interface {
 	Measurement
@@ -25,11 +23,13 @@ type distanceImplementation struct {
 
 // NewDistance creates a new Distance instance.
 func NewDistance(value float64, unit string) (Distance, error) {
-	if _, ok := distanceConversionFactors.HasFactor(unit); !ok {
+	rates := distance.ConversionRates()
+
+	if _, ok := rates.Has(unit + unit); !ok {
 		return nil, fmt.Errorf("unknown Distance unit %s", unit)
 	}
 
-	m, err := newBaseMeasurement(value, unit, distanceConversionFactors)
+	m, err := newBaseMeasurement(value, unit, rates)
 	if err != nil {
 		return nil, err
 	}

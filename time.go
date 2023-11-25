@@ -6,8 +6,6 @@ import (
 	"github.com/asaphin/go-physics-units/time"
 )
 
-var timeConversionFactors = newImmutableConversionFactors(time.ConversionFactors())
-
 type Time interface {
 	Measurement
 	ConvertTo(unit string) (Time, error)
@@ -47,11 +45,13 @@ func (t *timeImplementation) ConvertToBaseUnits() Time {
 }
 
 func NewTime(value float64, unit string) (Time, error) {
-	if _, ok := timeConversionFactors.HasFactor(unit); !ok {
+	rates := time.ConversionRates()
+
+	if _, ok := rates.Has(unit + unit); !ok {
 		return nil, fmt.Errorf("unknown Time unit %s", unit)
 	}
 
-	m, err := newBaseMeasurement(value, unit, timeConversionFactors)
+	m, err := newBaseMeasurement(value, unit, rates)
 	if err != nil {
 		return nil, err
 	}

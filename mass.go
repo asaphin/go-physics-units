@@ -6,8 +6,6 @@ import (
 	"github.com/asaphin/go-physics-units/mass"
 )
 
-var massConversionFactors = newImmutableConversionFactors(mass.ConversionFactors())
-
 type Mass interface {
 	Measurement
 }
@@ -17,11 +15,13 @@ type massImplementation struct {
 }
 
 func NewMass(value float64, unit string) (Mass, error) {
-	if _, ok := massConversionFactors.HasFactor(unit); !ok {
+	rates := mass.ConversionRates()
+
+	if _, ok := rates.Has(unit + unit); !ok {
 		return nil, fmt.Errorf("unknown Mass unit %s", unit)
 	}
 
-	m, err := newBaseMeasurement(value, unit, massConversionFactors)
+	m, err := newBaseMeasurement(value, unit, rates)
 	if err != nil {
 		return nil, err
 	}

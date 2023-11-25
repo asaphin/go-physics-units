@@ -6,8 +6,6 @@ import (
 	"github.com/asaphin/go-physics-units/velocity"
 )
 
-var velocityConversionFactors = newImmutableConversionFactors(velocity.ConversionFactors())
-
 type Velocity interface {
 	Measurement
 }
@@ -17,11 +15,13 @@ type velocityImplenentation struct {
 }
 
 func NewVelocity(value float64, unit string) (Velocity, error) {
-	if _, ok := velocityConversionFactors.HasFactor(unit); !ok {
+	rates := velocity.ConversionRates()
+
+	if _, ok := rates.Has(unit + unit); !ok {
 		return nil, fmt.Errorf("unknown Velocity unit %s", unit)
 	}
 
-	m, err := newBaseMeasurement(value, unit, velocityConversionFactors)
+	m, err := newBaseMeasurement(value, unit, rates)
 	if err != nil {
 		return nil, err
 	}
