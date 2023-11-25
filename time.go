@@ -8,38 +8,45 @@ import (
 
 var timeConversionFactors = newImmutableConversionFactors(time.ConversionFactors())
 
-type Time struct {
-	BaseMeasurement
+type Time interface {
+	Measurement
+	ConvertTo(unit string) (Time, error)
+	MustConvertTo(unit string) Time
+	ConvertToBaseUnits() Time
 }
 
-func (t *Time) ConvertTo(unit string) (*Time, error) {
+type timeImplementation struct {
+	baseMeasurement
+}
+
+func (t *timeImplementation) ConvertTo(unit string) (Time, error) {
 	m, err := t.convertTo(unit)
 	if err != nil {
 		return nil, err
 	}
 
-	return &Time{*m}, nil
+	return &timeImplementation{*m}, nil
 }
 
-func (t *Time) MustConvertTo(unit string) *Time {
+func (t *timeImplementation) MustConvertTo(unit string) Time {
 	m, err := t.convertTo(unit)
 	if err != nil {
 		panic(err)
 	}
 
-	return &Time{*m}
+	return &timeImplementation{*m}
 }
 
-func (t *Time) MustConvertToBaseUnits() *Time {
+func (t *timeImplementation) ConvertToBaseUnits() Time {
 	m, err := t.convertTo(time.BaseUnit)
 	if err != nil {
 		panic(err)
 	}
 
-	return &Time{*m}
+	return &timeImplementation{*m}
 }
 
-func NewTime(value float64, unit string) (*Time, error) {
+func NewTime(value float64, unit string) (Time, error) {
 	if _, ok := timeConversionFactors.HasFactor(unit); !ok {
 		return nil, fmt.Errorf("unknown Time unit %s", unit)
 	}
@@ -49,20 +56,15 @@ func NewTime(value float64, unit string) (*Time, error) {
 		return nil, err
 	}
 
-	return &Time{*m}, nil
+	return &timeImplementation{*m}, nil
 }
 
-var errTimeConversion = errors.New("not a time measure")
+var timeConversionErr = errors.New("not a time measure")
 
-func ToTime(m Measurement) (*Time, error) {
+func ToTime(m Measurement) (Time, error) {
 	if m.Type() == MeasureTime {
-		t, ok := m.(*Time)
-		if !ok {
-			return nil, errTimeConversion
-		}
-
-		return t, nil
+		return &timeImplementation{*m.(*baseMeasurement)}, nil
 	}
 
-	return nil, errTimeConversion
+	return nil, timeConversionErr
 }

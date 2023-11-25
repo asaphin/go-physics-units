@@ -38,6 +38,16 @@ func randFloat(min, max float64) float64 {
 	return min + rand.Float64()*(max-min)
 }
 
+func randFloats(min, max float64, n int) []float64 {
+	floats := make([]float64, n)
+
+	for i := range floats {
+		floats[i] = randFloat(min, max)
+	}
+
+	return floats
+}
+
 func randStringElement(arr []string) string {
 	if len(arr) == 0 {
 		panic("empty array")
@@ -48,10 +58,10 @@ func randStringElement(arr []string) string {
 	return arr[index]
 }
 
-func generateRandomDistances(n int) []*units.Distance {
+func generateRandomDistances(n int) []units.Distance {
 	validDistanceUnits := getValidUnits(distance.ConversionFactors())
 
-	distances := make([]*units.Distance, n)
+	distances := make([]units.Distance, n)
 
 	for i := 0; i < n; i++ {
 		dist, err := units.NewDistance(randFloat(-100, 100), randStringElement(validDistanceUnits))
@@ -65,10 +75,10 @@ func generateRandomDistances(n int) []*units.Distance {
 	return distances
 }
 
-func generateRandomTimes(n int) []*units.Time {
+func generateRandomTimes(n int) []units.Time {
 	validTimeUnits := getValidUnits(time.ConversionFactors())
 
-	times := make([]*units.Time, n)
+	times := make([]units.Time, n)
 
 	for i := 0; i < n; i++ {
 		tm, err := units.NewTime(randFloat(-100, 100), randStringElement(validTimeUnits))
