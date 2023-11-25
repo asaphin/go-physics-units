@@ -1,6 +1,7 @@
 package units
 
 import (
+	"errors"
 	"fmt"
 	"github.com/asaphin/go-physics-units/conversion-factors"
 	"strconv"
@@ -22,6 +23,8 @@ type baseMeasurement struct {
 	unit              string
 	conversionFactors *immutableConversionFactors
 }
+
+var errBaseMeasurementConversion = errors.New("not a *baseMeasurement type")
 
 func (b *baseMeasurement) Value() float64 {
 	return b.value
@@ -80,7 +83,7 @@ func ParseString(s string) (Measurement, error) {
 
 	value, err := strconv.ParseFloat(parts[0], 64)
 	if err != nil {
-		return nil, fmt.Errorf("failed to parse value %v: %v", parts[0], err)
+		return nil, fmt.Errorf("failed to parse value %v: %w", parts[0], err)
 	}
 
 	return NewMeasurement(value, parts[1])
@@ -99,10 +102,15 @@ func NewBaseMeasurement(value float64, unit string, conversionFactors conversion
 		return nil, fmt.Errorf("unit conversion factor can not be zero (%s)", unit)
 	}
 
-	return &baseMeasurement{value: value, unit: unit, conversionFactors: newImmutableConversionFactors(conversionFactors)}, nil
+	return &baseMeasurement{
+		value:             value,
+		unit:              unit,
+		conversionFactors: newImmutableConversionFactors(conversionFactors),
+	}, nil
 }
 
-func newBaseMeasurement(value float64, unit string, conversionFactors *immutableConversionFactors) (*baseMeasurement, error) {
+func newBaseMeasurement(value float64, unit string,
+	conversionFactors *immutableConversionFactors) (*baseMeasurement, error) {
 	factor, ok := conversionFactors.HasFactor(unit)
 
 	if !ok {
@@ -113,5 +121,9 @@ func newBaseMeasurement(value float64, unit string, conversionFactors *immutable
 		return nil, fmt.Errorf("unit conversion factor can not be zero (%s)", unit)
 	}
 
-	return &baseMeasurement{value: value, unit: unit, conversionFactors: conversionFactors}, nil
+	return &baseMeasurement{
+		value:             value,
+		unit:              unit,
+		conversionFactors: conversionFactors,
+	}, nil
 }

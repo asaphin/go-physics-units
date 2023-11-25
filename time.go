@@ -59,12 +59,17 @@ func NewTime(value float64, unit string) (Time, error) {
 	return &timeImplementation{*m}, nil
 }
 
-var timeConversionErr = errors.New("not a time measure")
+var errTimeConversion = errors.New("not a time measure")
 
 func ToTime(m Measurement) (Time, error) {
-	if m.Type() == MeasureTime {
-		return &timeImplementation{*m.(*baseMeasurement)}, nil
+	b, ok := m.(*baseMeasurement)
+	if !ok {
+		return nil, errBaseMeasurementConversion
 	}
 
-	return nil, timeConversionErr
+	if m.Type() == MeasureTime {
+		return &timeImplementation{*b}, nil
+	}
+
+	return nil, errTimeConversion
 }

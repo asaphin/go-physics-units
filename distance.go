@@ -81,12 +81,17 @@ func (d *distanceImplementation) DivideByTime(t Time) Velocity {
 	return v
 }
 
-var distanceConversionErr = errors.New("not a distance measure")
+var errDistanceConversion = errors.New("not a distance measure")
 
 func ToDistance(m Measurement) (Distance, error) {
 	if m.Type() == MeasureDistance {
-		return &distanceImplementation{*m.(*baseMeasurement)}, nil
+		b, ok := m.(*baseMeasurement)
+		if !ok {
+			return nil, errBaseMeasurementConversion
+		}
+
+		return &distanceImplementation{*b}, nil
 	}
 
-	return nil, distanceConversionErr
+	return nil, errDistanceConversion
 }
