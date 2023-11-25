@@ -25,12 +25,17 @@ func NewMass(value float64, unit string) (*Mass, error) {
 	return &Mass{*m}, nil
 }
 
-var massConversionErr = errors.New("not a mass measure")
+var errMassConversion = errors.New("not a mass measure")
 
 func ToMass(m Measurement) (*Mass, error) {
 	if m.Type() == MeasureMass {
-		return m.(*Mass), nil
+		ms, ok := m.(*Mass)
+		if !ok {
+			return nil, errMassConversion
+		}
+
+		return ms, nil
 	}
 
-	return nil, massConversionErr
+	return nil, errMassConversion
 }

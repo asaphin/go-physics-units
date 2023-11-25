@@ -66,12 +66,17 @@ func NewDistance(value float64, unit string) (*Distance, error) {
 	return &Distance{*m}, nil
 }
 
-var distanceConversionErr = errors.New("not a distance measure")
+var errDistanceConversion = errors.New("not a distance measure")
 
 func ToDistance(m Measurement) (*Distance, error) {
 	if m.Type() == MeasureDistance {
-		return &Distance{*(m.(*BaseMeasurement))}, nil
+		d, ok := m.(*Distance)
+		if !ok {
+			return nil, errDistanceConversion
+		}
+
+		return d, nil
 	}
 
-	return nil, distanceConversionErr
+	return nil, errDistanceConversion
 }

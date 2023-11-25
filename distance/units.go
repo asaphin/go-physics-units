@@ -50,7 +50,7 @@ var distanceConversionFactors = conversion.Factors{
 	Parsec:           3.0857e16,
 }
 
-// ConversionFactors shows how many base units (m) in specified unit
+// ConversionFactors shows how many base units (m) in specified unit.
 func ConversionFactors() conversion.Factors {
 	return conversion.CopyConversionFactors(distanceConversionFactors)
 }

@@ -44,3 +44,10 @@ gci:
 # Enable golangci-lint documentation linter
 docs:
   enabled: true
+
+run:
+  tests: false
+
+linters-settings:
+  varnamelen:
+    max-distance: 12

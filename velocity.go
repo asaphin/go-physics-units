@@ -27,14 +27,19 @@ func NewVelocity(value float64, unit string) (*Velocity, error) {
 	return &Velocity{*m}, nil
 }
 
-var velocityConversionErr = errors.New("not a velocity measure")
+var errVelocityConversion = errors.New("not a velocity measure")
 
 func ToVelocity(m Measurement) (*Velocity, error) {
 	if m.Type() == MeasureVelocity {
-		return m.(*Velocity), nil
+		v, ok := m.(*Velocity)
+		if !ok {
+			return nil, errVelocityConversion
+		}
+
+		return v, nil
 	}
 
-	return nil, velocityConversionErr
+	return nil, errVelocityConversion
 }
 
 func NewVelocityFromDistanceAndTime(d *Distance, t *Time) *Velocity {
