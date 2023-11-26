@@ -9,15 +9,21 @@ import (
 const BaseUnit = MeterPerSecond
 
 const (
-	MeterPerSecond   = "m/s"
 	KilometerPerHour = "km/h"
+	FeetPerSecond    = "ft/s"
 	MilePerHour      = "mph"
+	Knot             = "kn"
+	MeterPerSecond   = "m/s"
+	SpeedOfLight     = "c"
 )
 
 var conversionFactors = conversion.Factors{
-	MeterPerSecond:   1,
 	KilometerPerHour: 0.277778,
+	FeetPerSecond:    0.3048,
 	MilePerHour:      0.44704,
+	Knot:             0.514444,
+	MeterPerSecond:   1,
+	SpeedOfLight:     299792458,
 }
 
 // ConversionFactors shows how many base units (m/s) in specified unit.
