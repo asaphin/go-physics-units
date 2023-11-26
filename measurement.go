@@ -14,16 +14,59 @@ type Measurement interface {
 	Value() float64
 	Unit() string
 	convertTo(targetUnit string) (*baseMeasurement, error)
+	unsafeConvertTo(targetUnit string) *baseMeasurement
+	unsafeGetValueIn(targetUnit string) float64
 	Type() MeasureType
-	Mul(multiplier float64) *baseMeasurement
-	Div(divisor float64) *baseMeasurement
 	fmt.Stringer
+
+	AddMeasurement(m Measurement) (Measurement, error)
+	SubMeasurement(m Measurement) (Measurement, error)
+	MulMeasurement(multiplier float64) Measurement
+	DivMeasurement(divisor float64) (Measurement, error)
 }
 
 type baseMeasurement struct {
 	value           float64
 	unit            string
 	conversionRates immutable.Float64Map
+}
+
+func (b *baseMeasurement) AddMeasurement(m Measurement) (Measurement, error) {
+	baseType := b.Type()
+	adderType := m.Type()
+
+	if baseType != adderType {
+		return nil, fmt.Errorf("incompatible types %s and %s", baseType, adderType)
+	}
+
+	adder := m.unsafeGetValueIn(b.unit)
+
+	return newUnsafeBaseMeasurement(b.value+adder, b.unit, b.conversionRates), nil
+}
+
+func (b *baseMeasurement) SubMeasurement(m Measurement) (Measurement, error) {
+	baseType := b.Type()
+	adderType := m.Type()
+
+	if baseType != adderType {
+		return nil, fmt.Errorf("incompatible types %s and %s", baseType, adderType)
+	}
+
+	subtract := m.unsafeGetValueIn(b.unit)
+
+	return newUnsafeBaseMeasurement(b.value-subtract, b.unit, b.conversionRates), nil
+}
+
+func (b *baseMeasurement) MulMeasurement(multiplier float64) Measurement {
+	return &baseMeasurement{value: b.value * multiplier, unit: b.unit, conversionRates: b.conversionRates}
+}
+
+func (b *baseMeasurement) DivMeasurement(divisor float64) (Measurement, error) {
+	if divisor == 0 {
+		return nil, errZeroDivision
+	}
+
+	return &baseMeasurement{value: b.value / divisor, unit: b.unit, conversionRates: b.conversionRates}, nil
 }
 
 var errBaseMeasurementConversion = errors.New("not a *baseMeasurement type")
@@ -59,16 +102,28 @@ func (b *baseMeasurement) convertTo(targetUnit string) (*baseMeasurement, error)
 	return newBaseMeasurement(b.value*factor, targetUnit, b.conversionRates)
 }
 
+func (b *baseMeasurement) unsafeConvertTo(targetUnit string) *baseMeasurement {
+	if b.unit == targetUnit {
+		return newUnsafeBaseMeasurement(b.value, targetUnit, b.conversionRates)
+	}
+
+	factor := b.conversionRates.Get(b.unit + targetUnit)
+
+	return newUnsafeBaseMeasurement(b.value*factor, targetUnit, b.conversionRates)
+}
+
+func (b *baseMeasurement) unsafeGetValueIn(targetUnit string) float64 {
+	if b.unit == targetUnit {
+		return b.value
+	}
+
+	factor := b.conversionRates.Get(b.unit + targetUnit)
+
+	return b.value * factor
+}
+
 func (b *baseMeasurement) Type() MeasureType {
 	return DetectMeasureType(b.unit)
-}
-
-func (b *baseMeasurement) Mul(multiplier float64) *baseMeasurement {
-	return &baseMeasurement{value: b.value * multiplier, unit: b.unit, conversionRates: b.conversionRates}
-}
-
-func (b *baseMeasurement) Div(divisor float64) *baseMeasurement {
-	return &baseMeasurement{value: b.value / divisor, unit: b.unit, conversionRates: b.conversionRates}
 }
 
 func (b *baseMeasurement) String() string {
@@ -133,4 +188,12 @@ func newBaseMeasurement(value float64, unit string, conversionRates immutable.Fl
 		unit:            unit,
 		conversionRates: conversionRates,
 	}, nil
+}
+
+func newUnsafeBaseMeasurement(value float64, unit string, conversionRates immutable.Float64Map) *baseMeasurement {
+	return &baseMeasurement{
+		value:           value,
+		unit:            unit,
+		conversionRates: conversionRates,
+	}
 }

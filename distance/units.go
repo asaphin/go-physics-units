@@ -4,7 +4,6 @@ import (
 	"github.com/asaphin/go-physics-units/conversion"
 	"github.com/asaphin/go-physics-units/internal/immutable"
 	"github.com/asaphin/go-physics-units/internal/rates"
-	"sync"
 )
 
 const BaseUnit = Meter
@@ -59,14 +58,13 @@ func ConversionFactors() conversion.Factors {
 }
 
 var conversionRates immutable.Float64Map
-var conversionRatesSync sync.Once
 
 // ConversionRates returns pointer to conversion rates storage.
-// Rates stored by composite keys unitFrom + unitTo
+// Rates stored by composite keys unitFrom + unitTo.
 func ConversionRates() immutable.Float64Map {
-	conversionRatesSync.Do(func() {
+	if conversionRates == nil {
 		conversionRates = immutable.MakeImmutable(rates.FactorsToRates(conversionFactors))
-	})
+	}
 
 	return conversionRates
 }

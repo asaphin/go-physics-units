@@ -5,55 +5,71 @@ import (
 	"testing"
 )
 
-func BenchmarkDistance_Mul(b *testing.B) {
+func BenchmarkDistance_AddSub(b *testing.B) {
+	n := 10000
+
+	distances1 := generateRandomDistances(n)
+	distances2 := generateRandomDistances(n)
+
+	var index int
+
+	b.Run("Addition of two random distances", func(b *testing.B) {
+		for i := 0; i < b.N; i++ {
+			index = i % n
+
+			_ = distances1[index].Add(distances2[index])
+		}
+	})
+
+	b.Run("Subtraction of two random distances", func(b *testing.B) {
+		for i := 0; i < b.N; i++ {
+			index = i % n
+
+			_ = distances1[index].Add(distances2[index])
+		}
+	})
+}
+
+func BenchmarkDistance_MulDiv(b *testing.B) {
 	n := 10000
 
 	distances := generateRandomDistances(n)
-
 	multipliers := randFloats(-100, 100, n)
 
 	var index int
 
-	b.ResetTimer()
-	for i := 0; i < b.N; i++ {
-		index = i % n
+	b.Run("Multiplying of distance", func(b *testing.B) {
+		for i := 0; i < b.N; i++ {
+			index = i % n
 
-		_ = distances[index].Mul(multipliers[index])
-	}
-}
+			_ = distances[index].Mul(multipliers[index])
+		}
+	})
 
-func BenchmarkDistance_Div(b *testing.B) {
-	n := 10000
+	b.Run("Division of distance", func(b *testing.B) {
+		for i := 0; i < b.N; i++ {
+			index = i % n
 
-	distances := generateRandomDistances(n)
-
-	divisors := randFloats(-100, 100, n)
-
-	var index int
-
-	b.ResetTimer()
-	for i := 0; i < b.N; i++ {
-		index = i % n
-
-		_ = distances[index].Div(divisors[index])
-	}
+			_, _ = distances[index].Div(multipliers[index])
+		}
+	})
 }
 
 func BenchmarkDistance_DivideByTime(b *testing.B) {
 	n := 10000
 
 	distances := generateRandomDistances(n)
-
 	times := generateRandomTimes(n)
 
 	var index int
 
-	b.ResetTimer()
-	for i := 0; i < b.N; i++ {
-		index = i % n
+	b.Run("Division of distance by time to get a velocity", func(b *testing.B) {
+		for i := 0; i < b.N; i++ {
+			index = i % n
 
-		_ = distances[index].DivideByTime(times[index])
-	}
+			_ = distances[index].DivideByTime(times[index])
+		}
+	})
 }
 
 func BenchmarkDistance_ConvertToBaseUnit(b *testing.B) {
@@ -63,12 +79,13 @@ func BenchmarkDistance_ConvertToBaseUnit(b *testing.B) {
 
 	var index int
 
-	b.ResetTimer()
-	for i := 0; i < b.N; i++ {
-		index = i % n
+	b.Run("Conversion of distances to basic units - meters", func(b *testing.B) {
+		for i := 0; i < b.N; i++ {
+			index = i % n
 
-		_ = distances[index].ConvertToBaseUnits()
-	}
+			_ = distances[index].ConvertToBaseUnits()
+		}
+	})
 }
 
 func BenchmarkDistance_ToString(b *testing.B) {
@@ -76,12 +93,15 @@ func BenchmarkDistance_ToString(b *testing.B) {
 
 	distances := generateRandomDistances(n)
 
-	b.ResetTimer()
-	for i := 0; i < b.N; i++ {
-		index := i % n
+	var index int
 
-		_ = distances[index].String()
-	}
+	b.Run("Conversion of distances to strings", func(b *testing.B) {
+		for i := 0; i < b.N; i++ {
+			index = i % n
+
+			_ = distances[index].String()
+		}
+	})
 }
 
 func BenchmarkDistance_ParseString(b *testing.B) {
@@ -89,21 +109,22 @@ func BenchmarkDistance_ParseString(b *testing.B) {
 
 	distances := generateRandomDistances(n)
 
-	strs := make([]string, n)
+	str := make([]string, n)
 
 	for i := range distances {
-		strs[i] = distances[i].String()
+		str[i] = distances[i].String()
 	}
 
-	b.ResetTimer()
-	for i := 0; i < b.N; i++ {
-		index := i % n
+	b.Run("Parse strings to distances", func(b *testing.B) {
+		for i := 0; i < b.N; i++ {
+			index := i % n
 
-		_, err := units.ParseString(strs[index])
-		if err != nil {
-			b.Error(err)
+			_, err := units.ParseString(str[index])
+			if err != nil {
+				b.Error(err)
+			}
 		}
-	}
+	})
 }
 
 func BenchmarkDistance_Creation(b *testing.B) {

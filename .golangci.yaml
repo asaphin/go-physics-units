@@ -23,6 +23,7 @@ linters:
     - gofumpt
     - depguard
     - goerr113
+    - dupl
 
 issues:
   # Set the severity level for different issues
@@ -50,4 +51,7 @@ run:
 
 linters-settings:
   varnamelen:
-    max-distance: 12
+    max-distance: 24
+
+  interfacebloat:
+    max: 24

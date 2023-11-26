@@ -1,15 +1,23 @@
 package units
 
-import "github.com/asaphin/go-physics-units/conversion"
+import (
+	"errors"
+)
 
-func getUnits(factors conversion.Factors) []string {
-	units := make([]string, len(factors))
+var errZeroDivision = errors.New("division by zero")
 
-	i := 0
-	for k := range factors {
-		units[i] = k
-		i++
-	}
+type Arithmetics[T any] interface {
+	Add(measurement T) T
+	Sub(measurement T) T
+	Mul(multiplier float64) T
+	Div(divisor float64) (T, error)
+}
 
-	return units
+type UnitConverter[T any] interface {
+	ConvertTo(unit string) (T, error)
+	MustConvertTo(unit string) T
+	ConvertToBaseUnits() T
+
+	valueInBaseUnits() float64
+	valueInUnits(unit string) float64
 }

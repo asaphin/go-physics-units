@@ -8,9 +8,8 @@ import (
 
 type Time interface {
 	Measurement
-	ConvertTo(unit string) (Time, error)
-	MustConvertTo(unit string) Time
-	ConvertToBaseUnits() Time
+	UnitConverter[Time]
+	Arithmetics[Time]
 }
 
 type timeImplementation struct {
@@ -18,28 +17,70 @@ type timeImplementation struct {
 }
 
 func (t *timeImplementation) ConvertTo(unit string) (Time, error) {
-	m, err := t.convertTo(unit)
+	msm, err := t.convertTo(unit)
 	if err != nil {
 		return nil, err
 	}
 
-	return &timeImplementation{*m}, nil
+	return &timeImplementation{*msm}, nil
 }
 
 func (t *timeImplementation) MustConvertTo(unit string) Time {
-	m, err := t.convertTo(unit)
+	msm, err := t.convertTo(unit)
 	if err != nil {
 		panic(err)
 	}
 
-	return &timeImplementation{*m}
+	return &timeImplementation{*msm}
 }
 
 func (t *timeImplementation) ConvertToBaseUnits() Time {
-	m, err := t.convertTo(time.BaseUnit)
-	if err != nil {
-		panic(err)
+	msm := t.unsafeConvertTo(time.BaseUnit)
+
+	return &timeImplementation{*msm}
+}
+
+func (t *timeImplementation) valueInBaseUnits() float64 {
+	return t.unsafeGetValueIn(time.BaseUnit)
+}
+
+func (t *timeImplementation) valueInUnits(unit string) float64 {
+	return t.unsafeGetValueIn(unit)
+}
+
+func (t *timeImplementation) Add(tm Time) Time {
+	t1 := t.value
+	t2 := tm.valueInUnits(t.unit)
+
+	return newTime(t1+t2, t.unit)
+}
+
+func (t *timeImplementation) Sub(tm Time) Time {
+	t1 := t.value
+	t2 := tm.valueInUnits(t.unit)
+
+	return newTime(t1-t2, t.unit)
+}
+
+func (t *timeImplementation) Mul(multiplier float64) Time {
+	msm := newUnsafeBaseMeasurement(t.value*multiplier, t.unit, t.conversionRates)
+
+	return &timeImplementation{*msm}
+}
+
+func (t *timeImplementation) Div(divisor float64) (Time, error) {
+	if divisor == 0 {
+		return nil, errZeroDivision
 	}
+
+	msm := newUnsafeBaseMeasurement(t.value/divisor, t.unit, t.conversionRates)
+
+	return &timeImplementation{*msm}, nil
+}
+
+// newTime unsafe time constructor without checks for internal usage.
+func newTime(value float64, unit string) Time {
+	m := newUnsafeBaseMeasurement(value, unit, time.ConversionRates())
 
 	return &timeImplementation{*m}
 }
@@ -51,10 +92,7 @@ func NewTime(value float64, unit string) (Time, error) {
 		return nil, fmt.Errorf("unknown Time unit %s", unit)
 	}
 
-	m, err := newBaseMeasurement(value, unit, rates)
-	if err != nil {
-		return nil, err
-	}
+	m := newUnsafeBaseMeasurement(value, unit, rates)
 
 	return &timeImplementation{*m}, nil
 }

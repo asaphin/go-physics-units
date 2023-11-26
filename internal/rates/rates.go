@@ -26,12 +26,10 @@ func FactorsToRates(f conversion.Factors) Rates {
 }
 
 func getUnits(f conversion.Factors) []string {
-	units := make([]string, len(f))
+	units := make([]string, 0, len(f))
 
-	i := 0
 	for k := range f {
-		units[i] = k
-		i++
+		units = append(units, k)
 	}
 
 	return units
