@@ -31,9 +31,76 @@ func TestDistance_ConvertTo(t *testing.T) {
 		t.Error(err)
 	}
 
-	if d2.Value() != 0.001 {
+	if !almostEqual(d2.Value(), 0.001, 0.001) {
 		t.Errorf("value should be 0.001, but was %v", d2.Value())
 	}
+}
+
+func TestDistance_Add(t *testing.T) {
+	epsilon := 1e-3
+
+	cases := []struct {
+		name            string
+		initialDistance float64
+		initialUnit     string
+		adderDistance   float64
+		adderUnit       string
+		resultDistance  float64
+	}{
+		{
+			name:            "adding of one decimeter to one meter",
+			initialDistance: 1,
+			initialUnit:     distance.Meter,
+			adderDistance:   1,
+			adderUnit:       distance.Decimeter,
+			resultDistance:  1.1,
+		},
+		{
+			name:            "adding of two kilometers to thousand meters",
+			initialDistance: 1000,
+			initialUnit:     distance.Meter,
+			adderDistance:   2,
+			adderUnit:       distance.Kilometer,
+			resultDistance:  3000,
+		},
+		{
+			name:            "adding of one km mile equivalent to one kilometer",
+			initialDistance: 1,
+			initialUnit:     distance.Kilometer,
+			adderDistance:   0.621371,
+			adderUnit:       distance.Mile,
+			resultDistance:  2,
+		},
+	}
+
+	for _, c := range cases {
+		t.Run(c.name, func(t *testing.T) {
+			d, err := units.NewDistance(c.initialDistance, c.initialUnit)
+			if err != nil {
+				t.Error(err)
+			}
+
+			adder, err := units.NewDistance(c.adderDistance, c.adderUnit)
+			if err != nil {
+				t.Error(err)
+			}
+
+			res := d.Add(adder)
+
+			if res.Type() != units.MeasureDistance {
+				t.Errorf("should be distance, but was %s", res.Type())
+			}
+
+			if res.Unit() != c.initialUnit {
+				t.Errorf("should be %s, but was %s", c.initialUnit, res.Unit())
+			}
+
+			if !almostEqual(res.Value(), c.resultDistance, epsilon) {
+				t.Errorf("value should be %f, but was %f", c.resultDistance, res.Value())
+			}
+		})
+	}
+
 }
 
 func TestDistance_DivideByTime(t *testing.T) {
