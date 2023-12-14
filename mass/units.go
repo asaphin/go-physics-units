@@ -9,17 +9,31 @@ import (
 const BaseUnit = Kilogram
 
 const (
-	Gram     = "g"
-	Kilogram = "kg"
-	Pound    = "lb"
-	Ounce    = "oz"
+	Dalton    = "Da"
+	Microgram = "µg"
+	Milligram = "mg"
+	Gram      = "g"
+	Kilogram  = "kg"
+	Ounce     = "oz"
+	Pound     = "lb"
+	Quintal   = "Qts"
+	Tonne     = "t"
+	EarthMass = "M⊕"
+	SolarMass = "M☉"
 )
 
 var conversionFactors = conversion.Factors{
-	Gram:     0.001,
-	Kilogram: 1,
-	Pound:    0.453592,
-	Ounce:    0.0283495,
+	Dalton:    1.6605390666e-27,
+	Microgram: 1e-9,
+	Milligram: 1e-6,
+	Gram:      0.001,
+	Kilogram:  1,
+	Ounce:     0.0283495,
+	Pound:     0.453592,
+	Quintal:   100,
+	Tonne:     1000,
+	EarthMass: 5.9722e24,
+	SolarMass: 1.98847e30,
 }
 
 // ConversionFactors shows how many base units (kg) in specified unit.

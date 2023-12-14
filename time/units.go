@@ -9,19 +9,29 @@ import (
 const BaseUnit = Second
 
 const (
-	Second = "s"
-	Minute = "min"
-	Hour   = "h"
-	Day    = "d"
-	Week   = "wk"
+	PlankTime   = "tp"
+	Nanosecond  = "ns"
+	Microsecond = "μs"
+	Millisecond = "ms"
+	Second      = "s"
+	Minute      = "min"
+	Hour        = "h"
+	Day         = "d"
+	Week        = "wk"
+	Year        = "yr"
 )
 
 var conversionFactors = conversion.Factors{
-	Second: 1,
-	Minute: 60,
-	Hour:   3600,
-	Day:    86400,
-	Week:   604800,
+	PlankTime:   5.39e-44,
+	Nanosecond:  1e-9,
+	Microsecond: 1e-6,
+	Millisecond: 0.001,
+	Second:      1,
+	Minute:      60,
+	Hour:        3600,
+	Day:         86400,
+	Week:        604800,
+	Year:        31557600,
 }
 
 // ConversionFactors shows how many base units (s) in specified unit.

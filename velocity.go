@@ -3,6 +3,7 @@ package units
 import (
 	"errors"
 	"fmt"
+	"github.com/asaphin/go-physics-units/distance"
 	"github.com/asaphin/go-physics-units/velocity"
 )
 
@@ -10,6 +11,8 @@ type Velocity interface {
 	Measurement
 	UnitConverter[Velocity]
 	Arithmetics[Velocity]
+
+	MultiplyByTime(t Time) Distance
 }
 
 type velocityImplenentation struct {
@@ -76,6 +79,13 @@ func (v *velocityImplenentation) Div(divisor float64) (Velocity, error) {
 	msm := newUnsafeBaseMeasurement(v.value/divisor, v.unit, v.conversionRates)
 
 	return &velocityImplenentation{*msm}, nil
+}
+
+func (v *velocityImplenentation) MultiplyByTime(t Time) Distance {
+	baseV := v.valueInBaseUnits()
+	baseT := t.valueInBaseUnits()
+
+	return newDistance(baseV*baseT, distance.BaseUnit)
 }
 
 func NewVelocity(value float64, unit string) (Velocity, error) {

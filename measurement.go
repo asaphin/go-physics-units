@@ -16,6 +16,7 @@ type Measurement interface {
 	convertTo(targetUnit string) (*baseMeasurement, error)
 	unsafeConvertTo(targetUnit string) *baseMeasurement
 	unsafeGetValueIn(targetUnit string) float64
+	ConvertToMeasurement(targetUnit string) (Measurement, error)
 	Type() MeasureType
 	fmt.Stringer
 
@@ -77,6 +78,10 @@ func (b *baseMeasurement) Value() float64 {
 
 func (b *baseMeasurement) Unit() string {
 	return b.unit
+}
+
+func (b *baseMeasurement) ConvertToMeasurement(targetUnit string) (Measurement, error) {
+	return b.convertTo(targetUnit)
 }
 
 func (b *baseMeasurement) convertTo(targetUnit string) (*baseMeasurement, error) {

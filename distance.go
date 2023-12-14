@@ -86,6 +86,18 @@ func (d *distanceImplementation) Div(divisor float64) (Distance, error) {
 	return &distanceImplementation{*msm}, nil
 }
 
+// DivideByTime implements the DivideByTime method of the Distance interface.
+func (d *distanceImplementation) DivideByTime(t Time) Velocity {
+	if t.Value() == 0 {
+		panic("division by zero")
+	}
+
+	baseD := d.valueInBaseUnits()
+	baseT := t.valueInBaseUnits()
+
+	return newVelocity(baseD/baseT, velocity.BaseUnit)
+}
+
 // NewDistance creates a new Distance instance.
 func NewDistance(value float64, unit string) (Distance, error) {
 	rates := distance.ConversionRates()
@@ -104,18 +116,6 @@ func newDistance(value float64, unit string) Distance {
 	msm := newUnsafeBaseMeasurement(value, unit, distance.ConversionRates())
 
 	return &distanceImplementation{*msm}
-}
-
-// DivideByTime implements the DivideByTime method of the Distance interface.
-func (d *distanceImplementation) DivideByTime(t Time) Velocity {
-	if t.Value() == 0 {
-		panic("division by zero")
-	}
-
-	baseD := d.valueInBaseUnits()
-	baseT := t.valueInBaseUnits()
-
-	return newVelocity(baseD/baseT, velocity.BaseUnit)
 }
 
 var errDistanceConversion = errors.New("not a distance measure")
