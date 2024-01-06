@@ -4,6 +4,8 @@ import (
 	"errors"
 	"fmt"
 	"github.com/asaphin/go-physics-units/time"
+
+	builtintime "time"
 )
 
 type Time interface {
@@ -110,4 +112,17 @@ func ToTime(m Measurement) (Time, error) {
 	}
 
 	return nil, errTimeConversion
+}
+
+func StringToTime(s string) (Time, error) {
+	m, err := ParseString(s)
+	if err != nil {
+		return nil, err
+	}
+
+	return ToTime(m)
+}
+
+func ParseDuration(d builtintime.Duration) Time {
+	return newTime(d.Seconds(), time.BaseUnit)
 }

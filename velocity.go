@@ -121,3 +121,12 @@ func ToVelocity(m Measurement) (Velocity, error) {
 
 	return nil, errVelocityConversion
 }
+
+func StringToVelocity(s string) (Velocity, error) {
+	m, err := ParseString(s)
+	if err != nil {
+		return nil, err
+	}
+
+	return ToVelocity(m)
+}

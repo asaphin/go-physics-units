@@ -24,6 +24,8 @@ linters:
     - depguard
     - goerr113
     - dupl
+    - forcetypeassert
+    - gofmt
 
 issues:
   # Set the severity level for different issues

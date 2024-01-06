@@ -21,7 +21,8 @@ type measurementCreator[T Measurement] struct {
 	measureType     MeasureType
 }
 
-func NewMeasurementCreator[T Measurement](measureType, baseUnit string, factors conversion.Factors) (MeasurementCreator[T], error) {
+func NewMeasurementCreator[T Measurement](
+	measureType, baseUnit string, factors conversion.Factors) (MeasurementCreator[T], error) {
 	if _, ok := factors[baseUnit]; !ok {
 		return nil, fmt.Errorf("provided factors doesn't contain unit %s", baseUnit)
 	}

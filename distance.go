@@ -132,3 +132,12 @@ func ToDistance(m Measurement) (Distance, error) {
 
 	return nil, errDistanceConversion
 }
+
+func StringToDistance(s string) (Distance, error) {
+	m, err := ParseString(s)
+	if err != nil {
+		return nil, err
+	}
+
+	return ToDistance(m)
+}
