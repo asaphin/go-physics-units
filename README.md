@@ -67,6 +67,46 @@ func main() {
 }
 ```
 
+You can also create a factory for your own measure type:
+
+```go
+package main
+
+import (
+	"fmt"
+	units "github.com/asaphin/go-physics-units"
+)
+
+func main() {
+	type Currency interface {
+		units.Measurement
+	}
+
+	currencyFactors := conversion.Factors{
+		"EUR": 1.1,
+		"USD": 1,
+		"UAH": 0.027,
+	}
+
+	mc, err := units.NewMeasurementCreator[Currency]("currency", "USD", currencyFactors)
+	if err != nil {
+		panic(err)
+	}
+
+	cur, err := mc.New(1, "USD")
+	if err != nil {
+		panic(err)
+	}
+
+	cur2, err := cur.ConvertToMeasurement("UAH")
+	if err != nil {
+		panic(err)
+	}
+
+	fmt.Println(cur2) // 37.03703703703704 UAH
+}
+```
+
 ## Documentation
 
 ## License
