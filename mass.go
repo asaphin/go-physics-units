@@ -111,3 +111,12 @@ func ToMass(m Measurement) (Mass, error) {
 
 	return nil, errMassConversion
 }
+
+func StringToMass(s string) (Mass, error) {
+	m, err := ParseString(s)
+	if err != nil {
+		return nil, err
+	}
+
+	return ToMass(m)
+}
