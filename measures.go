@@ -1,6 +1,7 @@
 package units
 
 import (
+	"github.com/asaphin/go-physics-units/area"
 	"github.com/asaphin/go-physics-units/conversion"
 	"github.com/asaphin/go-physics-units/distance"
 	"github.com/asaphin/go-physics-units/internal/immutable"
@@ -16,6 +17,7 @@ const (
 	MeasureTime     MeasureType = "time"
 	MeasureMass     MeasureType = "mass"
 	MeasureVelocity MeasureType = "velocity"
+	MeasureArea     MeasureType = "area"
 	MeasureCustom   MeasureType = "custom"
 )
 
@@ -24,6 +26,7 @@ var measureToConversionFactorsMapping = map[MeasureType]conversion.Factors{
 	MeasureTime:     time.ConversionFactors(),
 	MeasureMass:     mass.ConversionFactors(),
 	MeasureVelocity: velocity.ConversionFactors(),
+	MeasureArea:     area.ConversionFactors(),
 }
 
 var measureToConversionRatesMapping = map[MeasureType]immutable.Float64Map{
@@ -31,6 +34,7 @@ var measureToConversionRatesMapping = map[MeasureType]immutable.Float64Map{
 	MeasureTime:     time.ConversionRates(),
 	MeasureMass:     mass.ConversionRates(),
 	MeasureVelocity: velocity.ConversionRates(),
+	MeasureArea:     area.ConversionRates(),
 }
 
 func DetectMeasureType(unit string) MeasureType {

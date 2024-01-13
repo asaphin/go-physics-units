@@ -3,6 +3,7 @@ package units
 import (
 	"errors"
 	"fmt"
+	"github.com/asaphin/go-physics-units/area"
 	"github.com/asaphin/go-physics-units/distance"
 	"github.com/asaphin/go-physics-units/velocity"
 )
@@ -14,6 +15,7 @@ type Distance interface {
 	Arithmetics[Distance]
 
 	DivideByTime(t Time) Velocity
+	Square() Area
 }
 
 // distanceImplementation is a concrete implementation of the Distance interface.
@@ -96,6 +98,13 @@ func (d *distanceImplementation) DivideByTime(t Time) Velocity {
 	baseT := t.valueInBaseUnits()
 
 	return newVelocity(baseD/baseT, velocity.BaseUnit)
+}
+
+// Square implements the Square method of the Distance interface.
+func (d *distanceImplementation) Square() Area {
+	baseD := d.valueInBaseUnits()
+
+	return newArea(baseD*baseD, area.BaseUnit)
 }
 
 // NewDistance creates a new Distance instance.
