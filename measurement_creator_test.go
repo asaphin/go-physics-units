@@ -85,8 +85,8 @@ func TestMeasurementCreator_IncompatibleMeasures(t *testing.T) {
 		t.Fatal(err)
 	}
 
-	if sum, err := usd.AddMeasurement(foo); err == nil || sum != nil {
-		t.Errorf("1 USD + 5 foo = %v, %v; want nil and an error", sum, err)
+	if sum, addErr := usd.AddMeasurement(foo); addErr == nil || sum != nil {
+		t.Errorf("1 USD + 5 foo = %v, %v; want nil and an error", sum, addErr)
 	}
 
 	// Two measures with the same name but disjoint units.
@@ -100,8 +100,8 @@ func TestMeasurementCreator_IncompatibleMeasures(t *testing.T) {
 		t.Fatal(err)
 	}
 
-	if sum, err := usd.AddMeasurement(gbp); err == nil || sum != nil {
-		t.Errorf("1 USD + 1 GBP from unrelated creators = %v, %v; want nil and an error", sum, err)
+	if sum, addErr := usd.AddMeasurement(gbp); addErr == nil || sum != nil {
+		t.Errorf("1 USD + 1 GBP from unrelated creators = %v, %v; want nil and an error", sum, addErr)
 	}
 }
 
@@ -272,12 +272,13 @@ func TestNewBaseMeasurement(t *testing.T) {
 
 	assertMeasurement(t, usd, 1.1, "USD")
 
-	if m, err := units.NewBaseMeasurement(1, "GBP", currencyFactors()); err == nil || m != nil {
-		t.Errorf("unknown unit: got %v, %v; want nil and an error", m, err)
+	if bad, badErr := units.NewBaseMeasurement(1, "GBP", currencyFactors()); badErr == nil || bad != nil {
+		t.Errorf("unknown unit: got %v, %v; want nil and an error", bad, badErr)
 	}
 
-	if m, err := units.NewBaseMeasurement(1, "USD", conversion.Factors{"USD": 1, "BTC": 0}); err == nil || m != nil {
-		t.Errorf("zero factor: got %v, %v; want nil and an error", m, err)
+	zeroFactor := conversion.Factors{"USD": 1, "BTC": 0}
+	if bad, badErr := units.NewBaseMeasurement(1, "USD", zeroFactor); badErr == nil || bad != nil {
+		t.Errorf("zero factor: got %v, %v; want nil and an error", bad, badErr)
 	}
 
 	// Custom factors never produce a predefined measure, even with its symbols.

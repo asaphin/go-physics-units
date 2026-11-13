@@ -73,8 +73,7 @@ func (c *measurementCreator[T]) New(value float64, unit string) (T, error) {
 		return zero, err
 	}
 
-	// NewMeasurementCreator has checked that *baseMeasurement satisfies T.
-	return Measurement(&bm).(T), nil
+	return Measurement(&bm).(T), nil //nolint:errcheck // NewMeasurementCreator checked that *baseMeasurement satisfies T
 }
 
 // ParseString parses a measurement from a string of the form "<value> <unit>".

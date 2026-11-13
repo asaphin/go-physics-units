@@ -254,8 +254,22 @@ func newBaseMeasurement(value float64, unit string, table rates.Table) (baseMeas
 
 // parseValueAndUnit splits a "<value> <unit>" string and parses the value.
 func parseValueAndUnit(s string) (float64, string, error) {
-	parts := strings.Fields(s)
-	if len(parts) != 2 {
+	// FieldsSeq instead of Fields: no slice is allocated for the fields.
+	var parts [2]string
+
+	n := 0
+	for field := range strings.FieldsSeq(s) {
+		if n == len(parts) {
+			n++ // a third field: the format is invalid
+
+			break
+		}
+
+		parts[n] = field
+		n++
+	}
+
+	if n != len(parts) {
 		return 0, "", fmt.Errorf("invalid string format: %s", s)
 	}
 

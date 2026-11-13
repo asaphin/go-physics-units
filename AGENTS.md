@@ -7,7 +7,7 @@ Guidance for AI coding agents (and humans) working in this repository. `CLAUDE.m
 `go-physics-units` (module `github.com/asaphin/go-physics-units`, package name `units`) is a small Go library for creating, converting, parsing and doing arithmetic on physical measurements (distance, area, mass, time, velocity) and user-defined measures (e.g. currency).
 
 - **Published and pre-1.0** (tags `v0.0.0`–`v0.0.4`). Exported API changes affect real users: make them deliberately, call them out, and record them in `CHANGELOG.md`.
-- **Go version:** `go.mod` declares `go 1.22`, and CI tests both 1.22 and the latest stable release. Don't use newer features unless bumping `go.mod` is its own deliberate change. That rules out range-over-func iterators and the iterator helpers in `maps`/`slices` (Go 1.23), and `testing.B.Loop` and `strings.SplitSeq` (Go 1.24).
+- **Go version:** `go.mod` declares `go 1.27.0`. CI tests that exact version and the latest stable release. Use modern Go freely: iterators and the `maps`/`slices` helpers, `strings.FieldsSeq`, `testing.B.Loop`, `sync.WaitGroup.Go`, and generic methods (Go 1.27). The `modernize` linter points out older forms. Raising the minimum again is its own deliberate change, with a CHANGELOG entry.
 - **No third-party dependencies**, including in tests (stdlib `testing` only, no testify). Keep it that way unless asked.
 - **Branches:** `dev` is the working branch, and it only accepts pull requests. Work on a short-lived branch and open a PR into `dev`. Releases are merged from `dev` into `main`.
 
@@ -66,7 +66,7 @@ User-defined measures are first-class: they convert, combine and parse like the 
 | `measurement_creator.go` | Generic `NewMeasurementCreator[T]` for user-defined measures |
 | `internal/rates` | `Table`: the immutable, validated N×N rate table of one measure, a read-only handle passed by value. Also `CanonicalUnit` |
 | `Makefile` | Task runner (see Commands) |
-| `.github/workflows/ci.yml` | CI: vet, race tests and coverage (Go 1.22 and stable), a short fuzz run, golangci-lint (pinned version), govulncheck |
+| `.github/workflows/ci.yml` | CI: `go mod tidy` check, vet, race tests and coverage (the `go.mod` Go version and stable), a short fuzz run, golangci-lint (pinned version), govulncheck |
 | `CHANGELOG.md` | User-visible changes, under `## Unreleased` until the next tag |
 | `ROADMAP.md` | Ordered plan of upcoming work. Take steps in order and tick them off when done |
 
@@ -99,19 +99,20 @@ On error, always return a nil interface (`return nil, err`, or `var zero T` in g
 ## Commands
 
 ```sh
-make check      # what CI runs: gofmt check, go vet, golangci-lint, go test -race
+make check      # what CI runs: go mod tidy check, format check, go vet, golangci-lint, go test -race
 make test       # quick tests without the race detector
 make cover      # coverage summary; HTML report in coverage/ (gitignored)
 make bench      # benchmarks (root package only)
 make fuzz       # FuzzParseString; FUZZTIME=30s by default
-make fmt        # golangci-lint fmt (gofmt + goimports)
-staticcheck ./...
+make fmt        # golangci-lint fmt: gofumpt, goimports, golines (120 columns)
 ```
 
-- **golangci-lint:** `.golangci.yaml` uses the v2 format and enables every linter except a documented opt-out list. CI pins golangci-lint `v2.13.2` and runs it with the `go.mod` Go version. A golangci-lint binary can't read the export data of Go releases newer than it supports, so linting with the latest Go would break whenever Go is released.
-- **Upgrading golangci-lint:** new linters can appear, so upgrade on purpose. Fix the new findings, or add the linter to the opt-out list with a reason.
+- **golangci-lint:** `.golangci.yaml` (v2 format) lists every enabled linter explicitly, grouped by purpose, and gives a reason for each linter it leaves out. It is adapted from the golden config by Marat Reimers. golangci-lint also runs staticcheck with all checks, so there is no separate staticcheck step.
+- **Pinned version:** golangci-lint `v2.15.0`, set in the Makefile (`GOLANGCI_LINT_VERSION`) and in CI. `make lint` refuses to run any other version and prints the install command.
+- **Lint Go version:** CI runs golangci-lint with the `go.mod` Go version. A golangci-lint binary can't read the export data of Go releases newer than it supports: v2.13.2 fails on Go 1.27.4, for example. Linting with the latest Go would therefore break whenever Go is released.
+- **Upgrading golangci-lint:** upgrade on purpose, in its own PR. Bump both pins, read the changelog for renamed options, then fix the new findings or disable a check with a reason. Enabling a new linter is a separate, reviewed change.
 - **`nolint`:** add a `//nolint:<linter> // reason` directive only with a reason. `nolintlint` flags unused directives.
-- **Done means:** `make check` and `staticcheck ./...` are clean, coverage is still around 99% (`make cover`), and benchmarks show no hot-path regression.
+- **Done means:** `make check` is clean, coverage is still around 99% (`make cover`), and benchmarks show no hot-path regression.
 
 ## Recipes
 
@@ -144,7 +145,7 @@ The factor model is multiplicative only. It can't express measures with an offse
 
 ## Code conventions
 
-- Format with `make fmt` (gofmt and goimports): stdlib imports first, a blank line, then module imports.
+- Format with `make fmt`. It runs gofumpt and goimports, with stdlib imports first, a blank line, then module imports, and golines wraps lines longer than 120 columns.
 - Error strings are lower-case with no trailing punctuation and include the offending unit. Use `unknownUnitError(mt, unit)` for unknown units, and wrap underlying errors with `%w`.
 - Return errors rather than panicking. The only intended panics are `Must*` methods and `rates.MustNewTable` on constant data.
 - Exported identifiers need doc comments that start with the identifier's name, as do package clauses (`revive` enforces both).
@@ -160,7 +161,7 @@ The factor model is multiplicative only. It can't express measures with an offse
 - On error paths, assert that the result is nil as well as that the error is non-nil.
 - `Example*` functions in `example_test.go` mirror `README.md` and have verified `// Output:` blocks. Keep the README snippets in sync with them.
 - If a test fails because of a library bug, fix the library or skip the test with `t.Skip("known defect: …")`. Never change expected values to match wrong output.
-- Benchmarks are in `distance_benchmark_test.go` and use the `generateRandom*` helpers.
+- Benchmarks are in `distance_benchmark_test.go`. They loop with `b.Loop()` (`for i := 0; b.Loop(); i++` when an index is needed) and use the `generateRandom*` helpers, which draw from `math/rand/v2`.
 - `immutability_test.go` enforces the immutability principle (no exported variables, no internal types in the exported API, race-free concurrent use). If one of its tests fails, fix the code, not the test.
 
 ## Known defects and design debt

@@ -123,8 +123,8 @@ func TestMeasurement_Arithmetic(t *testing.T) {
 
 	assertMeasurement(t, quot, 0.25, distance.Kilometer)
 
-	if q, err := km.DivMeasurement(0); err == nil || q != nil {
-		t.Errorf("DivMeasurement(0) = %v, %v; want nil and an error", q, err)
+	if q, divErr := km.DivMeasurement(0); divErr == nil || q != nil {
+		t.Errorf("DivMeasurement(0) = %v, %v; want nil and an error", q, divErr)
 	}
 
 	kg, err := units.NewMeasurement(1, mass.Kilogram)
