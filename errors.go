@@ -45,6 +45,9 @@ const (
 	// ErrInvalidMeasure: NewMeasurementCreator got an empty or predefined measure
 	// name, or a type parameter that Measurement alone doesn't satisfy.
 	ErrInvalidMeasure Error = "invalid measure"
+	// ErrOutOfRange: the value can't be represented in the target type, as in
+	// Time.ToDuration of NaN or of more than about 292 years.
+	ErrOutOfRange Error = "value out of range"
 )
 
 // UnitError reports a unit that doesn't belong to a measure. It matches

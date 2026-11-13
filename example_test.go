@@ -101,6 +101,21 @@ func ExampleDistance_compare() {
 	// [12 in 1 ft 1 mi]
 }
 
+func ExampleTime_ToDuration() {
+	tm, _ := units.NewTime(1.5, time.Hour)
+
+	d, err := tm.ToDuration()
+	if err != nil {
+		panic(err)
+	}
+
+	fmt.Println(d)
+	fmt.Println(units.ParseDuration(d))
+	// Output:
+	// 1h30m0s
+	// 5400 s
+}
+
 func ExampleUnitError() {
 	_, err := units.StringToDistance("3 kg")
 

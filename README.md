@@ -111,6 +111,7 @@ Operations that combine measures return their result in SI base units:
 | `Area.DivideByDistance`    | `Distance` in m           |
 | `Velocity.MultiplyByTime`  | `Distance` in m           |
 | `ParseDuration`            | `Time` in s, from a `time.Duration` |
+| `Time.ToDuration`          | `time.Duration`, rounded to the nearest nanosecond |
 
 ## Errors
 
@@ -124,6 +125,7 @@ Every error matches exactly one sentinel, which you can test for with `errors.Is
 | `ErrInvalidFormat`        | the string isn't `"<value> <unit>"` with a finite value                                  |
 | `ErrInvalidFactors`       | custom conversion factors are invalid or lack the base unit                              |
 | `ErrInvalidMeasure`       | `NewMeasurementCreator` gets an empty or predefined measure name, or an unsupported type |
+| `ErrOutOfRange`           | `Time.ToDuration` gets NaN or more than about 292 years                                  |
 
 ```go
 _, err := units.StringToDistance("3 kg")
