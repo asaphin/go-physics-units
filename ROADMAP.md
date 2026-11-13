@@ -38,8 +38,8 @@ Size is relative effort: S < M < L.
 | ☐ | [3.2B](#32b-typed-results-from-generic-operations) | Typed results from generic operations (Path B) | P3 | no | M | v0.2.0 |
 | ☐ | [3.4](#34-migration-guide-and-release-v020) | Migration guide, release v0.2.0 | — | — | S | v0.2.0 |
 | ☐ | [4.1](#41-text-and-json-encoding) | Text and JSON encoding | P3 | no | M | v0.2.x |
-| ☐ | [4.2](#42-configurable-parser) | Configurable parser with aliases | P3, P2 | no | M | v0.2.x |
-| ☐ | [4.3](#43-new-measures-one-per-step) | New measures, one per step | P3 | no | S each | v0.2.x |
+| ☑ | [4.2](#42-configurable-parser) | Configurable parser with aliases | P3, P2 | no | M | v0.2.x |
+| ☑ | [4.3](#43-new-measures-one-per-step) | New measures, one per step | P3 | no | S each | v0.2.x |
 | ☐ | [4.4](#44-decision-temperature) | Temperature (design first) | P3 | **Decision** | M | v0.2.x |
 | ☐ | [5.1](#51-stabilise-and-release-v100) | Stabilise and release v1.0.0 | — | removals | M | v1.0.0 |
 
@@ -180,6 +180,8 @@ Prototype on a branch and benchmark it against v0.1.x.
 
 Each step is its own PR on `dev`, but nothing is tagged until the batch is complete, so users migrate once.
 
+> **Note (2026-11-13):** the author lifted the release ordering for now ("we'll take care about versioning later"), so steps 4.2 and 4.3 were done before Phase 3. The design decision of 2.1 still comes first for Phase 3 itself.
+
 ### 3.1 Typed unit symbols
 
 This step is part of both paths. If the RFC chooses integer units, adapt the step.
@@ -264,6 +266,7 @@ Serves **P3**.
 - The factor model is multiplicative only. Temperature needs an offset (°C, °F).
 - It also needs to tell absolute temperatures apart from differences: 20 °C plus a 10 K difference is 30 °C, but adding two absolute temperatures is meaningless.
 - Design the model for affine units, and the operations they allow, before writing any code.
+- **Status:** the design proposal is written: [docs/rfc-temperature.md](docs/rfc-temperature.md). It proposes two types (`Temperature` and `TemperatureDifference`), implemented after Phase 3; the decisions are the author's.
 
 ### Not planned unless there is demand
 

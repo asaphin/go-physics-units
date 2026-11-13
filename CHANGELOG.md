@@ -19,6 +19,7 @@ Changes in behaviour that compile unchanged:
 - **Custom measures:** `Type()` of a value from `NewMeasurementCreator` returns the measure name you gave, not `custom`. Code that checked for `MeasureCustom` should check for that name. `NewBaseMeasurement` values are still `custom`.
 - **Stricter input.** `NewMeasurementCreator` and `NewBaseMeasurement` reject empty, zero, negative, NaN and infinite factors, empty unit symbols, and, for the creator, empty or predefined measure names. `ParseString` rejects NaN and infinite values.
 - **`AddMeasurement` and `SubMeasurement`** return an error when the units can't be converted into each other. They used to count the other operand as zero.
+- **New measures** reserve their names: a custom measure named `volume`, `force`, `energy`, `power`, `pressure`, `frequency`, `angle`, `acceleration` or `data size` is now rejected by `NewMeasurementCreator`; rename it. Symbols such as `L`, `N`, `J`, `W`, `Pa` and `Hz` now parse as those measures.
 - **Error messages** changed, for example to `unknown distance unit kg`. Instead of matching messages, test for the new sentinel errors with `errors.Is`, such as `errors.Is(err, units.ErrUnknownUnit)`.
 
 ### Fixed

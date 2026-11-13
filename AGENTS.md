@@ -72,7 +72,7 @@ User-defined measures are first-class: they convert, combine and parse like the 
 | `Makefile` | Task runner (see Commands) |
 | `.github/workflows/ci.yml` | CI: `go mod tidy` check, vet, race tests and coverage (the `go.mod` Go version and stable), allocation guards, a short fuzz run, the RFC prototype, golangci-lint (pinned version), the exported-API report, govulncheck |
 | `.github/dependabot.yml`, `.github/pull_request_template.md` | Weekly bumps of the CI actions (into `dev`); the PR checklist |
-| `docs/` | Design documents. `docs/rfc-value-types.md` and its prototype, a separate module in `docs/rfc-value-types/` that CI tests but that isn't part of the library |
+| `docs/` | Design documents awaiting the author's decision: `docs/rfc-value-types.md` (ROADMAP 2.1) with its prototype, a separate module in `docs/rfc-value-types/` that CI tests but that isn't part of the library, and `docs/rfc-temperature.md` (ROADMAP 4.4) |
 | `CHANGELOG.md` | User-visible changes, under `## Unreleased` until the next tag |
 | `ROADMAP.md` | Ordered plan of upcoming work. Take steps in order and tick them off when done |
 
