@@ -188,6 +188,36 @@ func main() {
 }
 ```
 
+### Extending a predefined measure
+
+`ConversionFactors()` returns a copy of a measure's factors. Add units to it and create a measure of your own; the predefined measure stays unchanged:
+
+```go
+type Surveying interface{ units.Measurement }
+
+factors := distance.ConversionFactors() // a copy: changing it is safe
+factors["fur"] = 201.168                // furlong, 660 international feet
+factors["ch"] = 20.1168                 // chain, 66 international feet
+
+mc, err := units.NewMeasurementCreator[Surveying]("surveying", distance.BaseUnit, factors)
+if err != nil {
+	panic(err)
+}
+
+furlong, err := mc.New(1, "fur")
+if err != nil {
+	panic(err)
+}
+
+chains, _ := furlong.ConvertToMeasurement("ch")
+metres, _ := furlong.ConvertToMeasurement(distance.Meter)
+
+fmt.Println(chains, metres, furlong.Type()) // 10 ch 201.168 m surveying
+
+_, err = units.NewDistance(1, "fur")
+fmt.Println(err) // unknown distance unit fur
+```
+
 ## Supported units
 
 | Measure  | Package    | Base unit | Symbols |
