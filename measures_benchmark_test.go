@@ -16,6 +16,13 @@ func BenchmarkMeasures(b *testing.B) {
 	b.Run("mass", func(b *testing.B) { benchTypedMeasure(b, massCase) })
 	b.Run("time", func(b *testing.B) { benchTypedMeasure(b, timeCase) })
 	b.Run("velocity", func(b *testing.B) { benchTypedMeasure(b, velocityCase) })
+	b.Run("volume", func(b *testing.B) { benchTypedMeasure(b, volumeCase) })
+	b.Run("acceleration", func(b *testing.B) { benchTypedMeasure(b, accelerationCase) })
+	b.Run("force", func(b *testing.B) { benchTypedMeasure(b, forceCase) })
+	b.Run("energy", func(b *testing.B) { benchTypedMeasure(b, energyCase) })
+	b.Run("power", func(b *testing.B) { benchTypedMeasure(b, powerCase) })
+	b.Run("pressure", func(b *testing.B) { benchTypedMeasure(b, pressureCase) })
+	b.Run("frequency", func(b *testing.B) { benchTypedMeasure(b, frequencyCase) })
 }
 
 func benchTypedMeasure[T typedMeasure[T]](b *testing.B, c typedCase[T]) {

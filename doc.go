@@ -1,5 +1,6 @@
-// Package units provides immutable physical measurements (distance, area, mass,
-// time and velocity) with unit conversion, arithmetic and string parsing, plus
+// Package units provides immutable physical measurements (distance, area,
+// volume, mass, time, velocity, acceleration, force, energy, power, pressure and
+// frequency) with unit conversion, arithmetic and string parsing, plus
 // user-defined measures such as currencies.
 //
 // Unit symbols are defined in the per-measure subpackages, for example

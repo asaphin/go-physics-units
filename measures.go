@@ -1,13 +1,20 @@
 package units
 
 import (
+	"github.com/asaphin/go-physics-units/acceleration"
 	"github.com/asaphin/go-physics-units/area"
 	"github.com/asaphin/go-physics-units/conversion"
 	"github.com/asaphin/go-physics-units/distance"
+	"github.com/asaphin/go-physics-units/energy"
+	"github.com/asaphin/go-physics-units/force"
+	"github.com/asaphin/go-physics-units/frequency"
 	"github.com/asaphin/go-physics-units/internal/rates"
 	"github.com/asaphin/go-physics-units/mass"
+	"github.com/asaphin/go-physics-units/power"
+	"github.com/asaphin/go-physics-units/pressure"
 	"github.com/asaphin/go-physics-units/time"
 	"github.com/asaphin/go-physics-units/velocity"
+	"github.com/asaphin/go-physics-units/volume"
 )
 
 // MeasureType identifies a measure (a kind of physical quantity), such as
@@ -19,39 +26,67 @@ type MeasureType string
 // NewBaseMeasurement and the result of DetectMeasureType for unknown units;
 // measurements from a MeasurementCreator have the type the creator was given.
 const (
-	MeasureDistance MeasureType = "distance"
-	MeasureTime     MeasureType = "time"
-	MeasureMass     MeasureType = "mass"
-	MeasureVelocity MeasureType = "velocity"
-	MeasureArea     MeasureType = "area"
-	MeasureCustom   MeasureType = "custom"
+	MeasureDistance     MeasureType = "distance"
+	MeasureTime         MeasureType = "time"
+	MeasureMass         MeasureType = "mass"
+	MeasureVelocity     MeasureType = "velocity"
+	MeasureArea         MeasureType = "area"
+	MeasureVolume       MeasureType = "volume"
+	MeasureAcceleration MeasureType = "acceleration"
+	MeasureForce        MeasureType = "force"
+	MeasureEnergy       MeasureType = "energy"
+	MeasurePower        MeasureType = "power"
+	MeasurePressure     MeasureType = "pressure"
+	MeasureFrequency    MeasureType = "frequency"
+	MeasureCustom       MeasureType = "custom"
 )
 
 var measureToConversionFactorsMapping = map[MeasureType]conversion.Factors{
-	MeasureDistance: distance.ConversionFactors(),
-	MeasureTime:     time.ConversionFactors(),
-	MeasureMass:     mass.ConversionFactors(),
-	MeasureVelocity: velocity.ConversionFactors(),
-	MeasureArea:     area.ConversionFactors(),
+	MeasureDistance:     distance.ConversionFactors(),
+	MeasureTime:         time.ConversionFactors(),
+	MeasureMass:         mass.ConversionFactors(),
+	MeasureVelocity:     velocity.ConversionFactors(),
+	MeasureArea:         area.ConversionFactors(),
+	MeasureVolume:       volume.ConversionFactors(),
+	MeasureAcceleration: acceleration.ConversionFactors(),
+	MeasureForce:        force.ConversionFactors(),
+	MeasureEnergy:       energy.ConversionFactors(),
+	MeasurePower:        power.ConversionFactors(),
+	MeasurePressure:     pressure.ConversionFactors(),
+	MeasureFrequency:    frequency.ConversionFactors(),
 }
 
 // Rate tables of the predefined measures, built once at package init and never
 // written again. Each is named after its MeasureType, which is how a value
 // knows its measure.
 var (
-	distanceRates = rates.MustNewTable(string(MeasureDistance), distance.ConversionFactors())
-	timeRates     = rates.MustNewTable(string(MeasureTime), time.ConversionFactors())
-	massRates     = rates.MustNewTable(string(MeasureMass), mass.ConversionFactors())
-	velocityRates = rates.MustNewTable(string(MeasureVelocity), velocity.ConversionFactors())
-	areaRates     = rates.MustNewTable(string(MeasureArea), area.ConversionFactors())
+	distanceRates     = rates.MustNewTable(string(MeasureDistance), distance.ConversionFactors())
+	timeRates         = rates.MustNewTable(string(MeasureTime), time.ConversionFactors())
+	massRates         = rates.MustNewTable(string(MeasureMass), mass.ConversionFactors())
+	velocityRates     = rates.MustNewTable(string(MeasureVelocity), velocity.ConversionFactors())
+	areaRates         = rates.MustNewTable(string(MeasureArea), area.ConversionFactors())
+	volumeRates       = rates.MustNewTable(string(MeasureVolume), volume.ConversionFactors())
+	accelerationRates = rates.MustNewTable(string(MeasureAcceleration), acceleration.ConversionFactors())
+	forceRates        = rates.MustNewTable(string(MeasureForce), force.ConversionFactors())
+	energyRates       = rates.MustNewTable(string(MeasureEnergy), energy.ConversionFactors())
+	powerRates        = rates.MustNewTable(string(MeasurePower), power.ConversionFactors())
+	pressureRates     = rates.MustNewTable(string(MeasurePressure), pressure.ConversionFactors())
+	frequencyRates    = rates.MustNewTable(string(MeasureFrequency), frequency.ConversionFactors())
 )
 
 var measureToConversionRatesMapping = map[MeasureType]rates.Table{
-	MeasureDistance: distanceRates,
-	MeasureTime:     timeRates,
-	MeasureMass:     massRates,
-	MeasureVelocity: velocityRates,
-	MeasureArea:     areaRates,
+	MeasureDistance:     distanceRates,
+	MeasureTime:         timeRates,
+	MeasureMass:         massRates,
+	MeasureVelocity:     velocityRates,
+	MeasureArea:         areaRates,
+	MeasureVolume:       volumeRates,
+	MeasureAcceleration: accelerationRates,
+	MeasureForce:        forceRates,
+	MeasureEnergy:       energyRates,
+	MeasurePower:        powerRates,
+	MeasurePressure:     pressureRates,
+	MeasureFrequency:    frequencyRates,
 }
 
 // unitToMeasureType indexes every predefined unit symbol by its measure.

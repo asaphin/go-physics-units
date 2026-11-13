@@ -4,20 +4,34 @@ import (
 	"testing"
 
 	units "github.com/asaphin/go-physics-units"
+	"github.com/asaphin/go-physics-units/acceleration"
 	"github.com/asaphin/go-physics-units/area"
 	"github.com/asaphin/go-physics-units/conversion"
 	"github.com/asaphin/go-physics-units/distance"
+	"github.com/asaphin/go-physics-units/energy"
+	"github.com/asaphin/go-physics-units/force"
+	"github.com/asaphin/go-physics-units/frequency"
 	"github.com/asaphin/go-physics-units/mass"
+	"github.com/asaphin/go-physics-units/power"
+	"github.com/asaphin/go-physics-units/pressure"
 	"github.com/asaphin/go-physics-units/time"
 	"github.com/asaphin/go-physics-units/velocity"
+	"github.com/asaphin/go-physics-units/volume"
 )
 
 var predefinedFactors = map[units.MeasureType]conversion.Factors{
-	units.MeasureDistance: distance.ConversionFactors(),
-	units.MeasureArea:     area.ConversionFactors(),
-	units.MeasureMass:     mass.ConversionFactors(),
-	units.MeasureTime:     time.ConversionFactors(),
-	units.MeasureVelocity: velocity.ConversionFactors(),
+	units.MeasureDistance:     distance.ConversionFactors(),
+	units.MeasureArea:         area.ConversionFactors(),
+	units.MeasureMass:         mass.ConversionFactors(),
+	units.MeasureTime:         time.ConversionFactors(),
+	units.MeasureVelocity:     velocity.ConversionFactors(),
+	units.MeasureVolume:       volume.ConversionFactors(),
+	units.MeasureAcceleration: acceleration.ConversionFactors(),
+	units.MeasureForce:        force.ConversionFactors(),
+	units.MeasureEnergy:       energy.ConversionFactors(),
+	units.MeasurePower:        power.ConversionFactors(),
+	units.MeasurePressure:     pressure.ConversionFactors(),
+	units.MeasureFrequency:    frequency.ConversionFactors(),
 }
 
 // TestConversion_AllUnitPairs converts between every ordered pair of units of
@@ -102,6 +116,56 @@ func TestConversion_ReferenceValues(t *testing.T) {
 		{velocity.MilePerHour, velocity.KilometerPerHour, 1.609344},
 		{velocity.FeetPerSecond, velocity.MeterPerSecond, 0.3048},
 		{velocity.SpeedOfLight, velocity.KilometerPerHour, 1079252848.8},
+		{volume.CubicMeter, volume.Liter, 1000},
+		{volume.Liter, volume.Milliliter, 1000},
+		{volume.Milliliter, volume.CubicCentimeter, 1},
+		{volume.Microliter, volume.CubicMillimeter, 1},
+		{volume.Gallon, volume.Liter, 3.785411784},
+		{volume.Gallon, volume.Quart, 4},
+		{volume.Quart, volume.Pint, 2},
+		{volume.Gallon, volume.CubicInch, 231},
+		{volume.CubicFoot, volume.CubicInch, 1728},
+		{volume.CubicYard, volume.CubicFoot, 27},
+		{volume.Barrel, volume.Gallon, 42},
+		{volume.CubicKilometer, volume.CubicMeter, 1e9},
+		{acceleration.StandardGravity, acceleration.MeterPerSecondSquared, 9.80665},
+		{acceleration.MeterPerSecondSquared, acceleration.CentimeterPerSecondSquared, 100},
+		{acceleration.FootPerSecondSquared, acceleration.MeterPerSecondSquared, 0.3048},
+		{force.KilogramForce, force.Newton, 9.80665},
+		{force.PoundForce, force.Newton, 4.4482216152605},
+		{force.Kilonewton, force.Newton, 1000},
+		{force.Newton, force.Dyne, 1e5},
+		{force.Meganewton, force.Kilonewton, 1000},
+		{force.Newton, force.Millinewton, 1000},
+		{energy.KilowattHour, energy.Megajoule, 3.6},
+		{energy.WattHour, energy.Joule, 3600},
+		{energy.MegawattHour, energy.KilowattHour, 1000},
+		{energy.Kilocalorie, energy.Kilojoule, 4.184},
+		{energy.Kilocalorie, energy.Calorie, 1000},
+		{energy.BTU, energy.Joule, 1055.05585262},
+		{energy.Electronvolt, energy.Joule, 1.602176634e-19},
+		{energy.Joule, energy.Erg, 1e7},
+		{energy.FootPound, energy.Joule, 1.3558179483314004},
+		{energy.Gigajoule, energy.Megajoule, 1000},
+		{power.Horsepower, power.Watt, 745.69987158227022},
+		{power.MetricHorsepower, power.Watt, 735.49875},
+		{power.Kilowatt, power.Watt, 1000},
+		{power.Watt, power.Milliwatt, 1000},
+		{power.Gigawatt, power.Megawatt, 1000},
+		{power.BTUPerHour, power.Watt, 0.29307107017222222},
+		{pressure.Atmosphere, pressure.Pascal, 101325},
+		{pressure.Atmosphere, pressure.Torr, 760},
+		{pressure.Bar, pressure.Kilopascal, 100},
+		{pressure.Hectopascal, pressure.Millibar, 1},
+		{pressure.PoundPerSquareInch, pressure.Pascal, 6894.757293168361},
+		{pressure.MillimeterOfMercury, pressure.Pascal, 133.322387415},
+		{pressure.InchOfMercury, pressure.MillimeterOfMercury, 25.4},
+		{pressure.Megapascal, pressure.Bar, 10},
+		{pressure.Gigapascal, pressure.Megapascal, 1000},
+		{frequency.Kilohertz, frequency.Hertz, 1000},
+		{frequency.Hertz, frequency.RevolutionPerMinute, 60},
+		{frequency.Gigahertz, frequency.Megahertz, 1000},
+		{frequency.Terahertz, frequency.Gigahertz, 1000},
 	}
 
 	for _, c := range cases {
@@ -174,11 +238,18 @@ func TestConversion_MicroSignVariants(t *testing.T) {
 // examples in its doc comment.
 func TestRate(t *testing.T) {
 	rateFuncs := map[units.MeasureType]func(from, to string) (float64, bool){
-		units.MeasureDistance: distance.Rate,
-		units.MeasureArea:     area.Rate,
-		units.MeasureMass:     mass.Rate,
-		units.MeasureTime:     time.Rate,
-		units.MeasureVelocity: velocity.Rate,
+		units.MeasureDistance:     distance.Rate,
+		units.MeasureArea:         area.Rate,
+		units.MeasureMass:         mass.Rate,
+		units.MeasureTime:         time.Rate,
+		units.MeasureVelocity:     velocity.Rate,
+		units.MeasureVolume:       volume.Rate,
+		units.MeasureAcceleration: acceleration.Rate,
+		units.MeasureForce:        force.Rate,
+		units.MeasureEnergy:       energy.Rate,
+		units.MeasurePower:        power.Rate,
+		units.MeasurePressure:     pressure.Rate,
+		units.MeasureFrequency:    frequency.Rate,
 	}
 
 	for mt, rate := range rateFuncs {
@@ -213,6 +284,13 @@ func TestRate(t *testing.T) {
 		{"mass", mass.Rate, mass.Kilogram, mass.Gram, 1000},
 		{"time", time.Rate, time.Hour, time.Minute, 60},
 		{"velocity", velocity.Rate, velocity.MeterPerSecond, velocity.KilometerPerHour, 3.6},
+		{"volume", volume.Rate, volume.Liter, volume.Milliliter, 1000},
+		{"acceleration", acceleration.Rate, acceleration.StandardGravity, acceleration.MeterPerSecondSquared, 9.80665},
+		{"force", force.Rate, force.Kilonewton, force.Newton, 1000},
+		{"energy", energy.Rate, energy.KilowattHour, energy.Megajoule, 3.6},
+		{"power", power.Rate, power.Kilowatt, power.Watt, 1000},
+		{"pressure", pressure.Rate, pressure.Bar, pressure.Kilopascal, 100},
+		{"frequency", frequency.Rate, frequency.Kilohertz, frequency.Hertz, 1000},
 	}
 
 	for _, e := range examples {
@@ -224,11 +302,18 @@ func TestRate(t *testing.T) {
 
 func TestConversionFactors_ReturnsCopy(t *testing.T) {
 	for mt, factorsFn := range map[units.MeasureType]func() conversion.Factors{
-		units.MeasureDistance: distance.ConversionFactors,
-		units.MeasureArea:     area.ConversionFactors,
-		units.MeasureMass:     mass.ConversionFactors,
-		units.MeasureTime:     time.ConversionFactors,
-		units.MeasureVelocity: velocity.ConversionFactors,
+		units.MeasureDistance:     distance.ConversionFactors,
+		units.MeasureArea:         area.ConversionFactors,
+		units.MeasureMass:         mass.ConversionFactors,
+		units.MeasureTime:         time.ConversionFactors,
+		units.MeasureVelocity:     velocity.ConversionFactors,
+		units.MeasureVolume:       volume.ConversionFactors,
+		units.MeasureAcceleration: acceleration.ConversionFactors,
+		units.MeasureForce:        force.ConversionFactors,
+		units.MeasureEnergy:       energy.ConversionFactors,
+		units.MeasurePower:        power.ConversionFactors,
+		units.MeasurePressure:     pressure.ConversionFactors,
+		units.MeasureFrequency:    frequency.ConversionFactors,
 	} {
 		f := factorsFn()
 		for unit := range f {

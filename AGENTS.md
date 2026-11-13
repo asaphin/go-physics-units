@@ -4,7 +4,7 @@ Guidance for AI coding agents (and humans) working in this repository. `CLAUDE.m
 
 ## What this is
 
-`go-physics-units` (module `github.com/asaphin/go-physics-units`, package name `units`) is a small Go library for creating, converting, parsing and doing arithmetic on physical measurements (distance, area, mass, time, velocity) and user-defined measures (e.g. currency).
+`go-physics-units` (module `github.com/asaphin/go-physics-units`, package name `units`) is a small Go library for creating, converting, parsing and doing arithmetic on physical measurements (distance, area, volume, mass, time, velocity, acceleration, force, energy, power, pressure, frequency) and user-defined measures (e.g. currency).
 
 - **Published and pre-1.0** (tags `v0.0.0`–`v0.0.4`). Exported API changes affect real users: make them deliberately, call them out, and record them in `CHANGELOG.md`. `make api`, and the CI job "API changes", list every exported change since the latest tag; check that each one is in the CHANGELOG.
 - **Go version:** `go.mod` declares `go 1.27.0`. CI tests that exact version and the latest stable release. Use modern Go freely: iterators and the `maps`/`slices` helpers, `strings.FieldsSeq`, `testing.B.Loop`, `sync.WaitGroup.Go`, and generic methods (Go 1.27). The `modernize` linter points out older forms. Raising the minimum again is its own deliberate change, with a CHANGELOG entry.
@@ -63,8 +63,8 @@ User-defined measures are first-class: they convert, combine and parse like the 
 | `measures.go` | `MeasureType` constants, the predefined rate tables (`distanceRates`, …), the registries `measureToConversionFactorsMapping` and `measureToConversionRatesMapping`, the `unitToMeasureType` index, `DetectMeasureType` |
 | `common.go` | Generic `Arithmetics[T]` and `UnitConverter[T]` interfaces |
 | `errors.go` | The sentinel errors (constants of type `Error`), `UnitError`, and the unexported error types and constructors the package uses |
-| `distance.go`, `area.go`, `mass.go`, `time.go`, `velocity.go` | One file per measure: the public interface, the `xxxImplementation` struct embedding `baseMeasurement`, constructors and cross-measure operations. All five follow the same pattern |
-| `distance/`, `area/`, `mass/`, `time/`, `velocity/` | One `units.go` per measure: unit symbol constants, `BaseUnit`, the `conversionFactors` table, `ConversionFactors()` (returns a copy) and `Rate(from, to)` |
+| `distance.go`, `area.go`, `volume.go`, `mass.go`, `time.go`, `velocity.go`, `acceleration.go`, `force.go`, `energy.go`, `power.go`, `pressure.go`, `frequency.go` | One file per measure: the public interface, the `xxxImplementation` struct embedding `baseMeasurement`, constructors and cross-measure operations. All follow the same pattern |
+| `distance/`, `area/`, `volume/`, … (one per measure) | One `units.go` per measure: unit symbol constants, `BaseUnit`, the `conversionFactors` table, `ConversionFactors()` (returns a copy) and `Rate(from, to)` |
 | `conversion/` | Public `Factors` type alias (`map[string]float64`) and `CopyConversionFactors` |
 | `measurement_creator.go` | Generic `NewMeasurementCreator[T]` for user-defined measures |
 | `internal/rates` | `Table`: the immutable, validated N×N rate table of one measure, plus each unit's factor, a read-only handle passed by value. Also `CanonicalUnit` |
@@ -89,7 +89,7 @@ User-defined measures are first-class: they convert, combine and parse like the 
 6. **Combining values.**
    - `AddMeasurement` and `SubMeasurement` check that the types match *and* that a rate between the two units exists.
    - Typed `Add`/`Sub` need neither check: two values of one Go type share the same table.
-   - Cross-measure operations (`Distance.DivideByTime`, `Distance.Square`, `Area.DivideByDistance`, `Velocity.MultiplyByTime`) convert to base units and return results in the target measure's base unit. Dividing by a zero measurement returns an error, as `Div` does for a zero divisor.
+   - Cross-measure operations (`Distance.DivideByTime`, `Force.DivideByArea`, `Frequency.Period` and the others in the README's operations table) convert to base units and return results in the target measure's base unit. Dividing by a zero measurement returns an error, as `Div` does for a zero divisor.
    - **Comparisons** (`Compare`, `Equal`, `EqualWithinRel`, `CompareMeasurement`) compare two values in the same unit exactly. Otherwise they multiply each value by its unit's factor (`Table.Factor`), which gives the value in the base unit. The result doesn't depend on the order of the operands, so `a.Equal(b) == b.Equal(a)`; converting one value into the other's unit would break that at the last bit. `TestCompare_Symmetric` enforces it. `CompareMeasurement` falls back to the receiver's unit only for two tables that share a measure name.
 7. **Parsing.** `ParseString` accepts exactly `"<float> <unit>"`, two whitespace-separated fields. It rejects NaN and ±Inf.
 

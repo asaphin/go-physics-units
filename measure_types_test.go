@@ -6,11 +6,18 @@ import (
 	"testing"
 
 	units "github.com/asaphin/go-physics-units"
+	"github.com/asaphin/go-physics-units/acceleration"
 	"github.com/asaphin/go-physics-units/area"
 	"github.com/asaphin/go-physics-units/distance"
+	"github.com/asaphin/go-physics-units/energy"
+	"github.com/asaphin/go-physics-units/force"
+	"github.com/asaphin/go-physics-units/frequency"
 	"github.com/asaphin/go-physics-units/mass"
+	"github.com/asaphin/go-physics-units/power"
+	"github.com/asaphin/go-physics-units/pressure"
 	"github.com/asaphin/go-physics-units/time"
 	"github.com/asaphin/go-physics-units/velocity"
+	"github.com/asaphin/go-physics-units/volume"
 )
 
 // typedMeasure is the API shared by the predefined measure interfaces.
@@ -74,6 +81,48 @@ var (
 		unitA: velocity.Knot, unitB: velocity.KilometerPerHour, ratio: 1.852,
 		baseUnit: velocity.BaseUnit, baseRatio: 1852.0 / 3600, foreignUnit: distance.Meter,
 	}
+	volumeCase = typedCase[units.Volume]{
+		measureType: units.MeasureVolume,
+		newFn:       units.NewVolume, toFn: units.ToVolume, parseFn: units.StringToVolume,
+		unitA: volume.Gallon, unitB: volume.Liter, ratio: 3.785411784,
+		baseUnit: volume.BaseUnit, baseRatio: 0.003785411784, foreignUnit: mass.Kilogram,
+	}
+	accelerationCase = typedCase[units.Acceleration]{
+		measureType: units.MeasureAcceleration,
+		newFn:       units.NewAcceleration, toFn: units.ToAcceleration, parseFn: units.StringToAcceleration,
+		unitA: acceleration.StandardGravity, unitB: acceleration.FootPerSecondSquared, ratio: 9.80665 / 0.3048,
+		baseUnit: acceleration.BaseUnit, baseRatio: 9.80665, foreignUnit: velocity.MeterPerSecond,
+	}
+	forceCase = typedCase[units.Force]{
+		measureType: units.MeasureForce,
+		newFn:       units.NewForce, toFn: units.ToForce, parseFn: units.StringToForce,
+		unitA: force.KilogramForce, unitB: force.Newton, ratio: 9.80665,
+		baseUnit: force.BaseUnit, baseRatio: 9.80665, foreignUnit: mass.Kilogram,
+	}
+	energyCase = typedCase[units.Energy]{
+		measureType: units.MeasureEnergy,
+		newFn:       units.NewEnergy, toFn: units.ToEnergy, parseFn: units.StringToEnergy,
+		unitA: energy.KilowattHour, unitB: energy.Megajoule, ratio: 3.6,
+		baseUnit: energy.BaseUnit, baseRatio: 3.6e6, foreignUnit: power.Watt,
+	}
+	powerCase = typedCase[units.Power]{
+		measureType: units.MeasurePower,
+		newFn:       units.NewPower, toFn: units.ToPower, parseFn: units.StringToPower,
+		unitA: power.Horsepower, unitB: power.Kilowatt, ratio: 0.74569987158227022,
+		baseUnit: power.BaseUnit, baseRatio: 745.69987158227022, foreignUnit: energy.Joule,
+	}
+	pressureCase = typedCase[units.Pressure]{
+		measureType: units.MeasurePressure,
+		newFn:       units.NewPressure, toFn: units.ToPressure, parseFn: units.StringToPressure,
+		unitA: pressure.Atmosphere, unitB: pressure.Kilopascal, ratio: 101.325,
+		baseUnit: pressure.BaseUnit, baseRatio: 101325, foreignUnit: force.Newton,
+	}
+	frequencyCase = typedCase[units.Frequency]{
+		measureType: units.MeasureFrequency,
+		newFn:       units.NewFrequency, toFn: units.ToFrequency, parseFn: units.StringToFrequency,
+		unitA: frequency.Kilohertz, unitB: frequency.RevolutionPerMinute, ratio: 60000,
+		baseUnit: frequency.BaseUnit, baseRatio: 1000, foreignUnit: time.Second,
+	}
 )
 
 func TestTypedMeasures(t *testing.T) {
@@ -82,6 +131,13 @@ func TestTypedMeasures(t *testing.T) {
 	t.Run("mass", func(t *testing.T) { testTypedMeasure(t, massCase) })
 	t.Run("time", func(t *testing.T) { testTypedMeasure(t, timeCase) })
 	t.Run("velocity", func(t *testing.T) { testTypedMeasure(t, velocityCase) })
+	t.Run("volume", func(t *testing.T) { testTypedMeasure(t, volumeCase) })
+	t.Run("acceleration", func(t *testing.T) { testTypedMeasure(t, accelerationCase) })
+	t.Run("force", func(t *testing.T) { testTypedMeasure(t, forceCase) })
+	t.Run("energy", func(t *testing.T) { testTypedMeasure(t, energyCase) })
+	t.Run("power", func(t *testing.T) { testTypedMeasure(t, powerCase) })
+	t.Run("pressure", func(t *testing.T) { testTypedMeasure(t, pressureCase) })
+	t.Run("frequency", func(t *testing.T) { testTypedMeasure(t, frequencyCase) })
 }
 
 func testTypedMeasure[T typedMeasure[T]](t *testing.T, c typedCase[T]) {

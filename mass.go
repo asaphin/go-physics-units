@@ -3,6 +3,7 @@ package units
 import (
 	"cmp"
 
+	"github.com/asaphin/go-physics-units/force"
 	"github.com/asaphin/go-physics-units/mass"
 )
 
@@ -12,6 +13,9 @@ type Mass interface {
 	UnitConverter[Mass]
 	Arithmetics[Mass]
 	Comparer[Mass]
+
+	// MultiplyByAcceleration returns the force m·a in force.BaseUnit (N).
+	MultiplyByAcceleration(a Acceleration) Force
 }
 
 // massImplementation is the concrete implementation of Mass.
@@ -76,17 +80,22 @@ func (m *massImplementation) Div(divisor float64) (Mass, error) {
 	return &massImplementation{m.withValue(m.value / divisor)}, nil
 }
 
-// Compare compares the masss; see Comparer.
+// MultiplyByAcceleration returns the force m·a in N.
+func (m *massImplementation) MultiplyByAcceleration(a Acceleration) Force {
+	return newForce(m.valueInBaseUnits()*a.valueInBaseUnits(), force.BaseUnit)
+}
+
+// Compare compares the masses; see Comparer.
 func (m *massImplementation) Compare(other Mass) int {
 	return cmp.Compare(m.commonValues(other.base()))
 }
 
-// Equal reports whether the masss are equal; see Comparer.
+// Equal reports whether the masses are equal; see Comparer.
 func (m *massImplementation) Equal(other Mass) bool {
 	return m.Compare(other) == 0
 }
 
-// EqualWithinRel reports whether the masss are equal within the relative
+// EqualWithinRel reports whether the masses are equal within the relative
 // tolerance tol; see Comparer.
 func (m *massImplementation) EqualWithinRel(other Mass, tol float64) bool {
 	x, y := m.commonValues(other.base())
@@ -103,6 +112,12 @@ func NewMass(value float64, unit string) (Mass, error) {
 	}
 
 	return &massImplementation{msm}, nil
+}
+
+// newMass is an unchecked constructor for internal use with valid, canonical
+// units.
+func newMass(value float64, unit string) Mass {
+	return &massImplementation{baseMeasurement{value: value, unit: unit, conversionRates: massRates}}
 }
 
 const errMassConversion incompatibleError = "not a mass measure"

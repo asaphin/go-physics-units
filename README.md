@@ -3,7 +3,7 @@
 [![Go Reference](https://pkg.go.dev/badge/github.com/asaphin/go-physics-units.svg)](https://pkg.go.dev/github.com/asaphin/go-physics-units)
 [![CI](https://github.com/asaphin/go-physics-units/actions/workflows/ci.yml/badge.svg)](https://github.com/asaphin/go-physics-units/actions/workflows/ci.yml)
 
-go-physics-units is a Go library for working with physical measurements such as distance, area, mass, time and velocity.
+go-physics-units is a Go library for working with physical measurements: distance, area, volume, mass, time, velocity, acceleration, force, energy, power, pressure and frequency.
 You can create, parse, convert and combine measurements, and define measures of your own, such as currencies.
 It has no dependencies.
 
@@ -104,14 +104,31 @@ fmt.Println(ds) // [12 in 1 ft 1 mi]
 
 Operations that combine measures return their result in SI base units:
 
-| Operation                  | Result                    |
-|----------------------------|---------------------------|
-| `Distance.DivideByTime`    | `Velocity` in m/s         |
-| `Distance.Square`          | `Area` in m²              |
-| `Area.DivideByDistance`    | `Distance` in m           |
-| `Velocity.MultiplyByTime`  | `Distance` in m           |
-| `ParseDuration`            | `Time` in s, from a `time.Duration` |
-| `Time.ToDuration`          | `time.Duration`, rounded to the nearest nanosecond |
+| Operation                     | Result                                             |
+|-------------------------------|----------------------------------------------------|
+| `Distance.DivideByTime`       | `Velocity` in m/s                                  |
+| `Distance.Square`             | `Area` in m²                                       |
+| `Area.DivideByDistance`       | `Distance` in m                                    |
+| `Velocity.MultiplyByTime`     | `Distance` in m                                    |
+| `Velocity.DivideByTime`       | `Acceleration` in m/s²                             |
+| `Distance.Cube`               | `Volume` in m³                                     |
+| `Area.MultiplyByDistance`     | `Volume` in m³                                     |
+| `Volume.DivideByArea`         | `Distance` in m                                    |
+| `Volume.DivideByDistance`     | `Area` in m²                                       |
+| `Acceleration.MultiplyByTime` | `Velocity` in m/s                                  |
+| `Mass.MultiplyByAcceleration` | `Force` in N                                       |
+| `Acceleration.MultiplyByMass` | `Force` in N                                       |
+| `Force.DivideByMass`          | `Acceleration` in m/s²                             |
+| `Force.DivideByAcceleration`  | `Mass` in kg                                       |
+| `Force.DivideByArea`          | `Pressure` in Pa                                   |
+| `Force.MultiplyByDistance`    | `Energy` in J                                      |
+| `Energy.DivideByTime`         | `Power` in W                                       |
+| `Energy.DivideByDistance`     | `Force` in N                                       |
+| `Power.MultiplyByTime`        | `Energy` in J                                      |
+| `Pressure.MultiplyByArea`     | `Force` in N                                       |
+| `Frequency.Period`            | `Time` in s                                        |
+| `ParseDuration`               | `Time` in s, from a `time.Duration`                |
+| `Time.ToDuration`             | `time.Duration`, rounded to the nearest nanosecond |
 
 ## Errors
 
@@ -220,19 +237,28 @@ fmt.Println(err) // unknown distance unit fur
 
 ## Supported units
 
-| Measure  | Package    | Base unit | Symbols |
-|----------|------------|-----------|---------|
-| Distance | `distance` | m         | lp, fm, pm, Å, nm, μm, mm, cm, dm, m, km, in, ft, yd, mi, nmi, AU, ly, pc |
-| Area     | `area`     | m²        | mm², cm², in², ft², m², km², mi² |
-| Mass     | `mass`     | kg        | Da, μg, mg, g, kg, oz, lb, q, t, M⊕, M☉ |
-| Time     | `time`     | s         | tp, ns, μs, ms, s, min, h, d, wk, yr |
-| Velocity | `velocity` | m/s       | km/h, ft/s, mph, kn, m/s, c |
+| Measure      | Package        | Base unit | Symbols                                                                   |
+|--------------|----------------|-----------|---------------------------------------------------------------------------|
+| Distance     | `distance`     | m         | lp, fm, pm, Å, nm, μm, mm, cm, dm, m, km, in, ft, yd, mi, nmi, AU, ly, pc |
+| Area         | `area`         | m²        | mm², cm², in², ft², m², km², mi²                                          |
+| Mass         | `mass`         | kg        | Da, μg, mg, g, kg, oz, lb, q, t, M⊕, M☉                                   |
+| Time         | `time`         | s         | tp, ns, μs, ms, s, min, h, d, wk, yr                                      |
+| Velocity     | `velocity`     | m/s       | km/h, ft/s, mph, kn, m/s, c                                               |
+| Volume       | `volume`       | m³        | mm³, μL, cm³, mL, in³, L, pt, qt, gal, ft³, bbl, yd³, m³, km³             |
+| Acceleration | `acceleration` | m/s²      | cm/s², ft/s², m/s², gₙ                                                    |
+| Force        | `force`        | N         | dyn, mN, N, lbf, kgf, kN, MN                                              |
+| Energy       | `energy`       | J         | eV, erg, J, ft·lbf, cal, kJ, Btu, kcal, Wh, MJ, kWh, GJ, MWh              |
+| Power        | `power`        | W         | mW, W, Btu/h, PS, hp, kW, MW, GW                                          |
+| Pressure     | `pressure`     | Pa        | Pa, hPa, mbar, kPa, Torr, mmHg, inHg, psi, bar, atm, MPa, GPa             |
+| Frequency    | `frequency`    | Hz        | rpm, Hz, kHz, MHz, GHz, THz                                               |
 
 - Every symbol has a named constant in its package, for example `distance.LightYear` or `mass.Pound`.
 - Each unit package also provides `ConversionFactors()`, a copy of its factors, and `Rate(from, to)`, the multiplier between two units. For example, `distance.Rate(distance.Mile, distance.Kilometer)` returns 1.609344.
 - Symbols are case-sensitive.
 - The micro prefix can be written as `μ` (U+03BC GREEK SMALL LETTER MU) or `µ` (U+00B5 MICRO SIGN). Values always carry the `μ` form.
 - `yr` is the Julian year of 365.25 days.
+- `pt`, `qt` and `gal` are US liquid measures, `bbl` the 42-gallon oil barrel, `cal` the thermochemical calorie, `Btu` the International Table one, `hp` mechanical horsepower and `PS` metric horsepower. `mmHg` and `inHg` are the conventional values, and `gₙ` (with U+2099) is standard gravity, 9.80665 m/s².
+- Mind the case: `kN` is a kilonewton and `kn` a knot.
 - Strings are parsed in the form `"<value> <unit>"`, with whitespace between the value and the unit. NaN and infinite values are rejected.
 
 ## Documentation

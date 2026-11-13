@@ -3,6 +3,7 @@ package units
 import (
 	"cmp"
 
+	"github.com/asaphin/go-physics-units/acceleration"
 	"github.com/asaphin/go-physics-units/distance"
 	"github.com/asaphin/go-physics-units/velocity"
 )
@@ -17,6 +18,9 @@ type Velocity interface {
 
 	// MultiplyByTime returns the distance v·t in distance.BaseUnit (m).
 	MultiplyByTime(t Time) Distance
+	// DivideByTime returns the acceleration v/t in acceleration.BaseUnit
+	// (m/s²). It fails if t is zero.
+	DivideByTime(t Time) (Acceleration, error)
 }
 
 // velocityImplementation is the concrete implementation of Velocity.
@@ -86,17 +90,26 @@ func (v *velocityImplementation) MultiplyByTime(t Time) Distance {
 	return newDistance(v.valueInBaseUnits()*t.valueInBaseUnits(), distance.BaseUnit)
 }
 
-// Compare compares the velocitys; see Comparer.
+// DivideByTime returns the acceleration v/t in m/s², or an error if t is zero.
+func (v *velocityImplementation) DivideByTime(t Time) (Acceleration, error) {
+	if t.Value() == 0 {
+		return nil, ErrZeroDivision
+	}
+
+	return newAcceleration(v.valueInBaseUnits()/t.valueInBaseUnits(), acceleration.BaseUnit), nil
+}
+
+// Compare compares the velocities; see Comparer.
 func (v *velocityImplementation) Compare(other Velocity) int {
 	return cmp.Compare(v.commonValues(other.base()))
 }
 
-// Equal reports whether the velocitys are equal; see Comparer.
+// Equal reports whether the velocities are equal; see Comparer.
 func (v *velocityImplementation) Equal(other Velocity) bool {
 	return v.Compare(other) == 0
 }
 
-// EqualWithinRel reports whether the velocitys are equal within the relative
+// EqualWithinRel reports whether the velocities are equal within the relative
 // tolerance tol; see Comparer.
 func (v *velocityImplementation) EqualWithinRel(other Velocity, tol float64) bool {
 	x, y := v.commonValues(other.base())
