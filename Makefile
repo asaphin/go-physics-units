@@ -5,6 +5,9 @@ FUZZTIME ?= 30s
 # Keep in sync with .github/workflows/ci.yml. A different version can report
 # different issues, so lint and fmt refuse to run with any other version.
 GOLANGCI_LINT_VERSION := 2.15.0
+# make tools installs it into ./bin, which takes precedence over the one on PATH.
+BIN := $(CURDIR)/bin
+GOLANGCI_LINT ?= $(if $(wildcard $(BIN)/golangci-lint),$(BIN)/golangci-lint,golangci-lint)
 
 # bench-compare: a pinned benchstat, run with go run (a tool, not a module dependency).
 BENCHSTAT := golang.org/x/perf/cmd/benchstat@v0.0.0-20261009192801-be2c69fb417e
@@ -17,10 +20,18 @@ GO_VERSION := $(shell go env GOVERSION)
 # api: a pinned gorelease, run with go run. Keep in sync with .github/workflows/ci.yml.
 GORELEASE := golang.org/x/exp/cmd/gorelease@v0.0.0-20261014143641-f0251eb4aa3e
 
-.PHONY: check api build vet test race allocs bench bench-compare profile cover fuzz lint fmt fmt-check tidy-check golangci-lint-version
+.PHONY: help check tools api build vet test race allocs bench bench-compare rfc-bench profile cover fuzz lint fmt fmt-check tidy-check golangci-lint-version
 
 ## check: everything CI runs (go.mod tidiness, formatting, vet, lint, race-enabled tests, allocation guards)
 check: tidy-check fmt-check vet lint race allocs
+
+## help: lists the documented targets
+help:
+	@sed -n 's/^## //p' $(MAKEFILE_LIST)
+
+## tools: installs the pinned golangci-lint into ./bin, built with this module's Go (which it must understand)
+tools:
+	GOTOOLCHAIN=$(GO_VERSION) GOBIN=$(BIN) go install github.com/golangci/golangci-lint/v2/cmd/golangci-lint@v$(GOLANGCI_LINT_VERSION)
 
 ## api: exported API changes since the latest release tag, and the suggested next version (needs a clean working tree: commit first)
 api:
@@ -56,6 +67,10 @@ bench-compare:
 		-count=$(BENCH_COUNT) -benchtime=$(BENCH_TIME) . > .bench/head.txt
 	go run $(BENCHSTAT) .bench/base.txt .bench/head.txt
 
+## rfc-bench: the value-type prototype of docs/rfc-value-types.md against the current library
+rfc-bench:
+	cd docs/rfc-value-types && go test -run='^$$' -bench=. -benchmem .
+
 profile:
 	go test -run='^$$' -bench=. -benchmem -cpuprofile=profile.out .
 
@@ -70,20 +85,20 @@ fuzz:
 	go test -run='^$$' -fuzz=FuzzParseString -fuzztime=$(FUZZTIME) .
 
 lint: golangci-lint-version
-	golangci-lint run ./...
+	$(GOLANGCI_LINT) run ./...
 
 ## fmt: format with the formatters in .golangci.yaml (gofumpt, goimports, golines)
 fmt: golangci-lint-version
-	golangci-lint fmt ./...
+	$(GOLANGCI_LINT) fmt ./...
 
 fmt-check: golangci-lint-version
-	@golangci-lint fmt --diff ./... || { echo "formatting needed: run make fmt"; exit 1; }
+	@$(GOLANGCI_LINT) fmt --diff ./... || { echo "formatting needed: run make fmt"; exit 1; }
 
 tidy-check:
 	@go mod tidy -diff || { echo "go.mod is not tidy: run go mod tidy"; exit 1; }
 
 golangci-lint-version:
-	@golangci-lint version 2>/dev/null | grep -q 'version $(GOLANGCI_LINT_VERSION) ' || { \
-		echo "golangci-lint v$(GOLANGCI_LINT_VERSION) is required; found: $$(golangci-lint version 2>&1 | head -n 1)"; \
-		echo "install: curl -sSfL https://golangci-lint.run/install.sh | sh -s -- -b \$$(go env GOPATH)/bin v$(GOLANGCI_LINT_VERSION)"; \
+	@$(GOLANGCI_LINT) version 2>/dev/null | grep -q 'version $(GOLANGCI_LINT_VERSION) ' || { \
+		echo "golangci-lint v$(GOLANGCI_LINT_VERSION) is required; found: $$($(GOLANGCI_LINT) version 2>&1 | head -n 1)"; \
+		echo "install it into ./bin with: make tools"; \
 		exit 1; }

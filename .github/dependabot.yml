@@ -1,0 +1,16 @@
+# Weekly PRs that bump the GitHub Actions pinned in .github/workflows (into dev).
+# The module has no dependencies, so only the actions are watched. Tools pinned in
+# the Makefile and CI (golangci-lint, gorelease, benchstat) are upgraded by hand,
+# one at a time: see "Upgrading golangci-lint" in AGENTS.md.
+version: 2
+updates:
+  - package-ecosystem: github-actions
+    directory: /
+    target-branch: dev
+    schedule:
+      interval: weekly
+    groups:
+      actions:
+        patterns: ["*"]
+    commit-message:
+      prefix: "chore"

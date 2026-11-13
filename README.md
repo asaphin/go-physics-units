@@ -242,13 +242,14 @@ The full API reference is on [pkg.go.dev](https://pkg.go.dev/github.com/asaphin/
 ## Development
 
 ```shell
+make tools   # once: installs the pinned golangci-lint into ./bin
 make check   # formatting, go vet, golangci-lint and tests with the race detector
 make cover   # coverage summary, plus an HTML report in coverage/
 make bench   # benchmarks
 make fuzz    # fuzz the string parser (FUZZTIME=30s by default)
 ```
 
-`make check` needs golangci-lint v2.15.0, the version CI uses. With any other version it stops and prints the install command.
+`make check` needs golangci-lint v2.15.0, the version CI uses; `make tools` installs it into `./bin`, which `make` prefers over the one on your `PATH`. `make help` lists all targets.
 
 Guidelines for contributors and AI coding agents are in [AGENTS.md](AGENTS.md).
 

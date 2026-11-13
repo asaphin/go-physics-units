@@ -69,7 +69,9 @@ User-defined measures are first-class: they convert, combine and parse like the 
 | `measurement_creator.go` | Generic `NewMeasurementCreator[T]` for user-defined measures |
 | `internal/rates` | `Table`: the immutable, validated N×N rate table of one measure, plus each unit's factor, a read-only handle passed by value. Also `CanonicalUnit` |
 | `Makefile` | Task runner (see Commands) |
-| `.github/workflows/ci.yml` | CI: `go mod tidy` check, vet, race tests and coverage (the `go.mod` Go version and stable), a short fuzz run, golangci-lint (pinned version), govulncheck |
+| `.github/workflows/ci.yml` | CI: `go mod tidy` check, vet, race tests and coverage (the `go.mod` Go version and stable), allocation guards, a short fuzz run, the RFC prototype, golangci-lint (pinned version), the exported-API report, govulncheck |
+| `.github/dependabot.yml`, `.github/pull_request_template.md` | Weekly bumps of the CI actions (into `dev`); the PR checklist |
+| `docs/` | Design documents. `docs/rfc-value-types.md` and its prototype, a separate module in `docs/rfc-value-types/` that CI tests but that isn't part of the library |
 | `CHANGELOG.md` | User-visible changes, under `## Unreleased` until the next tag |
 | `ROADMAP.md` | Ordered plan of upcoming work. Take steps in order and tick them off when done |
 
@@ -103,7 +105,9 @@ On error, always return a nil interface (`return nil, err`, or `var zero T` in g
 ## Commands
 
 ```sh
+make tools      # once per clone: the pinned golangci-lint into ./bin (gitignored), built with the go.mod Go
 make check      # what CI runs: go mod tidy check, format check, go vet, golangci-lint, go test -race, allocation guards
+make help       # every documented target
 make test       # quick tests without the race detector
 make cover      # coverage summary; HTML report in coverage/ (gitignored)
 make bench      # benchmarks (root package only)
@@ -111,10 +115,11 @@ make bench-compare  # benchstat: BENCH_BASE (default the latest tag) vs the work
 make api        # gorelease: exported API changes since the latest tag, and the suggested version
 make fuzz       # FuzzParseString; FUZZTIME=30s by default
 make fmt        # golangci-lint fmt: gofumpt, goimports, golines (120 columns)
+make rfc-bench  # benchmarks of the value-type prototype (docs/rfc-value-types) against the library
 ```
 
 - **golangci-lint:** `.golangci.yaml` (v2 format) lists every enabled linter explicitly, grouped by purpose, and gives a reason for each linter it leaves out. It is adapted from the golden config by Marat Reimers. golangci-lint also runs staticcheck with all checks, so there is no separate staticcheck step.
-- **Pinned version:** golangci-lint `v2.15.0`, set in the Makefile (`GOLANGCI_LINT_VERSION`) and in CI. `make lint` refuses to run any other version and prints the install command.
+- **Pinned version:** golangci-lint `v2.15.0`, set in the Makefile (`GOLANGCI_LINT_VERSION`) and in CI. `make lint` refuses to run any other version and points to `make tools`, which builds that version into `./bin` with `GOTOOLCHAIN` set to the `go.mod` Go (golangci-lint's own `go.mod` would otherwise select an older Go, too old for this module).
 - **Lint Go version:** CI runs golangci-lint with the `go.mod` Go version. A golangci-lint binary can't read the export data of Go releases newer than it supports: v2.13.2 fails on Go 1.27.4, for example. Linting with the latest Go would therefore break whenever Go is released.
 - **Upgrading golangci-lint:** upgrade on purpose, in its own PR. Bump both pins, read the changelog for renamed options, then fix the new findings or disable a check with a reason. Enabling a new linter is a separate, reviewed change.
 - **`nolint`:** add a `//nolint:<linter> // reason` directive only with a reason. `nolintlint` flags unused directives.
