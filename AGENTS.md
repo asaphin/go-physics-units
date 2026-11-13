@@ -23,7 +23,8 @@ Measurements are created and combined in hot loops, so their cost is part of the
 - **Hot paths** are `NewX`, `ConvertTo`, `Add`/`Sub`/`Mul`/`Div`, the cross-measure operations, `String` and `ParseString`. Keep them free of reflection, `fmt`, and any allocation beyond the result value.
 - **Error paths too.** Build errors with `errors.New` and string concatenation. `fmt.Errorf` is for wrapping with `%w`, and it formats named string types such as `MeasureType` through reflection. Example: `unknownUnitError`.
 - **Inlining.** Keep the `rates.Table` methods small enough to inline. Check with `go build -gcflags=-m ./internal/rates`.
-- **Measure.** For any change that touches a hot path, run the benchmarks before and after, with `-count` of 5 or more, and compare ranges, not single runs. Differences around ±10% are noise on this suite. Report every regression to the user; don't accept one silently.
+- **Allocation guards.** `TestAllocations` (`alloc_test.go`) fixes the allocation count of each hot path, and CI fails if one rises. Unlike timings, allocation counts are deterministic. The race detector changes them, so the file is excluded from `-race` builds, and `make allocs` and CI run it separately. Lower a limit when you save an allocation; raise one only on purpose, and say why in the PR.
+- **Measure.** For any change that touches a hot path, run `make bench-compare` (`BENCH_BASE=<ref>`, default the latest tag). It benchmarks both sides on the same Go toolchain and compares them with benchstat. Differences around ±10% are noise on this suite. Report every regression to the user; don't accept one silently.
 
 ### 2. Immutability after init (data security)
 
@@ -99,10 +100,11 @@ On error, always return a nil interface (`return nil, err`, or `var zero T` in g
 ## Commands
 
 ```sh
-make check      # what CI runs: go mod tidy check, format check, go vet, golangci-lint, go test -race
+make check      # what CI runs: go mod tidy check, format check, go vet, golangci-lint, go test -race, allocation guards
 make test       # quick tests without the race detector
 make cover      # coverage summary; HTML report in coverage/ (gitignored)
 make bench      # benchmarks (root package only)
+make bench-compare  # benchstat: BENCH_BASE (default the latest tag) vs the working tree
 make fuzz       # FuzzParseString; FUZZTIME=30s by default
 make fmt        # golangci-lint fmt: gofumpt, goimports, golines (120 columns)
 ```
@@ -135,7 +137,7 @@ Mirror an existing measure, e.g. `area.go` and `area/units.go`, and update all o
    - the functions `NewX`, `ToX`, `StringToX` (and `newX` if a cross-measure operation returns this measure) and an `errXConversion` sentinel.
 3. **`measures.go`:** add a `MeasureType` constant, build the table with `xRates = rates.MustNewTable(string(MeasureX), x.ConversionFactors())`, and register the measure in **both** mapping maps.
 4. **Tests:**
-   - a `t.Run` case in `TestTypedMeasures` (`measure_types_test.go`), which covers the whole shared API;
+   - an `xCase` value in `measure_types_test.go`, used by `TestTypedMeasures` (the whole shared API) and `BenchmarkMeasures`;
    - an entry in `predefinedFactors` and in `TestConversionFactors_ReturnsCopy` (`conversion_test.go`);
    - reference values;
    - tests for any cross-measure operations.
@@ -161,7 +163,7 @@ The factor model is multiplicative only. It can't express measures with an offse
 - On error paths, assert that the result is nil as well as that the error is non-nil.
 - `Example*` functions in `example_test.go` mirror `README.md` and have verified `// Output:` blocks. Keep the README snippets in sync with them.
 - If a test fails because of a library bug, fix the library or skip the test with `t.Skip("known defect: …")`. Never change expected values to match wrong output.
-- Benchmarks are in `distance_benchmark_test.go`. They loop with `b.Loop()` (`for i := 0; b.Loop(); i++` when an index is needed) and use the `generateRandom*` helpers, which draw from `math/rand/v2`.
+- Benchmarks are in `measures_benchmark_test.go` (every measure, custom measures, error paths, `Rate`) and `distance_benchmark_test.go` (random data). Keep benchmark names stable, because `make bench-compare` matches them across versions. They loop with `b.Loop()` (`for i := 0; b.Loop(); i++` when an index is needed) and use the `generateRandom*` helpers, which draw from `math/rand/v2`.
 - `immutability_test.go` enforces the immutability principle (no exported variables, no internal types in the exported API, race-free concurrent use). If one of its tests fails, fix the code, not the test.
 
 ## Known defects and design debt

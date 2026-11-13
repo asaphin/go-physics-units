@@ -6,10 +6,18 @@ FUZZTIME ?= 30s
 # different issues, so lint and fmt refuse to run with any other version.
 GOLANGCI_LINT_VERSION := 2.15.0
 
-.PHONY: check build vet test race bench profile cover fuzz lint fmt fmt-check tidy-check golangci-lint-version
+# bench-compare: a pinned benchstat, run with go run (a tool, not a module dependency).
+BENCHSTAT := golang.org/x/perf/cmd/benchstat@v0.0.0-20261009192801-be2c69fb417e
+BENCH_BASE ?= $(shell git describe --tags --abbrev=0)
+BENCH_COUNT ?= 6
+BENCH_TIME ?= 1s
+# Both sides run on the toolchain this module selects, so Go releases don't skew the comparison.
+GO_VERSION := $(shell go env GOVERSION)
 
-## check: everything CI runs (go.mod tidiness, formatting, vet, lint, race-enabled tests)
-check: tidy-check fmt-check vet lint race
+.PHONY: check build vet test race allocs bench bench-compare profile cover fuzz lint fmt fmt-check tidy-check golangci-lint-version
+
+## check: everything CI runs (go.mod tidiness, formatting, vet, lint, race-enabled tests, allocation guards)
+check: tidy-check fmt-check vet lint race allocs
 
 build:
 	go build ./...
@@ -23,9 +31,23 @@ test:
 race:
 	go test -race -count=1 ./...
 
+## allocs: TestAllocations, which -race builds exclude because the race detector changes allocation counts
+allocs:
+	go test -count=1 -run='^TestAllocations$$' .
+
 ## bench: benchmarks live in the root package only
 bench:
 	go test -run='^$$' -bench=. -benchmem .
+
+## bench-compare: benchmarks BENCH_BASE (default: the latest tag) and the working tree, then compares them
+bench-compare:
+	rm -rf .bench && mkdir -p .bench/base
+	git archive $(BENCH_BASE) | tar -x -C .bench/base
+	cd .bench/base && GOTOOLCHAIN=$(GO_VERSION) go test -run='^$$' -bench=. -benchmem \
+		-count=$(BENCH_COUNT) -benchtime=$(BENCH_TIME) . > ../base.txt
+	GOTOOLCHAIN=$(GO_VERSION) go test -run='^$$' -bench=. -benchmem \
+		-count=$(BENCH_COUNT) -benchtime=$(BENCH_TIME) . > .bench/head.txt
+	go run $(BENCHSTAT) .bench/base.txt .bench/head.txt
 
 profile:
 	go test -run='^$$' -bench=. -benchmem -cpuprofile=profile.out .

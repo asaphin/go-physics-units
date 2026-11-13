@@ -36,47 +36,47 @@ type typedCase[T typedMeasure[T]] struct {
 	foreignUnit string  // a unit of another measure
 }
 
+// One case per predefined measure, shared by TestTypedMeasures and
+// BenchmarkMeasures. A new measure needs a case here.
+var (
+	distanceCase = typedCase[units.Distance]{
+		measureType: units.MeasureDistance,
+		newFn:       units.NewDistance, toFn: units.ToDistance, parseFn: units.StringToDistance,
+		unitA: distance.Mile, unitB: distance.Kilometer, ratio: 1.609344,
+		baseUnit: distance.BaseUnit, baseRatio: 1609.344, foreignUnit: mass.Kilogram,
+	}
+	areaCase = typedCase[units.Area]{
+		measureType: units.MeasureArea,
+		newFn:       units.NewArea, toFn: units.ToArea, parseFn: units.StringToArea,
+		unitA: area.SquareFoot, unitB: area.SquareInch, ratio: 144,
+		baseUnit: area.BaseUnit, baseRatio: 0.09290304, foreignUnit: time.Second,
+	}
+	massCase = typedCase[units.Mass]{
+		measureType: units.MeasureMass,
+		newFn:       units.NewMass, toFn: units.ToMass, parseFn: units.StringToMass,
+		unitA: mass.Pound, unitB: mass.Ounce, ratio: 16,
+		baseUnit: mass.BaseUnit, baseRatio: 0.45359237, foreignUnit: distance.Meter,
+	}
+	timeCase = typedCase[units.Time]{
+		measureType: units.MeasureTime,
+		newFn:       units.NewTime, toFn: units.ToTime, parseFn: units.StringToTime,
+		unitA: time.Hour, unitB: time.Minute, ratio: 60,
+		baseUnit: time.BaseUnit, baseRatio: 3600, foreignUnit: mass.Kilogram,
+	}
+	velocityCase = typedCase[units.Velocity]{
+		measureType: units.MeasureVelocity,
+		newFn:       units.NewVelocity, toFn: units.ToVelocity, parseFn: units.StringToVelocity,
+		unitA: velocity.Knot, unitB: velocity.KilometerPerHour, ratio: 1.852,
+		baseUnit: velocity.BaseUnit, baseRatio: 1852.0 / 3600, foreignUnit: distance.Meter,
+	}
+)
+
 func TestTypedMeasures(t *testing.T) {
-	t.Run("distance", func(t *testing.T) {
-		testTypedMeasure(t, typedCase[units.Distance]{
-			measureType: units.MeasureDistance,
-			newFn:       units.NewDistance, toFn: units.ToDistance, parseFn: units.StringToDistance,
-			unitA: distance.Mile, unitB: distance.Kilometer, ratio: 1.609344,
-			baseUnit: distance.BaseUnit, baseRatio: 1609.344, foreignUnit: mass.Kilogram,
-		})
-	})
-	t.Run("area", func(t *testing.T) {
-		testTypedMeasure(t, typedCase[units.Area]{
-			measureType: units.MeasureArea,
-			newFn:       units.NewArea, toFn: units.ToArea, parseFn: units.StringToArea,
-			unitA: area.SquareFoot, unitB: area.SquareInch, ratio: 144,
-			baseUnit: area.BaseUnit, baseRatio: 0.09290304, foreignUnit: time.Second,
-		})
-	})
-	t.Run("mass", func(t *testing.T) {
-		testTypedMeasure(t, typedCase[units.Mass]{
-			measureType: units.MeasureMass,
-			newFn:       units.NewMass, toFn: units.ToMass, parseFn: units.StringToMass,
-			unitA: mass.Pound, unitB: mass.Ounce, ratio: 16,
-			baseUnit: mass.BaseUnit, baseRatio: 0.45359237, foreignUnit: distance.Meter,
-		})
-	})
-	t.Run("time", func(t *testing.T) {
-		testTypedMeasure(t, typedCase[units.Time]{
-			measureType: units.MeasureTime,
-			newFn:       units.NewTime, toFn: units.ToTime, parseFn: units.StringToTime,
-			unitA: time.Hour, unitB: time.Minute, ratio: 60,
-			baseUnit: time.BaseUnit, baseRatio: 3600, foreignUnit: mass.Kilogram,
-		})
-	})
-	t.Run("velocity", func(t *testing.T) {
-		testTypedMeasure(t, typedCase[units.Velocity]{
-			measureType: units.MeasureVelocity,
-			newFn:       units.NewVelocity, toFn: units.ToVelocity, parseFn: units.StringToVelocity,
-			unitA: velocity.Knot, unitB: velocity.KilometerPerHour, ratio: 1.852,
-			baseUnit: velocity.BaseUnit, baseRatio: 1852.0 / 3600, foreignUnit: distance.Meter,
-		})
-	})
+	t.Run("distance", func(t *testing.T) { testTypedMeasure(t, distanceCase) })
+	t.Run("area", func(t *testing.T) { testTypedMeasure(t, areaCase) })
+	t.Run("mass", func(t *testing.T) { testTypedMeasure(t, massCase) })
+	t.Run("time", func(t *testing.T) { testTypedMeasure(t, timeCase) })
+	t.Run("velocity", func(t *testing.T) { testTypedMeasure(t, velocityCase) })
 }
 
 func testTypedMeasure[T typedMeasure[T]](t *testing.T, c typedCase[T]) {
