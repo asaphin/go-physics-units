@@ -53,9 +53,9 @@ The work since v0.0.4 already breaks the API: it changes the `mass.Quintal` symb
   - `fix:` the rate table, the data race, `ToX`, the creator and precision;
   - `perf:`;
   - `test:`;
-  - `chore:` the Makefile, golangci-lint, CI and Go 1.22;
+  - `chore:` the Makefile, golangci-lint, CI and the Go version;
   - `docs:`.
-- Push `dev`. This is the first run of `.github/workflows/ci.yml`. Check that every pinned action version resolves and that all jobs pass: tests on Go 1.22 and stable, lint and govulncheck.
+- Push `dev`. This is the first run of `.github/workflows/ci.yml`. Check that every pinned action version resolves and that all jobs pass: tests on the `go.mod` version and stable, lint and govulncheck.
 - **Done when** CI is green on `dev`.
 
 ### 0.2 Decision: replace `ConversionRates()` with `Rate()`
@@ -93,7 +93,7 @@ Everything in this phase stays useful whatever Phase 2 decides. Tag a v0.1.x rel
 
 Serves **P1**. Timing benchmarks on shared CI runners are too noisy to fail a build on, but allocation counts are deterministic.
 
-- **Allocation tests.** Add `testing.AllocsPerRun` tests for the hot paths, with today's counts as limits: 1 for `NewDistance`, `ConvertTo`, `Add`, `Mul`, `String` and the creator's `New`, and 2 for `ParseString` and the unknown-unit error. Put them in a file with `//go:build !race`, because the race detector can change allocation counts.
+- **Allocation tests.** Add `testing.AllocsPerRun` tests for the hot paths, with today's counts as limits: 1 for `NewDistance`, `ConvertTo`, `Add`, `Mul`, `String`, `ParseString` and the creator's `New`, and 2 for the unknown-unit error. Put them in a file with `//go:build !race`, because the race detector can change allocation counts.
 - **Wider benchmarks.** Cover every measure, not only distance, plus custom measures (`New` on a creator, `NewBaseMeasurement`), formatting and error paths.
 - **`make bench-compare`.** It benchmarks the latest tag and the working tree, then compares them with benchstat. Run benchstat with `go run golang.org/x/perf/cmd/benchstat@<pinned version>`: it's a tool, not a module dependency.
 - **Done when** undoing any allocation saving makes a test fail.
@@ -161,7 +161,7 @@ Write `docs/rfc-value-types.md` and answer these questions in it:
    - **Typed string constants** (`type Unit string`) are simple and catch a wrong measure at compile time. Conversions still need a map lookup.
    - **Typed integer constants indexing an immutable array** are the fastest option, but the set of units is closed.
    - **Unit values that carry their own factor** let users add units. The predefined units would then have to be exported variables, which P2 forbids.
-3. **Custom measures (P3).** How does a user-defined measure get the same typed API as the predefined ones? One option is a generic `Quantity[M]` with a marker type supplied by the user. It must not need a global registry that changes after init (P2).
+3. **Custom measures (P3).** How does a user-defined measure get the same typed API as the predefined ones? One option is a generic `Quantity[M]` with a marker type supplied by the user. Go 1.27's generic methods widen the options, though they can't implement interface methods. It must not need a global registry that changes after init (P2).
 4. **Errors.** Which operations can stop returning errors once units are typed?
 5. **Migration.** Keep the method names, so that most code compiles unchanged, and list what breaks, such as nil checks and string variables used as units.
 
@@ -276,6 +276,6 @@ Serves **P3**.
 
 ## Ongoing
 
-- **Go version.** Raise the minimum Go version in `go.mod` only when a feature needs it. Go 1.23 brings iterators, for example for listing units, and Go 1.24 brings `testing.B.Loop`. Make each raise its own CHANGELOG entry.
+- **Go version.** The minimum is Go 1.27. Raise it only when a feature needs it, and give each raise its own CHANGELOG entry. CI's stable test job shows early whether a new Go release breaks anything.
 - **Tools.** Upgrade the pinned tools on purpose, one at a time, and handle new findings: golangci-lint, gorelease, benchstat and the CI actions.
 - **Agent guidance.** Keep AGENTS.md in step with the code. Whenever a step changes how the library works, update the "How it works" and "Known defects" sections.

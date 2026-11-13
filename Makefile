@@ -2,10 +2,14 @@
 
 FUZZTIME ?= 30s
 
-.PHONY: check build vet test race bench profile cover fuzz lint fmt fmt-check
+# Keep in sync with .github/workflows/ci.yml. A different version can report
+# different issues, so lint and fmt refuse to run with any other version.
+GOLANGCI_LINT_VERSION := 2.15.0
 
-## check: everything CI runs (formatting, vet, lint, race-enabled tests)
-check: fmt-check vet lint race
+.PHONY: check build vet test race bench profile cover fuzz lint fmt fmt-check tidy-check golangci-lint-version
+
+## check: everything CI runs (go.mod tidiness, formatting, vet, lint, race-enabled tests)
+check: tidy-check fmt-check vet lint race
 
 build:
 	go build ./...
@@ -36,11 +40,21 @@ cover:
 fuzz:
 	go test -run='^$$' -fuzz=FuzzParseString -fuzztime=$(FUZZTIME) .
 
-lint:
+lint: golangci-lint-version
 	golangci-lint run ./...
 
-fmt:
+## fmt: format with the formatters in .golangci.yaml (gofumpt, goimports, golines)
+fmt: golangci-lint-version
 	golangci-lint fmt ./...
 
-fmt-check:
-	@test -z "$$(gofmt -l .)" || { echo "gofmt needed on:"; gofmt -l .; exit 1; }
+fmt-check: golangci-lint-version
+	@golangci-lint fmt --diff ./... || { echo "formatting needed: run make fmt"; exit 1; }
+
+tidy-check:
+	@go mod tidy -diff || { echo "go.mod is not tidy: run go mod tidy"; exit 1; }
+
+golangci-lint-version:
+	@golangci-lint version 2>/dev/null | grep -q 'version $(GOLANGCI_LINT_VERSION) ' || { \
+		echo "golangci-lint v$(GOLANGCI_LINT_VERSION) is required; found: $$(golangci-lint version 2>&1 | head -n 1)"; \
+		echo "install: curl -sSfL https://golangci-lint.run/install.sh | sh -s -- -b \$$(go env GOPATH)/bin v$(GOLANGCI_LINT_VERSION)"; \
+		exit 1; }
