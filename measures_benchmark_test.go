@@ -1,6 +1,7 @@
 package units_test
 
 import (
+	"fmt"
 	"testing"
 
 	units "github.com/asaphin/go-physics-units"
@@ -55,6 +56,11 @@ func benchTypedMeasure[T typedMeasure[T]](b *testing.B, c typedCase[T]) {
 	b.Run("String", func(b *testing.B) {
 		for b.Loop() {
 			_ = x.String()
+		}
+	})
+	b.Run("Format", func(b *testing.B) {
+		for b.Loop() {
+			_ = fmt.Sprintf("%.2f", x)
 		}
 	})
 	b.Run("StringTo", func(b *testing.B) {

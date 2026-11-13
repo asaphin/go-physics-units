@@ -1,6 +1,7 @@
 package units_test
 
 import (
+	"fmt"
 	"math"
 	"testing"
 
@@ -31,6 +32,11 @@ func FuzzParseString(f *testing.F) {
 
 		if mt := units.DetectMeasureType(m.Unit()); mt != m.Type() {
 			t.Fatalf("ParseString(%q): Type() = %s, but unit %s belongs to %s", s, m.Type(), m.Unit(), mt)
+		}
+
+		//nolint:gocritic // deliberately formats through fmt, to compare Format with String
+		if v := fmt.Sprintf("%v", m); v != m.String() {
+			t.Fatalf("%%v of %q is %q, want String() %q", s, v, m.String())
 		}
 
 		again, err := units.ParseString(m.String())

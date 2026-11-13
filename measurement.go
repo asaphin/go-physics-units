@@ -3,6 +3,7 @@ package units
 import (
 	"errors"
 	"fmt"
+	"io"
 	"math"
 	"strconv"
 	"strings"
@@ -28,6 +29,9 @@ type Measurement interface {
 	// ConvertToMeasurement returns the measurement expressed in targetUnit.
 	ConvertToMeasurement(targetUnit string) (Measurement, error)
 	fmt.Stringer
+	// Format implements fmt.Formatter: %v prints String(), %.2f formats the
+	// value and appends the unit ("5.00 km"). See the package documentation.
+	fmt.Formatter
 
 	// AddMeasurement returns the sum of the measurement and m, expressed in the
 	// receiver's unit. It fails if m can't be converted to that unit.
@@ -85,6 +89,40 @@ func (b *baseMeasurement) String() string {
 	s = append(s, b.unit...)
 
 	return string(s)
+}
+
+// Format implements fmt.Formatter, so fmt verbs format measurements sensibly:
+//
+//   - %v and %s print String(), honoring width and the '-' flag: "5 km".
+//   - %b, %e, %E, %f, %F, %g, %G, %x and %X format the value with the given
+//     flags, width and precision, then append the unit: %.2f gives "5.00 km".
+//   - %q prints String() quoted: "\"5 km\"".
+//   - %#v prints a Go-like form: units.Measurement{Value:5, Unit:"km", Type:"distance"}.
+//   - Other verbs print fmt's usual error form: %!d(units.Measurement=5 km).
+func (b *baseMeasurement) Format(f fmt.State, verb rune) {
+	switch verb {
+	case 'v', 's':
+		if verb == 'v' && f.Flag('#') {
+			_, _ = fmt.Fprintf(f, "units.Measurement{Value:%#v, Unit:%q, Type:%q}", b.value, b.unit, b.Type())
+
+			return
+		}
+
+		if _, ok := f.Width(); !ok && !f.Flag('-') {
+			_, _ = io.WriteString(f, b.String()) // fast path: fmt.Print, Println, plain %v
+
+			return
+		}
+
+		_, _ = fmt.Fprintf(f, fmt.FormatString(f, 's'), b.String())
+	case 'q':
+		_, _ = fmt.Fprintf(f, fmt.FormatString(f, 'q'), b.String())
+	case 'b', 'e', 'E', 'f', 'F', 'g', 'G', 'x', 'X':
+		_, _ = fmt.Fprintf(f, fmt.FormatString(f, verb), b.value)
+		_, _ = io.WriteString(f, " "+b.unit)
+	default:
+		_, _ = fmt.Fprintf(f, "%%!%c(units.Measurement=%s)", verb, b.String())
+	}
 }
 
 // AddMeasurement returns the sum of b and m, expressed in b's unit.
