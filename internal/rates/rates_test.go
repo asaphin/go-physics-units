@@ -90,6 +90,30 @@ func TestNewTable_DoesNotKeepFactors(t *testing.T) {
 	if table.Has("c") {
 		t.Error("a unit added to the factors after NewTable appeared in the table")
 	}
+
+	if got, ok := table.Factor("b"); !ok || got != 2 {
+		t.Errorf("Factor(b) = %v, %v after changing the factors; want 2, true", got, ok)
+	}
+}
+
+func TestTable_Factor(t *testing.T) {
+	table, err := rates.NewTable("distance", conversion.Factors{"m": 1, "km": 1000, "\u00b5m": 1e-6})
+	if err != nil {
+		t.Fatal(err)
+	}
+
+	for unit, want := range map[string]float64{"m": 1, "km": 1000, "\u03bcm": 1e-6} {
+		if got, ok := table.Factor(unit); !ok || got != want {
+			t.Errorf("Factor(%s) = %v, %v; want %v, true", unit, got, ok, want)
+		}
+	}
+
+	// Factor, like Rate, takes canonical symbols only.
+	for _, unit := range []string{"ft", "\u00b5m", ""} {
+		if got, ok := table.Factor(unit); ok || got != 0 {
+			t.Errorf("Factor(%q) = %v, %v; want 0, false", unit, got, ok)
+		}
+	}
 }
 
 func TestFactorRate(t *testing.T) {
@@ -127,6 +151,10 @@ func TestTable_Zero(t *testing.T) {
 
 	if r, ok := zero.Rate("a", "a"); ok || r != 0 {
 		t.Errorf("zero Table: Rate(a, a) = %v, %v; want 0, false", r, ok)
+	}
+
+	if f, ok := zero.Factor("a"); ok || f != 0 {
+		t.Errorf("zero Table: Factor(a) = %v, %v; want 0, false", f, ok)
 	}
 }
 

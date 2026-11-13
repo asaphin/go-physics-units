@@ -3,6 +3,7 @@ package units_test
 import (
 	"errors"
 	"fmt"
+	"slices"
 
 	units "github.com/asaphin/go-physics-units"
 	"github.com/asaphin/go-physics-units/conversion"
@@ -79,6 +80,25 @@ func ExampleParseString() {
 	// Output:
 	// distance
 	// 1.5 km
+}
+
+func ExampleDistance_compare() {
+	mile, _ := units.NewDistance(1, distance.Mile)
+	foot, _ := units.NewDistance(1, distance.Feet)
+	inches, _ := units.NewDistance(12, distance.Inch)
+
+	fmt.Println(mile.Compare(foot))
+
+	// Conversions round: in metres, 12 in and 1 ft differ in the last bit.
+	fmt.Println(foot.Equal(inches), foot.EqualWithinRel(inches, 1e-12))
+
+	ds := []units.Distance{mile, foot, inches}
+	slices.SortFunc(ds, units.Distance.Compare)
+	fmt.Println(ds)
+	// Output:
+	// 1
+	// false true
+	// [12 in 1 ft 1 mi]
 }
 
 func ExampleUnitError() {

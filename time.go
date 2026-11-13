@@ -1,6 +1,7 @@
 package units
 
 import (
+	"cmp"
 	builtintime "time"
 
 	"github.com/asaphin/go-physics-units/time"
@@ -12,6 +13,7 @@ type Time interface {
 	Measurement
 	UnitConverter[Time]
 	Arithmetics[Time]
+	Comparer[Time]
 }
 
 // timeImplementation is the concrete implementation of Time.
@@ -74,6 +76,24 @@ func (t *timeImplementation) Div(divisor float64) (Time, error) {
 	}
 
 	return &timeImplementation{t.withValue(t.value / divisor)}, nil
+}
+
+// Compare compares the times; see Comparer.
+func (t *timeImplementation) Compare(other Time) int {
+	return cmp.Compare(t.commonValues(other.base()))
+}
+
+// Equal reports whether the times are equal; see Comparer.
+func (t *timeImplementation) Equal(other Time) bool {
+	return t.Compare(other) == 0
+}
+
+// EqualWithinRel reports whether the times are equal within the relative
+// tolerance tol; see Comparer.
+func (t *timeImplementation) EqualWithinRel(other Time, tol float64) bool {
+	x, y := t.commonValues(other.base())
+
+	return equalWithinRel(x, y, tol)
 }
 
 // NewTime creates a time of value in unit, one of the symbols defined in the

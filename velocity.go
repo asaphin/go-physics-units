@@ -1,6 +1,8 @@
 package units
 
 import (
+	"cmp"
+
 	"github.com/asaphin/go-physics-units/distance"
 	"github.com/asaphin/go-physics-units/velocity"
 )
@@ -11,6 +13,7 @@ type Velocity interface {
 	Measurement
 	UnitConverter[Velocity]
 	Arithmetics[Velocity]
+	Comparer[Velocity]
 
 	// MultiplyByTime returns the distance v·t in distance.BaseUnit (m).
 	MultiplyByTime(t Time) Distance
@@ -81,6 +84,24 @@ func (v *velocityImplementation) Div(divisor float64) (Velocity, error) {
 // MultiplyByTime returns the distance v·t in m.
 func (v *velocityImplementation) MultiplyByTime(t Time) Distance {
 	return newDistance(v.valueInBaseUnits()*t.valueInBaseUnits(), distance.BaseUnit)
+}
+
+// Compare compares the velocitys; see Comparer.
+func (v *velocityImplementation) Compare(other Velocity) int {
+	return cmp.Compare(v.commonValues(other.base()))
+}
+
+// Equal reports whether the velocitys are equal; see Comparer.
+func (v *velocityImplementation) Equal(other Velocity) bool {
+	return v.Compare(other) == 0
+}
+
+// EqualWithinRel reports whether the velocitys are equal within the relative
+// tolerance tol; see Comparer.
+func (v *velocityImplementation) EqualWithinRel(other Velocity, tol float64) bool {
+	x, y := v.commonValues(other.base())
+
+	return equalWithinRel(x, y, tol)
 }
 
 // NewVelocity creates a velocity of value in unit, one of the symbols defined in

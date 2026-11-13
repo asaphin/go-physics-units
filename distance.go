@@ -1,6 +1,8 @@
 package units
 
 import (
+	"cmp"
+
 	"github.com/asaphin/go-physics-units/area"
 	"github.com/asaphin/go-physics-units/distance"
 	"github.com/asaphin/go-physics-units/velocity"
@@ -12,6 +14,7 @@ type Distance interface {
 	Measurement
 	UnitConverter[Distance]
 	Arithmetics[Distance]
+	Comparer[Distance]
 
 	// DivideByTime returns the velocity d/t in velocity.BaseUnit (m/s).
 	// It fails if t is zero.
@@ -96,6 +99,24 @@ func (d *distanceImplementation) Square() Area {
 	baseD := d.valueInBaseUnits()
 
 	return newArea(baseD*baseD, area.BaseUnit)
+}
+
+// Compare compares the distances; see Comparer.
+func (d *distanceImplementation) Compare(other Distance) int {
+	return cmp.Compare(d.commonValues(other.base()))
+}
+
+// Equal reports whether the distances are equal; see Comparer.
+func (d *distanceImplementation) Equal(other Distance) bool {
+	return d.Compare(other) == 0
+}
+
+// EqualWithinRel reports whether the distances are equal within the relative
+// tolerance tol; see Comparer.
+func (d *distanceImplementation) EqualWithinRel(other Distance, tol float64) bool {
+	x, y := d.commonValues(other.base())
+
+	return equalWithinRel(x, y, tol)
 }
 
 // NewDistance creates a distance of value in unit, one of the symbols defined in

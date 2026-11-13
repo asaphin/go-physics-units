@@ -1,6 +1,7 @@
 package units_test
 
 import (
+	"cmp"
 	"errors"
 	"testing"
 
@@ -22,6 +23,9 @@ type typedMeasure[T any] interface {
 	Sub(other T) T
 	Mul(multiplier float64) T
 	Div(divisor float64) (T, error)
+	Compare(other T) int
+	Equal(other T) bool
+	EqualWithinRel(other T, tol float64) bool
 }
 
 type typedCase[T typedMeasure[T]] struct {
@@ -151,6 +155,45 @@ func testTypedMeasure[T typedMeasure[T]](t *testing.T, c typedCase[T]) {
 		bad, err := x.Div(0)
 		if !errors.Is(err, units.ErrZeroDivision) || any(bad) != nil {
 			t.Errorf("Div(0) = %v, %v; want nil and ErrZeroDivision", bad, err)
+		}
+	})
+
+	t.Run("Compare", func(t *testing.T) {
+		// x is 2 unitA; y is 1 unitB, which is 1/ratio unitA.
+		want := cmp.Compare(2, 1/c.ratio)
+		if got, rev := x.Compare(y), y.Compare(x); got != want || rev != -want {
+			t.Errorf("x.Compare(y) = %d, y.Compare(x) = %d; want %d and %d", got, rev, want, -want)
+		}
+
+		bigger, same := x.Mul(2), x.Mul(1)
+		if x.Compare(bigger) != -1 || bigger.Compare(x) != 1 || x.Compare(same) != 0 {
+			t.Errorf("Compare: x vs 2x = %d, 2x vs x = %d, x vs x = %d; want -1, 1, 0",
+				x.Compare(bigger), bigger.Compare(x), x.Compare(same))
+		}
+	})
+
+	t.Run("Equal", func(t *testing.T) {
+		if same := x.Mul(1); !x.Equal(same) || x.Equal(y) || y.Equal(x) {
+			t.Errorf("Equal: x vs x = %v, x vs y = %v, y vs x = %v; want true, false, false",
+				x.Equal(same), x.Equal(y), y.Equal(x))
+		}
+
+		converted := x.MustConvertTo(c.unitB)
+		if x.Equal(converted) != converted.Equal(x) {
+			t.Errorf("Equal isn't symmetric for %v and %v", x, converted)
+		}
+	})
+
+	t.Run("EqualWithinRel", func(t *testing.T) {
+		converted := x.MustConvertTo(c.unitB)
+		if !x.EqualWithinRel(converted, 1e-12) || !converted.EqualWithinRel(x, 1e-12) {
+			t.Errorf("%v and %v aren't equal within 1e-12", x, converted)
+		}
+
+		near := x.Mul(1 + 1e-6)
+		if x.EqualWithinRel(near, 1e-9) || !x.EqualWithinRel(near, 1e-5) {
+			t.Errorf("%v and %v: within 1e-9 = %v, within 1e-5 = %v; want false, true",
+				x, near, x.EqualWithinRel(near, 1e-9), x.EqualWithinRel(near, 1e-5))
 		}
 	})
 

@@ -1,6 +1,7 @@
 package units
 
 import (
+	"cmp"
 	"fmt"
 	"io"
 	"math"
@@ -43,6 +44,10 @@ type Measurement interface {
 	// DivMeasurement returns the measurement divided by divisor. It fails if
 	// divisor is zero.
 	DivMeasurement(divisor float64) (Measurement, error)
+	// CompareMeasurement compares the measurement with m as Comparer.Compare
+	// does: it returns -1, 0 or +1 as the measurement is less than, equal to or
+	// greater than m. It fails if m can't be converted to the measurement's unit.
+	CompareMeasurement(m Measurement) (int, error)
 
 	base() *baseMeasurement
 }
@@ -162,6 +167,39 @@ func (b *baseMeasurement) DivMeasurement(divisor float64) (Measurement, error) {
 	bm := b.withValue(b.value / divisor)
 
 	return &bm, nil
+}
+
+// CompareMeasurement compares b with m. Like Comparer.Compare, it compares
+// values in different units in the measure's base unit.
+func (b *baseMeasurement) CompareMeasurement(m Measurement) (int, error) {
+	if m != nil && m.base().conversionRates == b.conversionRates {
+		return cmp.Compare(b.commonValues(m.base())), nil
+	}
+
+	// Another measure, or a measure with the same name but its own units: as in
+	// AddMeasurement, compare in b's unit if m converts to it.
+	v, err := b.valueOf(m)
+	if err != nil {
+		return 0, err
+	}
+
+	return cmp.Compare(b.value, v), nil
+}
+
+// commonValues returns the values of b and o, which must share b's conversion
+// table, in a common unit: their own if they have the same unit, otherwise the
+// reference unit of the table's factors (the base unit, for predefined
+// measures). Either way the result doesn't depend on the order of b and o, so
+// comparisons built on it are symmetric.
+func (b *baseMeasurement) commonValues(o *baseMeasurement) (float64, float64) {
+	if b.unit == o.unit {
+		return b.value, o.value
+	}
+
+	bf, _ := b.conversionRates.Factor(b.unit)
+	of, _ := b.conversionRates.Factor(o.unit)
+
+	return b.value * bf, o.value * of
 }
 
 // ConvertToMeasurement returns b expressed in targetUnit.

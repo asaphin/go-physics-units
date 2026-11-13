@@ -20,6 +20,7 @@ var (
 	sinkString      string
 	sinkRate        float64
 	sinkOK          bool
+	sinkInt         int
 	errSink         error
 )
 
@@ -67,6 +68,9 @@ func TestAllocations(t *testing.T) {
 		{"ParseString", 1, func() { sinkMeasurement, errSink = units.ParseString("10 km") }},
 		{"StringToDistance", 1, func() { sinkDistance, errSink = units.StringToDistance("10 km") }},
 		{"MeasurementCreator.New", 1, func() { sinkCurrency, errSink = mc.New(1, "EUR") }},
+		{"Compare", 0, func() { sinkInt = km.Compare(m500) }},
+		{"EqualWithinRel", 0, func() { sinkOK = km.EqualWithinRel(m500, 1e-9) }},
+		{"CompareMeasurement", 0, func() { sinkInt, errSink = km.CompareMeasurement(m500) }},
 		{"distance.Rate", 0, func() { sinkRate, sinkOK = distance.Rate(distance.Kilometer, distance.Meter) }},
 		{"unknown unit error", 1, func() { sinkDistance, errSink = units.NewDistance(1, "furlong") }},
 		{"invalid format error", 2, func() { sinkMeasurement, errSink = units.ParseString("10km") }},

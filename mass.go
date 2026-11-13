@@ -1,6 +1,8 @@
 package units
 
 import (
+	"cmp"
+
 	"github.com/asaphin/go-physics-units/mass"
 )
 
@@ -9,6 +11,7 @@ type Mass interface {
 	Measurement
 	UnitConverter[Mass]
 	Arithmetics[Mass]
+	Comparer[Mass]
 }
 
 // massImplementation is the concrete implementation of Mass.
@@ -71,6 +74,24 @@ func (m *massImplementation) Div(divisor float64) (Mass, error) {
 	}
 
 	return &massImplementation{m.withValue(m.value / divisor)}, nil
+}
+
+// Compare compares the masss; see Comparer.
+func (m *massImplementation) Compare(other Mass) int {
+	return cmp.Compare(m.commonValues(other.base()))
+}
+
+// Equal reports whether the masss are equal; see Comparer.
+func (m *massImplementation) Equal(other Mass) bool {
+	return m.Compare(other) == 0
+}
+
+// EqualWithinRel reports whether the masss are equal within the relative
+// tolerance tol; see Comparer.
+func (m *massImplementation) EqualWithinRel(other Mass, tol float64) bool {
+	x, y := m.commonValues(other.base())
+
+	return equalWithinRel(x, y, tol)
 }
 
 // NewMass creates a mass of value in unit, one of the symbols defined in the
