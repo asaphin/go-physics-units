@@ -5,8 +5,10 @@ import (
 
 	units "github.com/asaphin/go-physics-units"
 	"github.com/asaphin/go-physics-units/acceleration"
+	"github.com/asaphin/go-physics-units/angle"
 	"github.com/asaphin/go-physics-units/area"
 	"github.com/asaphin/go-physics-units/conversion"
+	"github.com/asaphin/go-physics-units/datasize"
 	"github.com/asaphin/go-physics-units/distance"
 	"github.com/asaphin/go-physics-units/energy"
 	"github.com/asaphin/go-physics-units/force"
@@ -269,4 +271,28 @@ func Example_work() {
 
 	fmt.Printf("%.1f, %.1f, %.1f = %.2f\n", weight, work, p, p.MustConvertTo(power.Horsepower))
 	// Output: 735.5 N, 2206.5 J, 551.6 W = 0.74 hp
+}
+
+func ExampleNewAngle() {
+	right, err := units.NewAngle(90, angle.Degree)
+	if err != nil {
+		panic(err)
+	}
+
+	fmt.Printf("%.4f\n", right.ConvertToBaseUnits())
+	fmt.Printf("%.2f\n", right.MustConvertTo(angle.Gradian)) // π/180 and π/200 both round
+	// Output:
+	// 1.5708 rad
+	// 100.00 gon
+}
+
+func ExampleNewDataSize() {
+	disk, err := units.NewDataSize(1, datasize.Terabyte)
+	if err != nil {
+		panic(err)
+	}
+
+	// What a "1 TB" disk shows in binary units.
+	fmt.Printf("%.1f\n", disk.MustConvertTo(datasize.Gibibyte))
+	// Output: 931.3 GiB
 }

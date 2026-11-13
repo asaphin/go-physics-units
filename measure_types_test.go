@@ -3,11 +3,14 @@ package units_test
 import (
 	"cmp"
 	"errors"
+	"math"
 	"testing"
 
 	units "github.com/asaphin/go-physics-units"
 	"github.com/asaphin/go-physics-units/acceleration"
+	"github.com/asaphin/go-physics-units/angle"
 	"github.com/asaphin/go-physics-units/area"
+	"github.com/asaphin/go-physics-units/datasize"
 	"github.com/asaphin/go-physics-units/distance"
 	"github.com/asaphin/go-physics-units/energy"
 	"github.com/asaphin/go-physics-units/force"
@@ -123,6 +126,18 @@ var (
 		unitA: frequency.Kilohertz, unitB: frequency.RevolutionPerMinute, ratio: 60000,
 		baseUnit: frequency.BaseUnit, baseRatio: 1000, foreignUnit: time.Second,
 	}
+	angleCase = typedCase[units.Angle]{
+		measureType: units.MeasureAngle,
+		newFn:       units.NewAngle, toFn: units.ToAngle, parseFn: units.StringToAngle,
+		unitA: angle.Revolution, unitB: angle.Degree, ratio: 360,
+		baseUnit: angle.BaseUnit, baseRatio: 2 * math.Pi, foreignUnit: time.Second,
+	}
+	dataSizeCase = typedCase[units.DataSize]{
+		measureType: units.MeasureDataSize,
+		newFn:       units.NewDataSize, toFn: units.ToDataSize, parseFn: units.StringToDataSize,
+		unitA: datasize.Gibibyte, unitB: datasize.Megabyte, ratio: 1073.741824,
+		baseUnit: datasize.BaseUnit, baseRatio: 1 << 30, foreignUnit: time.Second,
+	}
 )
 
 func TestTypedMeasures(t *testing.T) {
@@ -138,6 +153,8 @@ func TestTypedMeasures(t *testing.T) {
 	t.Run("power", func(t *testing.T) { testTypedMeasure(t, powerCase) })
 	t.Run("pressure", func(t *testing.T) { testTypedMeasure(t, pressureCase) })
 	t.Run("frequency", func(t *testing.T) { testTypedMeasure(t, frequencyCase) })
+	t.Run("angle", func(t *testing.T) { testTypedMeasure(t, angleCase) })
+	t.Run("data size", func(t *testing.T) { testTypedMeasure(t, dataSizeCase) })
 }
 
 func testTypedMeasure[T typedMeasure[T]](t *testing.T, c typedCase[T]) {

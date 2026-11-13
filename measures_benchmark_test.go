@@ -23,6 +23,8 @@ func BenchmarkMeasures(b *testing.B) {
 	b.Run("power", func(b *testing.B) { benchTypedMeasure(b, powerCase) })
 	b.Run("pressure", func(b *testing.B) { benchTypedMeasure(b, pressureCase) })
 	b.Run("frequency", func(b *testing.B) { benchTypedMeasure(b, frequencyCase) })
+	b.Run("angle", func(b *testing.B) { benchTypedMeasure(b, angleCase) })
+	b.Run("data size", func(b *testing.B) { benchTypedMeasure(b, dataSizeCase) })
 }
 
 func benchTypedMeasure[T typedMeasure[T]](b *testing.B, c typedCase[T]) {

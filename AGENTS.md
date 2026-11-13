@@ -4,7 +4,7 @@ Guidance for AI coding agents (and humans) working in this repository. `CLAUDE.m
 
 ## What this is
 
-`go-physics-units` (module `github.com/asaphin/go-physics-units`, package name `units`) is a small Go library for creating, converting, parsing and doing arithmetic on physical measurements (distance, area, volume, mass, time, velocity, acceleration, force, energy, power, pressure, frequency) and user-defined measures (e.g. currency).
+`go-physics-units` (module `github.com/asaphin/go-physics-units`, package name `units`) is a small Go library for creating, converting, parsing and doing arithmetic on physical measurements (distance, area, volume, mass, time, velocity, acceleration, force, energy, power, pressure, frequency, angle, data size) and user-defined measures (e.g. currency).
 
 - **Published and pre-1.0** (tags `v0.0.0`–`v0.0.4`). Exported API changes affect real users: make them deliberately, call them out, and record them in `CHANGELOG.md`. `make api`, and the CI job "API changes", list every exported change since the latest tag; check that each one is in the CHANGELOG.
 - **Go version:** `go.mod` declares `go 1.27.0`. CI tests that exact version and the latest stable release. Use modern Go freely: iterators and the `maps`/`slices` helpers, `strings.FieldsSeq`, `testing.B.Loop`, `sync.WaitGroup.Go`, and generic methods (Go 1.27). The `modernize` linter points out older forms. Raising the minimum again is its own deliberate change, with a CHANGELOG entry.
@@ -63,7 +63,7 @@ User-defined measures are first-class: they convert, combine and parse like the 
 | `measures.go` | `MeasureType` constants, the predefined rate tables (`distanceRates`, …), the registries `measureToConversionFactorsMapping` and `measureToConversionRatesMapping`, the `unitToMeasureType` index, `DetectMeasureType` |
 | `common.go` | Generic `Arithmetics[T]` and `UnitConverter[T]` interfaces |
 | `errors.go` | The sentinel errors (constants of type `Error`), `UnitError`, and the unexported error types and constructors the package uses |
-| `distance.go`, `area.go`, `volume.go`, `mass.go`, `time.go`, `velocity.go`, `acceleration.go`, `force.go`, `energy.go`, `power.go`, `pressure.go`, `frequency.go` | One file per measure: the public interface, the `xxxImplementation` struct embedding `baseMeasurement`, constructors and cross-measure operations. All follow the same pattern |
+| `distance.go`, `area.go`, `volume.go`, `mass.go`, `time.go`, `velocity.go`, `acceleration.go`, `force.go`, `energy.go`, `power.go`, `pressure.go`, `frequency.go`, `angle.go`, `datasize.go` | One file per measure: the public interface, the `xxxImplementation` struct embedding `baseMeasurement`, constructors and cross-measure operations. All follow the same pattern |
 | `distance/`, `area/`, `volume/`, … (one per measure) | One `units.go` per measure: unit symbol constants, `BaseUnit`, the `conversionFactors` table, `ConversionFactors()` (returns a copy) and `Rate(from, to)` |
 | `conversion/` | Public `Factors` type alias (`map[string]float64`) and `CopyConversionFactors` |
 | `measurement_creator.go` | Generic `NewMeasurementCreator[T]` for user-defined measures |

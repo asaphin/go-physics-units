@@ -1,12 +1,15 @@
 package units_test
 
 import (
+	"math"
 	"testing"
 
 	units "github.com/asaphin/go-physics-units"
 	"github.com/asaphin/go-physics-units/acceleration"
+	"github.com/asaphin/go-physics-units/angle"
 	"github.com/asaphin/go-physics-units/area"
 	"github.com/asaphin/go-physics-units/conversion"
+	"github.com/asaphin/go-physics-units/datasize"
 	"github.com/asaphin/go-physics-units/distance"
 	"github.com/asaphin/go-physics-units/energy"
 	"github.com/asaphin/go-physics-units/force"
@@ -32,6 +35,8 @@ var predefinedFactors = map[units.MeasureType]conversion.Factors{
 	units.MeasurePower:        power.ConversionFactors(),
 	units.MeasurePressure:     pressure.ConversionFactors(),
 	units.MeasureFrequency:    frequency.ConversionFactors(),
+	units.MeasureAngle:        angle.ConversionFactors(),
+	units.MeasureDataSize:     datasize.ConversionFactors(),
 }
 
 // TestConversion_AllUnitPairs converts between every ordered pair of units of
@@ -166,6 +171,24 @@ func TestConversion_ReferenceValues(t *testing.T) {
 		{frequency.Hertz, frequency.RevolutionPerMinute, 60},
 		{frequency.Gigahertz, frequency.Megahertz, 1000},
 		{frequency.Terahertz, frequency.Gigahertz, 1000},
+		{angle.Revolution, angle.Degree, 360},
+		{angle.Degree, angle.Arcminute, 60},
+		{angle.Arcminute, angle.Arcsecond, 60},
+		{angle.Revolution, angle.Gradian, 400},
+		{angle.Radian, angle.Milliradian, 1000},
+		{angle.Degree, angle.Radian, math.Pi / 180},
+		{datasize.Byte, datasize.Bit, 8},
+		{datasize.Kilobyte, datasize.Byte, 1000},
+		{datasize.Kibibyte, datasize.Byte, 1024},
+		{datasize.Mebibyte, datasize.Kibibyte, 1024},
+		{datasize.Gibibyte, datasize.Mebibyte, 1024},
+		{datasize.Tebibyte, datasize.Gibibyte, 1024},
+		{datasize.Pebibyte, datasize.Tebibyte, 1024},
+		{datasize.Gigabyte, datasize.Megabyte, 1000},
+		{datasize.Petabyte, datasize.Terabyte, 1000},
+		{datasize.Megabit, datasize.Kilobit, 1000},
+		{datasize.Gigabit, datasize.Megabyte, 125},
+		{datasize.Megabyte, datasize.Megabit, 8},
 	}
 
 	for _, c := range cases {
@@ -250,6 +273,8 @@ func TestRate(t *testing.T) {
 		units.MeasurePower:        power.Rate,
 		units.MeasurePressure:     pressure.Rate,
 		units.MeasureFrequency:    frequency.Rate,
+		units.MeasureAngle:        angle.Rate,
+		units.MeasureDataSize:     datasize.Rate,
 	}
 
 	for mt, rate := range rateFuncs {
@@ -291,6 +316,8 @@ func TestRate(t *testing.T) {
 		{"power", power.Rate, power.Kilowatt, power.Watt, 1000},
 		{"pressure", pressure.Rate, pressure.Bar, pressure.Kilopascal, 100},
 		{"frequency", frequency.Rate, frequency.Kilohertz, frequency.Hertz, 1000},
+		{"angle", angle.Rate, angle.Revolution, angle.Degree, 360},
+		{"data size", datasize.Rate, datasize.Kibibyte, datasize.Byte, 1024},
 	}
 
 	for _, e := range examples {
@@ -314,6 +341,8 @@ func TestConversionFactors_ReturnsCopy(t *testing.T) {
 		units.MeasurePower:        power.ConversionFactors,
 		units.MeasurePressure:     pressure.ConversionFactors,
 		units.MeasureFrequency:    frequency.ConversionFactors,
+		units.MeasureAngle:        angle.ConversionFactors,
+		units.MeasureDataSize:     datasize.ConversionFactors,
 	} {
 		f := factorsFn()
 		for unit := range f {

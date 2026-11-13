@@ -3,7 +3,7 @@
 [![Go Reference](https://pkg.go.dev/badge/github.com/asaphin/go-physics-units.svg)](https://pkg.go.dev/github.com/asaphin/go-physics-units)
 [![CI](https://github.com/asaphin/go-physics-units/actions/workflows/ci.yml/badge.svg)](https://github.com/asaphin/go-physics-units/actions/workflows/ci.yml)
 
-go-physics-units is a Go library for working with physical measurements: distance, area, volume, mass, time, velocity, acceleration, force, energy, power, pressure and frequency.
+go-physics-units is a Go library for working with physical measurements: distance, area, volume, mass, time, velocity, acceleration, force, energy, power, pressure, frequency, angle and data size.
 You can create, parse, convert and combine measurements, and define measures of your own, such as currencies.
 It has no dependencies.
 
@@ -251,6 +251,8 @@ fmt.Println(err) // unknown distance unit fur
 | Power        | `power`        | W         | mW, W, Btu/h, PS, hp, kW, MW, GW                                          |
 | Pressure     | `pressure`     | Pa        | Pa, hPa, mbar, kPa, Torr, mmHg, inHg, psi, bar, atm, MPa, GPa             |
 | Frequency    | `frequency`    | Hz        | rpm, Hz, kHz, MHz, GHz, THz                                               |
+| Angle        | `angle`        | rad       | arcsec, arcmin, mrad, gon, °, rad, rev                                    |
+| Data size    | `datasize`     | B         | bit, B, kbit, kB, KiB, Mbit, MB, MiB, Gbit, GB, GiB, TB, TiB, PB, PiB     |
 
 - Every symbol has a named constant in its package, for example `distance.LightYear` or `mass.Pound`.
 - Each unit package also provides `ConversionFactors()`, a copy of its factors, and `Rate(from, to)`, the multiplier between two units. For example, `distance.Rate(distance.Mile, distance.Kilometer)` returns 1.609344.
@@ -259,6 +261,7 @@ fmt.Println(err) // unknown distance unit fur
 - `yr` is the Julian year of 365.25 days.
 - `pt`, `qt` and `gal` are US liquid measures, `bbl` the 42-gallon oil barrel, `cal` the thermochemical calorie, `Btu` the International Table one, `hp` mechanical horsepower and `PS` metric horsepower. `mmHg` and `inHg` are the conventional values, and `gₙ` (with U+2099) is standard gravity, 9.80665 m/s².
 - Mind the case: `kN` is a kilonewton and `kn` a knot.
+- Data sizes have both decimal (`kB` = 1000 B) and binary (`KiB` = 1024 B) prefixes, and bits (`bit`, `Mbit`, …).
 - Strings are parsed in the form `"<value> <unit>"`, with whitespace between the value and the unit. NaN and infinite values are rejected.
 
 ## Documentation

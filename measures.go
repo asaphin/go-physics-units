@@ -2,8 +2,10 @@ package units
 
 import (
 	"github.com/asaphin/go-physics-units/acceleration"
+	"github.com/asaphin/go-physics-units/angle"
 	"github.com/asaphin/go-physics-units/area"
 	"github.com/asaphin/go-physics-units/conversion"
+	"github.com/asaphin/go-physics-units/datasize"
 	"github.com/asaphin/go-physics-units/distance"
 	"github.com/asaphin/go-physics-units/energy"
 	"github.com/asaphin/go-physics-units/force"
@@ -38,6 +40,8 @@ const (
 	MeasurePower        MeasureType = "power"
 	MeasurePressure     MeasureType = "pressure"
 	MeasureFrequency    MeasureType = "frequency"
+	MeasureAngle        MeasureType = "angle"
+	MeasureDataSize     MeasureType = "data size"
 	MeasureCustom       MeasureType = "custom"
 )
 
@@ -54,6 +58,8 @@ var measureToConversionFactorsMapping = map[MeasureType]conversion.Factors{
 	MeasurePower:        power.ConversionFactors(),
 	MeasurePressure:     pressure.ConversionFactors(),
 	MeasureFrequency:    frequency.ConversionFactors(),
+	MeasureAngle:        angle.ConversionFactors(),
+	MeasureDataSize:     datasize.ConversionFactors(),
 }
 
 // Rate tables of the predefined measures, built once at package init and never
@@ -72,6 +78,8 @@ var (
 	powerRates        = rates.MustNewTable(string(MeasurePower), power.ConversionFactors())
 	pressureRates     = rates.MustNewTable(string(MeasurePressure), pressure.ConversionFactors())
 	frequencyRates    = rates.MustNewTable(string(MeasureFrequency), frequency.ConversionFactors())
+	angleRates        = rates.MustNewTable(string(MeasureAngle), angle.ConversionFactors())
+	dataSizeRates     = rates.MustNewTable(string(MeasureDataSize), datasize.ConversionFactors())
 )
 
 var measureToConversionRatesMapping = map[MeasureType]rates.Table{
@@ -87,6 +95,8 @@ var measureToConversionRatesMapping = map[MeasureType]rates.Table{
 	MeasurePower:        powerRates,
 	MeasurePressure:     pressureRates,
 	MeasureFrequency:    frequencyRates,
+	MeasureAngle:        angleRates,
+	MeasureDataSize:     dataSizeRates,
 }
 
 // unitToMeasureType indexes every predefined unit symbol by its measure.
