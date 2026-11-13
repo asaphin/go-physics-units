@@ -1,59 +1,58 @@
+version: "2"
+
 linters:
-  # Enable all linters by default
-  enable-all: true
-  # Disable some specific linters
+  # Enable every linter, then opt out of the ones that don't fit this project.
+  # CI pins the golangci-lint version, so new linters only arrive on an explicit upgrade.
+  default: all
   disable:
-    - gochecknoglobals
-    - gocyclo
-    - goimports
-    - deadcode
-    - interfacer
-    - structcheck
-    - golint
-    - ifshort
-    - varcheck
-    - exhaustivestruct
-    - nosnakecase
-    - maligned
-    - scopelint
-    - gomnd
-    - ireturn
-    - gci
-    - paralleltest
-    - gofumpt
-    - depguard
-    - goerr113
-    - dupl
+    # Disabled since the original configuration.
+    - depguard # no dependency policy to enforce
+    - dupl # the measure types deliberately mirror each other
+    - err113 # dynamic errors that name the offending unit are intended
     - forcetypeassert
+    - gochecknoglobals # unit tables and registries are package-level by design
+    - gocyclo # cyclop and gocognit cover complexity
+    - ireturn # the public API returns interfaces by design
+    - mnd # conversion factors are magic numbers by nature
+    - paralleltest
+    # Opinionated style checks added to golangci-lint after the original configuration.
+    - funcorder
+    - noinlineerr
+    # Deprecated in favour of a new major version, or the successor of a linter disabled above.
+    - exhaustruct
+    - exhaustruct_v5
+    - gomodguard
+    - wsl
+
+  settings:
+    interfacebloat:
+      max: 24
+    varnamelen:
+      max-distance: 24
+    wrapcheck:
+      # Errors from this module's own packages need no extra wrapping.
+      ignore-package-globs:
+        - github.com/asaphin/go-physics-units/*
+
+  exclusions:
+    rules:
+      # Table-driven tests are long and repetitive by nature.
+      - path: _test\.go
+        linters:
+          - cyclop
+          - funlen
+          - gocognit
+          - goconst
+          - iface
+          - maintidx
+          - unparam
+          - varnamelen
+
+formatters:
+  enable:
     - gofmt
+    - goimports
 
 issues:
-  # Set the severity level for different issues
-  severity:
-    default: error
-    style: warning
-    perf: warning
-
-workflow:
-  # Enable parallel linting
-  allow-parallel-runners: true
-
-# Additional configuration for specific linters
-gci:
-  - name: goimports
-    # Set the import order style
-    style: golangci-lint
-
-# Enable golangci-lint documentation linter
-docs:
-  enabled: true
-
-run:
-  tests: false
-
-linters-settings:
-  varnamelen:
-    max-distance: 24
-
-  interfacebloat:
-    max: 24
+  max-issues-per-linter: 0
+  max-same-issues: 0
