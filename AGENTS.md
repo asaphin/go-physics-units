@@ -6,7 +6,7 @@ Guidance for AI coding agents (and humans) working in this repository. `CLAUDE.m
 
 `go-physics-units` (module `github.com/asaphin/go-physics-units`, package name `units`) is a small Go library for creating, converting, parsing and doing arithmetic on physical measurements (distance, area, mass, time, velocity) and user-defined measures (e.g. currency).
 
-- **Published and pre-1.0** (tags `v0.0.0`–`v0.0.4`). Exported API changes affect real users: make them deliberately, call them out, and record them in `CHANGELOG.md`.
+- **Published and pre-1.0** (tags `v0.0.0`–`v0.0.4`). Exported API changes affect real users: make them deliberately, call them out, and record them in `CHANGELOG.md`. `make api`, and the CI job "API changes", list every exported change since the latest tag; check that each one is in the CHANGELOG.
 - **Go version:** `go.mod` declares `go 1.27.0`. CI tests that exact version and the latest stable release. Use modern Go freely: iterators and the `maps`/`slices` helpers, `strings.FieldsSeq`, `testing.B.Loop`, `sync.WaitGroup.Go`, and generic methods (Go 1.27). The `modernize` linter points out older forms. Raising the minimum again is its own deliberate change, with a CHANGELOG entry.
 - **No third-party dependencies**, including in tests (stdlib `testing` only, no testify). Keep it that way unless asked.
 - **Branches:** `dev` is the working branch, and it only accepts pull requests. Work on a short-lived branch and open a PR into `dev`. Releases are merged from `dev` into `main`.
@@ -105,6 +105,7 @@ make test       # quick tests without the race detector
 make cover      # coverage summary; HTML report in coverage/ (gitignored)
 make bench      # benchmarks (root package only)
 make bench-compare  # benchstat: BENCH_BASE (default the latest tag) vs the working tree
+make api        # gorelease: exported API changes since the latest tag, and the suggested version
 make fuzz       # FuzzParseString; FUZZTIME=30s by default
 make fmt        # golangci-lint fmt: gofumpt, goimports, golines (120 columns)
 ```

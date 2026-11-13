@@ -25,7 +25,7 @@ Size is relative effort: S < M < L.
 | ☑ | [0.3](#03-decision-zero-division-returns-an-error-everywhere) | Zero division returns an error everywhere | correctness | yes, **Decision** | S | v0.1.0 |
 | ☐ | [0.4](#04-release-v010) | Release v0.1.0 | — | — | S | v0.1.0 |
 | ☑ | [1.1](#11-allocation-guards-and-wider-benchmarks) | Allocation guards and wider benchmarks | P1 | no | S | — |
-| ☐ | [1.2](#12-api-change-report-in-ci) | API-change report in CI | all | no | S | — |
+| ☑ | [1.2](#12-api-change-report-in-ci) | API-change report in CI | all | no | S | — |
 | ☐ | [1.3](#13-formatting-with-fmt-verbs) | `fmt.Formatter` (`%.2f` → `5.00 km`) | P1, P2 | no | S | v0.1.x |
 | ☐ | [1.4](#14-immutable-exported-errors) | Immutable exported errors for `errors.Is` | P2 | no | M | v0.1.x |
 | ☐ | [1.5](#15-compare-and-equal) | `Compare` and `Equal` | P3 | no | S | v0.1.x |

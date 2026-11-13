@@ -14,10 +14,17 @@ BENCH_TIME ?= 1s
 # Both sides run on the toolchain this module selects, so Go releases don't skew the comparison.
 GO_VERSION := $(shell go env GOVERSION)
 
-.PHONY: check build vet test race allocs bench bench-compare profile cover fuzz lint fmt fmt-check tidy-check golangci-lint-version
+# api: a pinned gorelease, run with go run. Keep in sync with .github/workflows/ci.yml.
+GORELEASE := golang.org/x/exp/cmd/gorelease@v0.0.0-20261014143641-f0251eb4aa3e
+
+.PHONY: check api build vet test race allocs bench bench-compare profile cover fuzz lint fmt fmt-check tidy-check golangci-lint-version
 
 ## check: everything CI runs (go.mod tidiness, formatting, vet, lint, race-enabled tests, allocation guards)
 check: tidy-check fmt-check vet lint race allocs
+
+## api: exported API changes since the latest release tag, and the suggested next version (needs a clean working tree: commit first)
+api:
+	GOTOOLCHAIN=$(GO_VERSION) go run $(GORELEASE)
 
 build:
 	go build ./...
