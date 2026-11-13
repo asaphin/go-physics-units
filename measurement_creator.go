@@ -1,66 +1,90 @@
 package units
 
 import (
+	"errors"
 	"fmt"
+	"reflect"
+
 	"github.com/asaphin/go-physics-units/conversion"
-	"github.com/asaphin/go-physics-units/internal/immutable"
 	"github.com/asaphin/go-physics-units/internal/rates"
-	"strconv"
-	"strings"
 )
 
+// MeasurementCreator creates measurements of a user-defined measure, such as a
+// currency.
 type MeasurementCreator[T Measurement] interface {
+	// New creates a measurement with the given value and unit. It fails if the
+	// unit doesn't belong to the measure.
 	New(value float64, unit string) (T, error)
+	// ParseString parses a measurement from a string of the form
+	// "<value> <unit>", e.g. "10 USD".
 	ParseString(s string) (T, error)
 }
 
 type measurementCreator[T Measurement] struct {
-	baseUnit        string
-	factors         conversion.Factors
-	conversionRates immutable.Float64Map
-	measureType     MeasureType
+	conversionRates rates.Table
 }
 
+// NewMeasurementCreator returns a creator for the user-defined measure named
+// measureType, whose units are described by factors (see conversion.Factors).
+// The factors are copied, so later changes to the map have no effect.
+//
+// T must be satisfied by Measurement alone: Measurement itself or an interface
+// that only embeds it, e.g. type Currency interface{ units.Measurement }.
+// The predefined measure interfaces such as Distance are rejected; use their own
+// constructors instead.
+//
+// measureType must be non-empty and differ from the predefined MeasureType
+// values, baseUnit must be one of the factors' units, and every factor must be
+// positive and finite.
 func NewMeasurementCreator[T Measurement](
-	measureType, baseUnit string, factors conversion.Factors) (MeasurementCreator[T], error) {
-	if _, ok := factors[baseUnit]; !ok {
+	measureType, baseUnit string, factors conversion.Factors,
+) (MeasurementCreator[T], error) {
+	if _, ok := Measurement(&baseMeasurement{}).(T); !ok {
+		return nil, fmt.Errorf("unsupported measurement type %s: it must be satisfied by units.Measurement alone",
+			reflect.TypeFor[T]())
+	}
+
+	if measureType == "" {
+		return nil, errors.New("measure type must not be empty")
+	}
+
+	if isReservedMeasureType(MeasureType(measureType)) {
+		return nil, fmt.Errorf("measure type %s is reserved for a predefined measure", measureType)
+	}
+
+	table, err := rates.NewTable(measureType, factors)
+	if err != nil {
+		return nil, err
+	}
+
+	if !table.Has(rates.CanonicalUnit(baseUnit)) {
 		return nil, fmt.Errorf("provided factors doesn't contain unit %s", baseUnit)
 	}
 
-	f := conversion.CopyConversionFactors(factors)
-
-	return &measurementCreator[T]{
-		baseUnit:        baseUnit,
-		factors:         f,
-		conversionRates: immutable.MakeImmutable(rates.FactorsToRates(f)),
-		measureType:     MeasureType(measureType),
-	}, nil
+	return &measurementCreator[T]{conversionRates: table}, nil
 }
 
+// New creates a measurement with the given value and unit.
 func (c *measurementCreator[T]) New(value float64, unit string) (T, error) {
 	bm, err := newBaseMeasurement(value, unit, c.conversionRates)
+	if err != nil {
+		var zero T
 
-	return Measurement(bm).(T), err
+		return zero, err
+	}
+
+	// NewMeasurementCreator has checked that *baseMeasurement satisfies T.
+	return Measurement(&bm).(T), nil
 }
 
+// ParseString parses a measurement from a string of the form "<value> <unit>".
 func (c *measurementCreator[T]) ParseString(s string) (T, error) {
-	var bm *baseMeasurement
-
-	parts := strings.Fields(s)
-	if len(parts) != 2 {
-		return Measurement(bm).(T), fmt.Errorf("invalid string format: %s", s)
-	}
-
-	if _, ok := c.factors[parts[1]]; !ok {
-		return Measurement(bm).(T), fmt.Errorf("unit %s isn't specified for measure %s", parts[1], c.measureType)
-	}
-
-	value, err := strconv.ParseFloat(parts[0], 64)
+	value, unit, err := parseValueAndUnit(s)
 	if err != nil {
-		return Measurement(bm).(T), fmt.Errorf("failed to parse value %v: %w", parts[0], err)
+		var zero T
+
+		return zero, err
 	}
 
-	bm, err = newBaseMeasurement(value, parts[1], c.conversionRates)
-
-	return Measurement(bm).(T), err
+	return c.New(value, unit)
 }

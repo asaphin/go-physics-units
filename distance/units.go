@@ -1,20 +1,25 @@
+// Package distance defines the distance (length) unit symbols supported by the
+// units package and their conversion factors to the base unit, the metre.
 package distance
 
 import (
+	"math"
+
 	"github.com/asaphin/go-physics-units/conversion"
-	"github.com/asaphin/go-physics-units/internal/immutable"
 	"github.com/asaphin/go-physics-units/internal/rates"
 )
 
+// BaseUnit is the SI unit of length that all distance factors are relative to.
 const BaseUnit = Meter
 
+// Distance unit symbols.
 const (
-	PlankLength      = "lp"
+	PlanckLength     = "lp"
 	Femtometer       = "fm"
 	Picometer        = "pm"
 	Angstrom         = "Å"
 	Nanometer        = "nm"
-	Micrometer       = "μm"
+	Micrometer       = "μm" // U+03BC GREEK SMALL LETTER MU; "µm" (U+00B5 MICRO SIGN) is accepted too
 	Millimeter       = "mm"
 	Centimeter       = "cm"
 	Decimeter        = "dm"
@@ -30,8 +35,19 @@ const (
 	Parsec           = "pc"
 )
 
+// PlankLength is a misspelled alias of PlanckLength.
+//
+// Deprecated: Use PlanckLength.
+const PlankLength = PlanckLength
+
+const (
+	astronomicalUnit = 1.495978707e11 // m, exact by definition (IAU 2012)
+	speedOfLight     = 299792458      // m/s, exact by definition
+	julianYear       = 31557600       // s, 365.25 days
+)
+
 var conversionFactors = conversion.Factors{
-	PlankLength:      1.616255e-35,
+	PlanckLength:     1.616255e-35, // CODATA 2018
 	Femtometer:       1e-15,
 	Picometer:        1e-12,
 	Angstrom:         1e-10,
@@ -47,24 +63,21 @@ var conversionFactors = conversion.Factors{
 	Yard:             0.9144,
 	Mile:             1609.344,
 	NauticalMile:     1852,
-	AstronomicalUnit: 1.495978707e11,
-	LightYear:        9.4607e15,
-	Parsec:           3.0857e16,
+	AstronomicalUnit: astronomicalUnit,
+	LightYear:        speedOfLight * julianYear,           // exact (IAU)
+	Parsec:           astronomicalUnit * 648000 / math.Pi, // exact by definition (IAU 2015)
 }
 
-// ConversionFactors shows how many base units (m) in specified unit.
+var conversionRates = rates.MustNewTable("distance", conversionFactors)
+
+// ConversionFactors returns a copy of the distance conversion factors: how many
+// base units (m) there are in one unit of each symbol.
 func ConversionFactors() conversion.Factors {
 	return conversion.CopyConversionFactors(conversionFactors)
 }
 
-var conversionRates immutable.Float64Map
-
-// ConversionRates returns pointer to conversion rates storage.
-// Rates stored by composite keys unitFrom + unitTo.
-func ConversionRates() immutable.Float64Map {
-	if conversionRates == nil {
-		conversionRates = immutable.MakeImmutable(rates.FactorsToRates(conversionFactors))
-	}
-
+// ConversionRates returns the shared, immutable table of conversion rates
+// between every pair of distance units.
+func ConversionRates() rates.Table {
 	return conversionRates
 }

@@ -2,50 +2,50 @@ package units
 
 import (
 	"errors"
-	"fmt"
+
 	"github.com/asaphin/go-physics-units/area"
 	"github.com/asaphin/go-physics-units/distance"
 )
 
-// Area interface represents an area measurement.
+// Area is an area measurement. Its unit symbols are defined in the area package.
 type Area interface {
 	Measurement
 	UnitConverter[Area]
 	Arithmetics[Area]
 
+	// DivideByDistance returns the distance a/d in distance.BaseUnit (m).
+	// It panics if d is zero.
 	DivideByDistance(d Distance) Distance
 }
 
-// areaImplementation is a concrete implementation of the Area interface.
+// areaImplementation is the concrete implementation of Area.
 type areaImplementation struct {
 	baseMeasurement
 }
 
-// ConvertTo implements the ConvertTo method of the Area interface.
+// ConvertTo returns the area expressed in unit.
 func (a *areaImplementation) ConvertTo(unit string) (Area, error) {
 	msm, err := a.convertTo(unit)
 	if err != nil {
 		return nil, err
 	}
 
-	return &areaImplementation{*msm}, nil
+	return &areaImplementation{msm}, nil
 }
 
-// MustConvertTo implements the MustConvertTo method of the Area interface.
+// MustConvertTo is like ConvertTo but panics if unit isn't an area unit.
 func (a *areaImplementation) MustConvertTo(unit string) Area {
 	msm, err := a.convertTo(unit)
 	if err != nil {
 		panic(err)
 	}
 
-	return &areaImplementation{*msm}
+	return &areaImplementation{msm}
 }
 
-// ConvertToBaseUnits implements the MustConvertToBaseUnits method of the Area interface.
+// ConvertToBaseUnits returns the area expressed in square metres.
 func (a *areaImplementation) ConvertToBaseUnits() Area {
-	msm := a.unsafeConvertTo(area.BaseUnit)
-
-	return &areaImplementation{*msm}
+	return &areaImplementation{a.unsafeConvertTo(area.BaseUnit)}
 }
 
 func (a *areaImplementation) valueInBaseUnits() float64 {
@@ -56,83 +56,69 @@ func (a *areaImplementation) valueInUnits(unit string) float64 {
 	return a.unsafeGetValueIn(unit)
 }
 
-func (a *areaImplementation) Add(area Area) Area {
-	a1 := a.value
-	a2 := area.valueInUnits(a.unit)
-
-	return newArea(a1+a2, a.unit)
+// Add returns the sum of the areas, expressed in the receiver's unit.
+func (a *areaImplementation) Add(other Area) Area {
+	return &areaImplementation{a.withValue(a.value + other.valueInUnits(a.unit))}
 }
 
-func (a *areaImplementation) Sub(area Area) Area {
-	a1 := a.value
-	a2 := area.valueInUnits(a.unit)
-
-	return newArea(a1-a2, a.unit)
+// Sub returns the difference of the areas, expressed in the receiver's unit.
+func (a *areaImplementation) Sub(other Area) Area {
+	return &areaImplementation{a.withValue(a.value - other.valueInUnits(a.unit))}
 }
 
+// Mul returns the area multiplied by multiplier.
 func (a *areaImplementation) Mul(multiplier float64) Area {
-	msm := newUnsafeBaseMeasurement(a.value*multiplier, a.unit, a.conversionRates)
-
-	return &areaImplementation{*msm}
+	return &areaImplementation{a.withValue(a.value * multiplier)}
 }
 
+// Div returns the area divided by divisor. It fails if divisor is zero.
 func (a *areaImplementation) Div(divisor float64) (Area, error) {
 	if divisor == 0 {
 		return nil, errZeroDivision
 	}
 
-	msm := newUnsafeBaseMeasurement(a.value/divisor, a.unit, a.conversionRates)
-
-	return &areaImplementation{*msm}, nil
+	return &areaImplementation{a.withValue(a.value / divisor)}, nil
 }
 
-// DivideByDistance implements the DivideByDistance method of the Area interface.
+// DivideByDistance returns the distance a/d in m. It panics if d is zero.
 func (a *areaImplementation) DivideByDistance(d Distance) Distance {
 	if d.Value() == 0 {
-		panic("division by zero")
+		panic(errZeroDivision)
 	}
 
-	baseA := a.valueInBaseUnits()
-	baseD := d.valueInBaseUnits()
-
-	return newDistance(baseA/baseD, distance.BaseUnit)
+	return newDistance(a.valueInBaseUnits()/d.valueInBaseUnits(), distance.BaseUnit)
 }
 
-// NewArea creates a new Area instance.
+// NewArea creates an area of value in unit, one of the symbols defined in the
+// area package.
 func NewArea(value float64, unit string) (Area, error) {
-	rates := area.ConversionRates()
-
-	if _, ok := rates.Has(unit + unit); !ok {
-		return nil, fmt.Errorf("unknown Area unit %s", unit)
+	msm, err := newBaseMeasurement(value, unit, area.ConversionRates())
+	if err != nil {
+		return nil, err
 	}
 
-	msm := newUnsafeBaseMeasurement(value, unit, rates)
-
-	return &areaImplementation{*msm}, nil
+	return &areaImplementation{msm}, nil
 }
 
-// newArea unsafe area constructor without checks for internal usage.
+// newArea is an unchecked constructor for internal use with valid, canonical
+// units.
 func newArea(value float64, unit string) Area {
-	msm := newUnsafeBaseMeasurement(value, unit, area.ConversionRates())
-
-	return &areaImplementation{*msm}
+	return &areaImplementation{baseMeasurement{value: value, unit: unit, conversionRates: area.ConversionRates()}}
 }
 
 var errAreaConversion = errors.New("not an area measure")
 
+// ToArea converts m, for example a result of ParseString, into an Area.
+// It fails if m isn't an area.
 func ToArea(m Measurement) (Area, error) {
-	if m.Type() == MeasureArea {
-		b, ok := m.(*baseMeasurement)
-		if !ok {
-			return nil, errBaseMeasurementConversion
-		}
-
-		return &areaImplementation{*b}, nil
+	if m == nil || m.Type() != MeasureArea {
+		return nil, errAreaConversion
 	}
 
-	return nil, errAreaConversion
+	return &areaImplementation{*m.base()}, nil
 }
 
+// StringToArea parses an area from a string such as "10 m²".
 func StringToArea(s string) (Area, error) {
 	m, err := ParseString(s)
 	if err != nil {

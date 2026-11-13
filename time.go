@@ -2,44 +2,47 @@ package units
 
 import (
 	"errors"
-	"fmt"
-	"github.com/asaphin/go-physics-units/time"
-
 	builtintime "time"
+
+	"github.com/asaphin/go-physics-units/time"
 )
 
+// Time is a time (duration) measurement. Its unit symbols are defined in the
+// time package of this module.
 type Time interface {
 	Measurement
 	UnitConverter[Time]
 	Arithmetics[Time]
 }
 
+// timeImplementation is the concrete implementation of Time.
 type timeImplementation struct {
 	baseMeasurement
 }
 
+// ConvertTo returns the time expressed in unit.
 func (t *timeImplementation) ConvertTo(unit string) (Time, error) {
 	msm, err := t.convertTo(unit)
 	if err != nil {
 		return nil, err
 	}
 
-	return &timeImplementation{*msm}, nil
+	return &timeImplementation{msm}, nil
 }
 
+// MustConvertTo is like ConvertTo but panics if unit isn't a time unit.
 func (t *timeImplementation) MustConvertTo(unit string) Time {
 	msm, err := t.convertTo(unit)
 	if err != nil {
 		panic(err)
 	}
 
-	return &timeImplementation{*msm}
+	return &timeImplementation{msm}
 }
 
+// ConvertToBaseUnits returns the time expressed in seconds.
 func (t *timeImplementation) ConvertToBaseUnits() Time {
-	msm := t.unsafeConvertTo(time.BaseUnit)
-
-	return &timeImplementation{*msm}
+	return &timeImplementation{t.unsafeConvertTo(time.BaseUnit)}
 }
 
 func (t *timeImplementation) valueInBaseUnits() float64 {
@@ -50,70 +53,60 @@ func (t *timeImplementation) valueInUnits(unit string) float64 {
 	return t.unsafeGetValueIn(unit)
 }
 
-func (t *timeImplementation) Add(tm Time) Time {
-	t1 := t.value
-	t2 := tm.valueInUnits(t.unit)
-
-	return newTime(t1+t2, t.unit)
+// Add returns the sum of the times, expressed in the receiver's unit.
+func (t *timeImplementation) Add(other Time) Time {
+	return &timeImplementation{t.withValue(t.value + other.valueInUnits(t.unit))}
 }
 
-func (t *timeImplementation) Sub(tm Time) Time {
-	t1 := t.value
-	t2 := tm.valueInUnits(t.unit)
-
-	return newTime(t1-t2, t.unit)
+// Sub returns the difference of the times, expressed in the receiver's unit.
+func (t *timeImplementation) Sub(other Time) Time {
+	return &timeImplementation{t.withValue(t.value - other.valueInUnits(t.unit))}
 }
 
+// Mul returns the time multiplied by multiplier.
 func (t *timeImplementation) Mul(multiplier float64) Time {
-	msm := newUnsafeBaseMeasurement(t.value*multiplier, t.unit, t.conversionRates)
-
-	return &timeImplementation{*msm}
+	return &timeImplementation{t.withValue(t.value * multiplier)}
 }
 
+// Div returns the time divided by divisor. It fails if divisor is zero.
 func (t *timeImplementation) Div(divisor float64) (Time, error) {
 	if divisor == 0 {
 		return nil, errZeroDivision
 	}
 
-	msm := newUnsafeBaseMeasurement(t.value/divisor, t.unit, t.conversionRates)
-
-	return &timeImplementation{*msm}, nil
+	return &timeImplementation{t.withValue(t.value / divisor)}, nil
 }
 
-// newTime unsafe time constructor without checks for internal usage.
-func newTime(value float64, unit string) Time {
-	m := newUnsafeBaseMeasurement(value, unit, time.ConversionRates())
-
-	return &timeImplementation{*m}
-}
-
+// NewTime creates a time of value in unit, one of the symbols defined in the
+// time package of this module.
 func NewTime(value float64, unit string) (Time, error) {
-	rates := time.ConversionRates()
-
-	if _, ok := rates.Has(unit + unit); !ok {
-		return nil, fmt.Errorf("unknown Time unit %s", unit)
+	msm, err := newBaseMeasurement(value, unit, time.ConversionRates())
+	if err != nil {
+		return nil, err
 	}
 
-	m := newUnsafeBaseMeasurement(value, unit, rates)
+	return &timeImplementation{msm}, nil
+}
 
-	return &timeImplementation{*m}, nil
+// newTime is an unchecked constructor for internal use with valid, canonical
+// units.
+func newTime(value float64, unit string) Time {
+	return &timeImplementation{baseMeasurement{value: value, unit: unit, conversionRates: time.ConversionRates()}}
 }
 
 var errTimeConversion = errors.New("not a time measure")
 
+// ToTime converts m, for example a result of ParseString, into a Time.
+// It fails if m isn't a time.
 func ToTime(m Measurement) (Time, error) {
-	b, ok := m.(*baseMeasurement)
-	if !ok {
-		return nil, errBaseMeasurementConversion
+	if m == nil || m.Type() != MeasureTime {
+		return nil, errTimeConversion
 	}
 
-	if m.Type() == MeasureTime {
-		return &timeImplementation{*b}, nil
-	}
-
-	return nil, errTimeConversion
+	return &timeImplementation{*m.base()}, nil
 }
 
+// StringToTime parses a time from a string such as "10 min".
 func StringToTime(s string) (Time, error) {
 	m, err := ParseString(s)
 	if err != nil {
@@ -123,6 +116,7 @@ func StringToTime(s string) (Time, error) {
 	return ToTime(m)
 }
 
+// ParseDuration converts a standard library time.Duration into a Time in seconds.
 func ParseDuration(d builtintime.Duration) Time {
 	return newTime(d.Seconds(), time.BaseUnit)
 }
