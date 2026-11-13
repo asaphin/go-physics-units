@@ -34,7 +34,10 @@ jobs:
       - uses: actions/checkout@v7
       - uses: actions/setup-go@v7
         with:
-          go-version: stable
+          # The go.mod version, not stable: a golangci-lint binary can't read the
+          # export data of Go releases newer than it supports, so linting with the
+          # latest Go breaks whenever Go is released.
+          go-version-file: go.mod
       - uses: golangci/golangci-lint-action@v9
         with:
           # Pinned: the configuration enables all linters, so upgrades are explicit.

@@ -20,7 +20,7 @@ Size is relative effort: S < M < L.
 
 | Done | Step | What | Serves | Breaking | Size | Release |
 |:-:|---|---|---|---|:-:|---|
-| ☐ | [0.1](#01-commit-the-current-work-and-get-ci-green) | Commit the current work, first CI run | — | — | S | — |
+| ☑ | [0.1](#01-commit-the-current-work-and-get-ci-green) | Commit the current work, first CI run | — | — | S | — |
 | ☑ | [0.2](#02-decision-replace-conversionrates-with-rate) | Replace `ConversionRates()` with `Rate()` | P2 | yes, **Decision** | S | v0.1.0 |
 | ☑ | [0.3](#03-decision-zero-division-returns-an-error-everywhere) | Zero division returns an error everywhere | correctness | yes, **Decision** | S | v0.1.0 |
 | ☐ | [0.4](#04-release-v010) | Release v0.1.0 | — | — | S | v0.1.0 |
