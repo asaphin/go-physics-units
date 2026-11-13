@@ -9,7 +9,7 @@ Guidance for AI coding agents (and humans) working in this repository. `CLAUDE.m
 - **Published and pre-1.0** (tags `v0.0.0`–`v0.0.4`). Exported API changes affect real users: make them deliberately, call them out, and record them in `CHANGELOG.md`.
 - **Go version:** `go.mod` declares `go 1.22`, and CI tests both 1.22 and the latest stable release. Don't use newer features unless bumping `go.mod` is its own deliberate change. That rules out range-over-func iterators and the iterator helpers in `maps`/`slices` (Go 1.23), and `testing.B.Loop` and `strings.SplitSeq` (Go 1.24).
 - **No third-party dependencies**, including in tests (stdlib `testing` only, no testify). Keep it that way unless asked.
-- **Working branch:** `dev`, which is also the PR base.
+- **Branches:** `dev` is the working branch, and it only accepts pull requests. Work on a short-lived branch and open a PR into `dev`. Releases are merged from `dev` into `main`.
 
 ## Design principles
 
@@ -108,7 +108,7 @@ make fmt        # golangci-lint fmt (gofmt + goimports)
 staticcheck ./...
 ```
 
-- **golangci-lint:** `.golangci.yaml` uses the v2 format and enables every linter except a documented opt-out list. CI pins golangci-lint `v2.13.2`.
+- **golangci-lint:** `.golangci.yaml` uses the v2 format and enables every linter except a documented opt-out list. CI pins golangci-lint `v2.13.2` and runs it with the `go.mod` Go version. A golangci-lint binary can't read the export data of Go releases newer than it supports, so linting with the latest Go would break whenever Go is released.
 - **Upgrading golangci-lint:** new linters can appear, so upgrade on purpose. Fix the new findings, or add the linter to the opt-out list with a reason.
 - **`nolint`:** add a `//nolint:<linter> // reason` directive only with a reason. `nolintlint` flags unused directives.
 - **Done means:** `make check` and `staticcheck ./...` are clean, coverage is still around 99% (`make cover`), and benchmarks show no hot-path regression.
