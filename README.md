@@ -59,6 +59,9 @@ func main() {
 
 	fmt.Println(nmi) // 5.399568034557235 nmi
 
+	// fmt verbs format the value and keep the unit.
+	fmt.Printf("%.2f\n", nmi) // 5.40 nmi
+
 	// Accessing the value and unit.
 	fmt.Println(dist.Value(), dist.Unit()) // 10 km
 

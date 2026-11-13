@@ -33,6 +33,9 @@ func Example() {
 
 	fmt.Println(nmi)
 
+	// fmt verbs format the value and keep the unit.
+	fmt.Printf("%.2f\n", nmi)
+
 	// Accessing the value and unit.
 	fmt.Println(dist.Value(), dist.Unit())
 
@@ -52,6 +55,7 @@ func Example() {
 	// Output:
 	// 5 km
 	// 5.399568034557235 nmi
+	// 5.40 nmi
 	// 10 km
 	// 16.666666666666668 m/s
 	// 60 km/h

@@ -41,6 +41,7 @@
 
 ### Added
 
+- Measurements implement `fmt.Formatter`. `%f`, `%e`, `%g` and the other float verbs format the value with the given flags, width and precision and append the unit: `fmt.Sprintf("%.2f", d)` gives `5.00 km`. `%v` and `%s` print `String()` with width, `%q` quotes it, and `%#v` prints `units.Measurement{Value:5, Unit:"km", Type:"distance"}`. Previously, verbs other than `%v` and `%s` printed the internal struct, including the whole conversion table.
 - The area measure: the `area` package (mm², cm², in², ft², m², km², mi²), `Area`, `NewArea`, `ToArea`, `StringToArea` and `MeasureArea`, with the cross-measure operations `Distance.Square` and `Area.DivideByDistance`.
 - `Rate(from, to string) (float64, bool)` in each unit package: the multiplier that converts a value from one unit to another, for example `distance.Rate(distance.Mile, distance.Kilometer)` is 1.609344. Both forms of the micro sign are accepted.
 - `distance.PlanckLength` and `time.PlanckTime`. The misspelled `PlankLength` and `PlankTime` remain as deprecated aliases.
