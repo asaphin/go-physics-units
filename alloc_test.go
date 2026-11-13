@@ -4,6 +4,7 @@ package units_test
 
 import (
 	"testing"
+	builtintime "time"
 
 	units "github.com/asaphin/go-physics-units"
 	"github.com/asaphin/go-physics-units/conversion"
@@ -21,6 +22,7 @@ var (
 	sinkRate        float64
 	sinkOK          bool
 	sinkInt         int
+	sinkDuration    builtintime.Duration
 	errSink         error
 )
 
@@ -71,6 +73,7 @@ func TestAllocations(t *testing.T) {
 		{"Compare", 0, func() { sinkInt = km.Compare(m500) }},
 		{"EqualWithinRel", 0, func() { sinkOK = km.EqualWithinRel(m500, 1e-9) }},
 		{"CompareMeasurement", 0, func() { sinkInt, errSink = km.CompareMeasurement(m500) }},
+		{"ToDuration", 0, func() { sinkDuration, errSink = hour.ToDuration() }},
 		{"distance.Rate", 0, func() { sinkRate, sinkOK = distance.Rate(distance.Kilometer, distance.Meter) }},
 		{"unknown unit error", 1, func() { sinkDistance, errSink = units.NewDistance(1, "furlong") }},
 		{"invalid format error", 2, func() { sinkMeasurement, errSink = units.ParseString("10km") }},

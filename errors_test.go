@@ -21,6 +21,7 @@ var sentinels = []units.Error{
 	units.ErrInvalidFormat,
 	units.ErrInvalidFactors,
 	units.ErrInvalidMeasure,
+	units.ErrOutOfRange,
 }
 
 // errOf discards a result and returns the error.
@@ -108,6 +109,11 @@ func TestErrors(t *testing.T) {
 		{
 			"AddMeasurement of measures with the same name", errOf(usd.AddMeasurement(gbp)),
 			units.ErrIncompatibleMeasures, "can't convert GBP to USD: the units belong to different currency measures",
+		},
+
+		{
+			"ToDuration", errOf(mustTime(t, 293, time.Year).ToDuration()),
+			units.ErrOutOfRange, "time 293 yr can't be represented as a time.Duration",
 		},
 
 		{"Div", errOf(km.Div(0)), units.ErrZeroDivision, "division by zero"},
