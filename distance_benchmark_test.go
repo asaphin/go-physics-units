@@ -68,7 +68,7 @@ func BenchmarkDistance_DivideByTime(b *testing.B) {
 		for i := range b.N {
 			index = i % n
 
-			_ = distances[index].DivideByTime(times[index])
+			_, _ = distances[index].DivideByTime(times[index])
 		}
 	})
 }

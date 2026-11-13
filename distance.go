@@ -16,8 +16,8 @@ type Distance interface {
 	Arithmetics[Distance]
 
 	// DivideByTime returns the velocity d/t in velocity.BaseUnit (m/s).
-	// It panics if t is zero.
-	DivideByTime(t Time) Velocity
+	// It fails if t is zero.
+	DivideByTime(t Time) (Velocity, error)
 	// Square returns the area d² in area.BaseUnit (m²).
 	Square() Area
 }
@@ -84,13 +84,13 @@ func (d *distanceImplementation) Div(divisor float64) (Distance, error) {
 	return &distanceImplementation{d.withValue(d.value / divisor)}, nil
 }
 
-// DivideByTime returns the velocity d/t in m/s. It panics if t is zero.
-func (d *distanceImplementation) DivideByTime(t Time) Velocity {
+// DivideByTime returns the velocity d/t in m/s, or an error if t is zero.
+func (d *distanceImplementation) DivideByTime(t Time) (Velocity, error) {
 	if t.Value() == 0 {
-		panic(errZeroDivision)
+		return nil, errZeroDivision
 	}
 
-	return newVelocity(d.valueInBaseUnits()/t.valueInBaseUnits(), velocity.BaseUnit)
+	return newVelocity(d.valueInBaseUnits()/t.valueInBaseUnits(), velocity.BaseUnit), nil
 }
 
 // Square returns the area d² in m².

@@ -31,6 +31,7 @@
   - Creating a value with an unknown unit is almost twice as fast.
   - `NewBaseMeasurement` is two to four times as fast, depending on the number of units.
   - Most other operations allocate once instead of twice.
+- `Distance.DivideByTime` and `Area.DivideByDistance` return `(X, error)` and fail when the divisor is zero, as `Div` does. They used to panic.
 - The minimum Go version is now 1.22.
 
 ### Removed

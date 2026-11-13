@@ -14,8 +14,8 @@ type Area interface {
 	Arithmetics[Area]
 
 	// DivideByDistance returns the distance a/d in distance.BaseUnit (m).
-	// It panics if d is zero.
-	DivideByDistance(d Distance) Distance
+	// It fails if d is zero.
+	DivideByDistance(d Distance) (Distance, error)
 }
 
 // areaImplementation is the concrete implementation of Area.
@@ -80,13 +80,13 @@ func (a *areaImplementation) Div(divisor float64) (Area, error) {
 	return &areaImplementation{a.withValue(a.value / divisor)}, nil
 }
 
-// DivideByDistance returns the distance a/d in m. It panics if d is zero.
-func (a *areaImplementation) DivideByDistance(d Distance) Distance {
+// DivideByDistance returns the distance a/d in m, or an error if d is zero.
+func (a *areaImplementation) DivideByDistance(d Distance) (Distance, error) {
 	if d.Value() == 0 {
-		panic(errZeroDivision)
+		return nil, errZeroDivision
 	}
 
-	return newDistance(a.valueInBaseUnits()/d.valueInBaseUnits(), distance.BaseUnit)
+	return newDistance(a.valueInBaseUnits()/d.valueInBaseUnits(), distance.BaseUnit), nil
 }
 
 // NewArea creates an area of value in unit, one of the symbols defined in the

@@ -42,7 +42,10 @@ func Example() {
 		panic(err)
 	}
 
-	vel := dist.DivideByTime(tm)
+	vel, err := dist.DivideByTime(tm)
+	if err != nil {
+		panic(err)
+	}
 
 	fmt.Println(vel)
 	fmt.Println(vel.MustConvertTo(velocity.KilometerPerHour))

@@ -84,7 +84,7 @@ User-defined measures are first-class: they convert, combine and parse like the 
 6. **Combining values.**
    - `AddMeasurement` and `SubMeasurement` check that the types match *and* that a rate between the two units exists.
    - Typed `Add`/`Sub` need neither check: two values of one Go type share the same table.
-   - Cross-measure operations (`Distance.DivideByTime`, `Distance.Square`, `Area.DivideByDistance`, `Velocity.MultiplyByTime`) convert to base units and return results in the target measure's base unit.
+   - Cross-measure operations (`Distance.DivideByTime`, `Distance.Square`, `Area.DivideByDistance`, `Velocity.MultiplyByTime`) convert to base units and return results in the target measure's base unit. Dividing by a zero measurement returns an error, as `Div` does for a zero divisor.
 7. **Parsing.** `ParseString` accepts exactly `"<float> <unit>"`, two whitespace-separated fields. It rejects NaN and ±Inf.
 
 Constructor conventions per measure:
@@ -146,7 +146,7 @@ The factor model is multiplicative only. It can't express measures with an offse
 
 - Format with `make fmt` (gofmt and goimports): stdlib imports first, a blank line, then module imports.
 - Error strings are lower-case with no trailing punctuation and include the offending unit. Use `unknownUnitError(mt, unit)` for unknown units, and wrap underlying errors with `%w`.
-- Return errors rather than panicking. The only intended panics are `Must*` methods and `rates.MustNewTable` on constant data. `DivideByTime` and `DivideByDistance` panic on zero, but that is a known defect (below), not a pattern to copy.
+- Return errors rather than panicking. The only intended panics are `Must*` methods and `rates.MustNewTable` on constant data.
 - Exported identifiers need doc comments that start with the identifier's name, as do package clauses (`revive` enforces both).
 - **Look-alike characters:** U+00B5 and U+03BC look identical. Wherever the difference matters in code (comparisons, tests), write them as Go escape sequences, as `internal/rates.CanonicalUnit` and the tests do. Unit constants keep the readable literal symbol.
 - **Shadowed `time` package:** the `time` subpackage shadows the stdlib one. Import the stdlib package as `builtintime "time"`, as `time.go` and `time_test.go` do.
@@ -167,7 +167,6 @@ The factor model is multiplicative only. It can't express measures with an offse
 
 Verified on 2026-11-13. Delete each entry once it is fixed. Each of these needs an exported API change, so agree on the fix before starting. `ROADMAP.md` schedules the fixes.
 
-- **Inconsistent zero division.** `DivideByTime` and `DivideByDistance` panic on zero, while `Div` returns an error. Fixing this means changing the `Distance` and `Area` interfaces.
 - **`XxxMeasurement` methods lose the type.** `AddMeasurement` and the other `XxxMeasurement` methods on a typed value (e.g. a `Distance`) return a generic `Measurement`, not a `Distance`.
 - **Costly `NewBaseMeasurement`.** It builds a full N×N table on every call; `NewMeasurementCreator` is the efficient path.
 - **Interface-based design.** Every value is a heap-allocated interface (about 65–200 ns per operation, one allocation). Units are plain strings, so `NewDistance(1, mass.Kilogram)` compiles. A value-type redesign with typed units was prototyped at about 1.4 ns with 0 allocations, but it hasn't been decided.

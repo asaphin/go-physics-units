@@ -109,7 +109,10 @@ func TestDistance_DivideByTime(t *testing.T) {
 		t.Fatal(err)
 	}
 
-	vel := dist.DivideByTime(tm)
+	vel, err := dist.DivideByTime(tm)
+	if err != nil {
+		t.Fatal(err)
+	}
 
 	assertMeasurement(t, vel, 100000.0/7200, velocity.BaseUnit)
 	assertMeasurement(t, vel.MustConvertTo(velocity.KilometerPerHour), 50, velocity.KilometerPerHour)
@@ -119,7 +122,9 @@ func TestDistance_DivideByTime(t *testing.T) {
 		t.Fatal(err)
 	}
 
-	assertPanics(t, func() { dist.DivideByTime(zero) })
+	if v, err := dist.DivideByTime(zero); err == nil || v != nil {
+		t.Errorf("DivideByTime(0 s) = %v, %v; want nil and an error", v, err)
+	}
 }
 
 func TestDistance_Square(t *testing.T) {

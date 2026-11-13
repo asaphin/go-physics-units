@@ -68,7 +68,10 @@ func main() {
 		panic(err)
 	}
 
-	vel := dist.DivideByTime(tm)
+	vel, err := dist.DivideByTime(tm)
+	if err != nil {
+		panic(err)
+	}
 
 	fmt.Println(vel)                                          // 16.666666666666668 m/s
 	fmt.Println(vel.MustConvertTo(velocity.KilometerPerHour)) // 60 km/h

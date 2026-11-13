@@ -33,12 +33,19 @@ func TestArea_DivideByDistance(t *testing.T) {
 		t.Fatal(err)
 	}
 
-	assertMeasurement(t, a.DivideByDistance(d), 2000, distance.BaseUnit)
+	got, err := a.DivideByDistance(d)
+	if err != nil {
+		t.Fatal(err)
+	}
+
+	assertMeasurement(t, got, 2000, distance.BaseUnit)
 
 	zero, err := units.NewDistance(0, distance.Meter)
 	if err != nil {
 		t.Fatal(err)
 	}
 
-	assertPanics(t, func() { a.DivideByDistance(zero) })
+	if got, err := a.DivideByDistance(zero); err == nil || got != nil {
+		t.Errorf("DivideByDistance(0 m) = %v, %v; want nil and an error", got, err)
+	}
 }

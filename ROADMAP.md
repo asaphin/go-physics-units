@@ -22,7 +22,7 @@ Size is relative effort: S < M < L.
 |:-:|---|---|---|---|:-:|---|
 | ☐ | [0.1](#01-commit-the-current-work-and-get-ci-green) | Commit the current work, first CI run | — | — | S | — |
 | ☑ | [0.2](#02-decision-replace-conversionrates-with-rate) | Replace `ConversionRates()` with `Rate()` | P2 | yes, **Decision** | S | v0.1.0 |
-| ☐ | [0.3](#03-decision-zero-division-returns-an-error-everywhere) | Zero division returns an error everywhere | correctness | yes, **Decision** | S | v0.1.0 |
+| ☑ | [0.3](#03-decision-zero-division-returns-an-error-everywhere) | Zero division returns an error everywhere | correctness | yes, **Decision** | S | v0.1.0 |
 | ☐ | [0.4](#04-release-v010) | Release v0.1.0 | — | — | S | v0.1.0 |
 | ☐ | [1.1](#11-allocation-guards-and-wider-benchmarks) | Allocation guards and wider benchmarks | P1 | no | S | — |
 | ☐ | [1.2](#12-api-change-report-in-ci) | API-change report in CI | all | no | S | — |
