@@ -30,7 +30,7 @@ Size is relative effort: S < M < L.
 | ☑ | [1.4](#14-immutable-exported-errors) | Immutable exported errors for `errors.Is` | P2 | no | M | v0.1.x |
 | ☑ | [1.5](#15-compare-and-equal) | `Compare` and `Equal` | P3 | no | S | v0.1.x |
 | ☑ | [1.6](#16-timetoduration) | `Time.ToDuration` | P3 | no | S | v0.1.x |
-| ☐ | [1.7](#17-examples-for-every-measure) | Examples for every measure | docs | no | S | v0.1.x |
+| ☑ | [1.7](#17-examples-for-every-measure) | Examples for every measure | docs | no | S | v0.1.x |
 | ☐ | [2.1](#21-decision-gate-design-rfc-and-prototype) | RFC and prototype: value types, typed units | P1–P3 | **Decision gate** | M | — |
 | ☐ | [3.1](#31-typed-unit-symbols) | Typed unit symbols | P1, safety | yes | M | v0.2.0 |
 | ☐ | [3.2A](#32a-value-type-measures) | Value-type measures (Path A) | P1, P2 | yes | L | v0.2.0 |

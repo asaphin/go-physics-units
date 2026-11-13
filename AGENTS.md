@@ -145,7 +145,7 @@ Mirror an existing measure, e.g. `area.go` and `area/units.go`, and update all o
    - an entry in `predefinedFactors` and in `TestConversionFactors_ReturnsCopy` (`conversion_test.go`);
    - reference values;
    - tests for any cross-measure operations.
-5. **Docs:** update `README.md` (units table and operations table) and `CHANGELOG.md`.
+5. **Docs:** an `ExampleNewX` in `example_measures_test.go` (and one per cross-measure operation), `README.md` (units table and operations table) and `CHANGELOG.md`.
 
 The factor model is multiplicative only. It can't express measures with an offset (°C, °F) or non-linear scales (dB, pH). Don't shoehorn them in; raise it as a design question instead.
 
@@ -167,6 +167,7 @@ The factor model is multiplicative only. It can't express measures with an offse
 - Prefer table-driven tests with `t.Run`. Use `t.Fatal` when a setup step fails, and `assertPanics` for intended panics.
 - On error paths, assert that the result is nil as well as that the error is non-nil.
 - `Example*` functions in `example_test.go` mirror `README.md` and have verified `// Output:` blocks. Keep the README snippets in sync with them.
+- `example_measures_test.go` has an example for each measure, each cross-measure operation, `NewBaseMeasurement` and formatting, and the unit packages have their own (`distance/example_test.go`). They are what pkg.go.dev shows; a new measure or cross-measure operation needs one.
 - If a test fails because of a library bug, fix the library or skip the test with `t.Skip("known defect: …")`. Never change expected values to match wrong output.
 - Benchmarks are in `measures_benchmark_test.go` (every measure, custom measures, error paths, `Rate`) and `distance_benchmark_test.go` (random data). Keep benchmark names stable, because `make bench-compare` matches them across versions. They loop with `b.Loop()` (`for i := 0; b.Loop(); i++` when an index is needed) and use the `generateRandom*` helpers, which draw from `math/rand/v2`.
 - `immutability_test.go` enforces the immutability principle (no exported variables, no internal types in the exported API, race-free concurrent use). If one of its tests fails, fix the code, not the test.

@@ -41,6 +41,7 @@
 
 ### Added
 
+- Runnable examples on pkg.go.dev for every measure, the cross-measure operations, extending a predefined measure, `NewBaseMeasurement`, formatting and `distance.Rate`.
 - `Time.ToDuration`, the reverse of `ParseDuration`: it converts a `Time` into a `time.Duration`, rounded to the nearest nanosecond, and fails with `ErrOutOfRange` for NaN or beyond about ±292 years.
 - `Compare`, `Equal` and `EqualWithinRel` on every measure, from the new `Comparer[T]` interface, and `CompareMeasurement` on every measurement, including custom ones. `Compare` follows `cmp.Compare`, so `slices.SortFunc(ds, units.Distance.Compare)` sorts distances in any mix of units. Values in different units are compared in the base unit, so the result doesn't depend on the order of the operands. `EqualWithinRel` allows a relative tolerance, because conversions round: 12 in and 1 ft differ in the last bit.
 - Sentinel errors for `errors.Is`: `ErrUnknownUnit`, `ErrIncompatibleMeasures`, `ErrZeroDivision`, `ErrInvalidFormat`, `ErrInvalidFactors`, `ErrInvalidMeasure` and `ErrOutOfRange`. Every error the package returns matches exactly one of them and keeps its detailed message. They are constants of the new type `Error`, so no importer can reassign them, and `errors.AsType[units.Error](err)` finds the kind. Unknown-unit errors are `*UnitError` values, which carry the measure and the unit, and an unparsable value wraps its `*strconv.NumError`.

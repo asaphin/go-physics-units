@@ -178,3 +178,35 @@ func ExampleNewMeasurementCreator() {
 	// 37.03703703703704 UAH
 	// currency
 }
+
+// A predefined measure can be extended: copy its factors, add units, and create
+// a measure of your own.
+func ExampleNewMeasurementCreator_extendPredefined() {
+	type Surveying interface{ units.Measurement }
+
+	factors := distance.ConversionFactors() // a copy: changing it is safe
+	factors["fur"] = 201.168                // furlong, 660 international feet
+	factors["ch"] = 20.1168                 // chain, 66 international feet
+
+	mc, err := units.NewMeasurementCreator[Surveying]("surveying", distance.BaseUnit, factors)
+	if err != nil {
+		panic(err)
+	}
+
+	furlong, err := mc.New(1, "fur")
+	if err != nil {
+		panic(err)
+	}
+
+	chains, _ := furlong.ConvertToMeasurement("ch")
+	metres, _ := furlong.ConvertToMeasurement(distance.Meter)
+
+	fmt.Println(chains, metres, furlong.Type())
+
+	// The predefined distance measure is unchanged.
+	_, err = units.NewDistance(1, "fur")
+	fmt.Println(err)
+	// Output:
+	// 10 ch 201.168 m surveying
+	// unknown distance unit fur
+}
