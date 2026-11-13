@@ -6,7 +6,7 @@
 
 - Converting between metres and millimetres no longer gives a wrong result. The internal rate table keyed pairs by concatenating the two symbols, and `"m"+"mm"` equals `"mm"+"m"`, so one of the two directions was wrong in every process.
 - Using measurements from several goroutines no longer causes a data race. The conversion tables were built lazily on first use, and are now built once at startup.
-- `ToDistance`, `ToArea`, `ToMass`, `ToTime` and `ToVelocity` now accept a value that already is that measure, and return an error instead of panicking on `nil`.
+- `ToDistance`, `ToMass`, `ToTime` and `ToVelocity` now accept a value that already is that measure, and return an error instead of panicking on `nil`.
 - `NewMeasurementCreator[T]` returns an error instead of panicking later when `T` is a predefined measure interface such as `units.Distance`.
 - On error, `MeasurementCreator.New`, `MeasurementCreator.ParseString` and `ConvertToMeasurement` return a nil interface, not an interface that wraps a nil pointer.
 - `Type()` of a custom measurement returns the measure type given to `NewMeasurementCreator`, not `custom`.
@@ -32,7 +32,7 @@
   - `NewBaseMeasurement` is two to four times as fast, depending on the number of units.
   - Most other operations allocate once instead of twice.
   - `StringToDistance` and the other `StringToX` functions allocate once instead of twice. They parse and construct directly instead of going through `ParseString`, so a unit of another measure is reported as unknown for that measure (`unknown distance unit kg`) instead of `not a distance measure`.
-- `Distance.DivideByTime` and `Area.DivideByDistance` return `(X, error)` and fail when the divisor is zero, as `Div` does. They used to panic.
+- `Distance.DivideByTime` returns `(Velocity, error)` and fails when the time is zero, as `Div` does. It used to panic.
 - The minimum Go version is now 1.27.
 
 ### Removed
@@ -41,5 +41,6 @@
 
 ### Added
 
+- The area measure: the `area` package (mm², cm², in², ft², m², km², mi²), `Area`, `NewArea`, `ToArea`, `StringToArea` and `MeasureArea`, with the cross-measure operations `Distance.Square` and `Area.DivideByDistance`.
 - `Rate(from, to string) (float64, bool)` in each unit package: the multiplier that converts a value from one unit to another, for example `distance.Rate(distance.Mile, distance.Kilometer)` is 1.609344. Both forms of the micro sign are accepted.
 - `distance.PlanckLength` and `time.PlanckTime`. The misspelled `PlankLength` and `PlankTime` remain as deprecated aliases.
