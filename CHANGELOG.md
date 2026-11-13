@@ -2,6 +2,25 @@
 
 ## Unreleased
 
+This release breaks the API in a few places; the next section lists what to change. Everything else is fixes and additions.
+
+### Upgrading from v0.0.4
+
+Compile-time breaks:
+
+- **Go 1.27** is the minimum version.
+- **`ConversionRates()`** is gone from the unit packages. For the multiplier between two units use `Rate(from, to)`, for example `distance.Rate(distance.Mile, distance.Kilometer)`; for the whole table use `ConversionFactors()`.
+- **`Distance.DivideByTime`** returns `(Velocity, error)`. Handle the error, which is `ErrZeroDivision` when the time is zero; the method used to panic.
+
+Changes in behaviour that compile unchanged:
+
+- **`mass.Quintal`** is `"q"`, not `"Qts"`. Stored strings such as `"3 Qts"` no longer parse; replace the symbol.
+- **`mass.Microgram`** is `"μg"` with U+03BC GREEK SMALL LETTER MU, not U+00B5 MICRO SIGN. Both forms are still accepted as input, but values report `"μg"`, so compare units with the constant rather than a literal.
+- **Custom measures:** `Type()` of a value from `NewMeasurementCreator` returns the measure name you gave, not `custom`. Code that checked for `MeasureCustom` should check for that name. `NewBaseMeasurement` values are still `custom`.
+- **Stricter input.** `NewMeasurementCreator` and `NewBaseMeasurement` reject empty, zero, negative, NaN and infinite factors, empty unit symbols, and, for the creator, empty or predefined measure names. `ParseString` rejects NaN and infinite values.
+- **`AddMeasurement` and `SubMeasurement`** return an error when the units can't be converted into each other. They used to count the other operand as zero.
+- **Error messages** changed, for example to `unknown distance unit kg`. Instead of matching messages, test for the new sentinel errors with `errors.Is`, such as `errors.Is(err, units.ErrUnknownUnit)`.
+
 ### Fixed
 
 - Converting between metres and millimetres no longer gives a wrong result. The internal rate table keyed pairs by concatenating the two symbols, and `"m"+"mm"` equals `"mm"+"m"`, so one of the two directions was wrong in every process.
