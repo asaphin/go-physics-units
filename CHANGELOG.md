@@ -46,7 +46,7 @@ Changes in behaviour that compile unchanged:
 - The names of the new measures (`volume`, `acceleration`, `force`, `energy`, `power`, `pressure`, `frequency`, `angle` and `data size`) are now reserved, so `NewMeasurementCreator` rejects them for custom measures. Their predefined symbols, such as `L` and `N`, now belong to those measures in `ParseString` and `DetectMeasureType`.
 - Error messages name the measure, for example `unknown distance unit kg`.
 - Faster, with fewer allocations:
-  - `ParseString` is about twice as fast and allocates once instead of three times. `DetectMeasureType` uses an index instead of a linear scan, and the parser no longer builds a slice of fields.
+  - `ParseString` and `NewMeasurement` are three to four times as fast and allocate once instead of three times. One index takes a symbol straight to its unit and table, and the parser no longer builds a slice of fields.
   - `String()` is about twice as fast and allocates once.
   - Errors are cheaper. Creating a value with an unknown unit is about three times as fast and allocates once instead of four times. Parsing a malformed string is about twice as fast and allocates twice instead of four times.
   - `NewBaseMeasurement` is two to four times as fast, depending on the number of units.
@@ -61,6 +61,7 @@ Changes in behaviour that compile unchanged:
 
 ### Added
 
+- `Parser`, a configurable parser built with `NewParser` and options: `WithAliases` (alternative unit names such as `metres`), `CaseInsensitive` (exact matches win, and an ambiguous match such as `KN` fails with the new `ErrAmbiguousUnit`), `AllowNoSpace` (`10km`) and `WithCreator` (the units of a custom measure). A `Parser` is immutable and safe for concurrent use, and the zero `Parser` behaves like `ParseString`. `Parser.Unit` resolves an alias to its symbol. Invalid options fail with the new `ErrInvalidOption`.
 - Nine measures: volume, acceleration, force, energy, power, pressure, frequency, angle and data size, each with its unit package (`volume`, `acceleration`, …, `angle`, `datasize`), `NewX`, `ToX`, `StringToX` and `MeasureX`. The factors are exact definitions from NIST SP 811 and the SI Brochure. They come with cross-measure operations that link them to each other and to the existing measures: `Distance.Cube`, `Area.MultiplyByDistance`, `Volume.DivideByArea` and `DivideByDistance`, `Velocity.DivideByTime`, `Acceleration.MultiplyByTime` and `MultiplyByMass`, `Mass.MultiplyByAcceleration`, `Force.DivideByMass`, `DivideByAcceleration`, `DivideByArea` and `MultiplyByDistance`, `Energy.DivideByTime` and `DivideByDistance`, `Power.MultiplyByTime`, `Pressure.MultiplyByArea` and `Frequency.Period`.
 - Runnable examples on pkg.go.dev for every measure, the cross-measure operations, extending a predefined measure, `NewBaseMeasurement`, formatting and `distance.Rate`.
 - `Time.ToDuration`, the reverse of `ParseDuration`: it converts a `Time` into a `time.Duration`, rounded to the nearest nanosecond, and fails with `ErrOutOfRange` for NaN or beyond about ±292 years.

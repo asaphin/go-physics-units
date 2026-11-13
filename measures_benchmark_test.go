@@ -151,6 +151,34 @@ func BenchmarkErrors(b *testing.B) {
 	})
 }
 
+// BenchmarkParser covers the configurable parser, against ParseString.
+func BenchmarkParser(b *testing.B) {
+	strict, _ := units.NewParser()
+	all, _ := units.NewParser(units.CaseInsensitive(), units.AllowNoSpace(),
+		units.WithAliases(map[string]string{"metres": distance.Meter}))
+
+	b.Run("ParseString", func(b *testing.B) {
+		for b.Loop() {
+			_, _ = units.ParseString("10 km")
+		}
+	})
+	b.Run("default options", func(b *testing.B) {
+		for b.Loop() {
+			_, _ = strict.Parse("10 km")
+		}
+	})
+	b.Run("alias", func(b *testing.B) {
+		for b.Loop() {
+			_, _ = all.Parse("10 metres")
+		}
+	})
+	b.Run("no space, other case", func(b *testing.B) {
+		for b.Loop() {
+			_, _ = all.Parse("10KM")
+		}
+	})
+}
+
 // BenchmarkRate covers the unit packages' Rate functions.
 func BenchmarkRate(b *testing.B) {
 	for b.Loop() {

@@ -99,15 +99,18 @@ var measureToConversionRatesMapping = map[MeasureType]rates.Table{
 	MeasureDataSize:     dataSizeRates,
 }
 
-// unitToMeasureType indexes every predefined unit symbol by its measure.
-var unitToMeasureType = buildUnitIndex()
+// predefinedUnits indexes every predefined unit symbol, in canonical form, by
+// its unit and table: one lookup takes NewMeasurement and ParseString from a
+// symbol to a value. It is built at init and never written again, and it is
+// the starting point of every Parser.
+var predefinedUnits = buildUnitIndex()
 
-func buildUnitIndex() map[string]MeasureType {
-	index := make(map[string]MeasureType)
+func buildUnitIndex() map[string]parsedUnit {
+	index := make(map[string]parsedUnit)
 
-	for mt, factors := range measureToConversionFactorsMapping {
-		for unit := range factors {
-			index[rates.CanonicalUnit(unit)] = mt
+	for _, table := range measureToConversionRatesMapping {
+		for unit := range table.Units() {
+			index[unit] = parsedUnit{unit: unit, table: table}
 		}
 	}
 
@@ -117,8 +120,8 @@ func buildUnitIndex() map[string]MeasureType {
 // DetectMeasureType returns the predefined measure that the unit symbol belongs
 // to, or MeasureCustom if it isn't a predefined symbol.
 func DetectMeasureType(unit string) MeasureType {
-	if mt, ok := unitToMeasureType[rates.CanonicalUnit(unit)]; ok {
-		return mt
+	if pu, ok := predefinedUnits[rates.CanonicalUnit(unit)]; ok {
+		return MeasureType(pu.table.Measure())
 	}
 
 	return MeasureCustom

@@ -130,6 +130,26 @@ Operations that combine measures return their result in SI base units:
 | `ParseDuration`               | `Time` in s, from a `time.Duration`                |
 | `Time.ToDuration`             | `time.Duration`, rounded to the nearest nanosecond |
 
+## Parsing with options
+
+`ParseString` is strict: exactly `"<value> <unit>"` with a predefined, case-sensitive symbol.
+A `Parser` accepts more, with the options you choose. It is immutable once built and safe for concurrent use:
+
+```go
+p, err := units.NewParser(
+	units.WithAliases(map[string]string{"metres": distance.Meter, "kph": velocity.KilometerPerHour}),
+	units.CaseInsensitive(), // "10 KM" is 10 km, but "1 KN" is ambiguous: kN or kn
+	units.AllowNoSpace(),    // "100kph"
+)
+if err != nil {
+	panic(err)
+}
+
+m, err := p.Parse("5 metres") // 5 m, a distance
+```
+
+`WithCreator(mc)` adds the units of a custom measure, and `p.Unit("metres")` resolves an alias to its symbol for the typed constructors.
+
 ## Errors
 
 Every error matches exactly one sentinel, which you can test for with `errors.Is`:
@@ -142,6 +162,8 @@ Every error matches exactly one sentinel, which you can test for with `errors.Is
 | `ErrInvalidFormat`        | the string isn't `"<value> <unit>"` with a finite value                                  |
 | `ErrInvalidFactors`       | custom conversion factors are invalid or lack the base unit                              |
 | `ErrInvalidMeasure`       | `NewMeasurementCreator` gets an empty or predefined measure name, or an unsupported type |
+| `ErrAmbiguousUnit`        | a case-insensitive `Parser` gets a unit that matches several symbols, such as `KN`       |
+| `ErrInvalidOption`        | `NewParser` gets an invalid alias, or two measures that share a symbol                   |
 | `ErrOutOfRange`           | `Time.ToDuration` gets NaN or more than about 292 years                                  |
 
 ```go

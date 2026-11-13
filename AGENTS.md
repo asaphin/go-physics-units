@@ -67,6 +67,7 @@ User-defined measures are first-class: they convert, combine and parse like the 
 | `distance/`, `area/`, `volume/`, … (one per measure) | One `units.go` per measure: unit symbol constants, `BaseUnit`, the `conversionFactors` table, `ConversionFactors()` (returns a copy) and `Rate(from, to)` |
 | `conversion/` | Public `Factors` type alias (`map[string]float64`) and `CopyConversionFactors` |
 | `measurement_creator.go` | Generic `NewMeasurementCreator[T]` for user-defined measures |
+| `parser.go` | `Parser`, `NewParser` and its options |
 | `internal/rates` | `Table`: the immutable, validated N×N rate table of one measure, plus each unit's factor, a read-only handle passed by value. Also `CanonicalUnit` |
 | `Makefile` | Task runner (see Commands) |
 | `.github/workflows/ci.yml` | CI: `go mod tidy` check, vet, race tests and coverage (the `go.mod` Go version and stable), allocation guards, a short fuzz run, the RFC prototype, golangci-lint (pinned version), the exported-API report, govulncheck |
@@ -84,7 +85,7 @@ User-defined measures are first-class: they convert, combine and parse like the 
    - Predefined tables are named after their `MeasureType` constant, and `TestMeasureRegistriesAreConsistent` enforces this.
    - `NewMeasurementCreator` names the table after the measure type you pass; predefined names are rejected.
    - `NewBaseMeasurement` names it `custom`.
-   - `DetectMeasureType(unit)` maps a predefined symbol to its measure through an index. It is only used where no table is known yet (`NewMeasurement`, `ParseString`). Because of it, **predefined symbols must be unique across all measures**; `TestMeasuresSelfCheck` enforces this.
+   - `predefinedUnits` (`measures.go`) indexes every predefined symbol by its unit and table. `NewMeasurement`, `ParseString` and `DetectMeasureType` use it where no table is known yet, and every `Parser` starts from a copy of it. Because of it, **predefined symbols must be unique across all measures**; `TestMeasuresSelfCheck` enforces this.
 5. **Micro sign.** `rates.CanonicalUnit` maps U+00B5 MICRO SIGN to U+03BC GREEK SMALL LETTER MU. Every entry point that receives a unit string canonicalises it (`newBaseMeasurement`, `convertTo`, `DetectMeasureType`), and tables store canonical keys. Internal paths that only handle units already stored in a value skip this step.
 6. **Combining values.**
    - `AddMeasurement` and `SubMeasurement` check that the types match *and* that a rate between the two units exists.
@@ -92,6 +93,8 @@ User-defined measures are first-class: they convert, combine and parse like the 
    - Cross-measure operations (`Distance.DivideByTime`, `Force.DivideByArea`, `Frequency.Period` and the others in the README's operations table) convert to base units and return results in the target measure's base unit. Dividing by a zero measurement returns an error, as `Div` does for a zero divisor.
    - **Comparisons** (`Compare`, `Equal`, `EqualWithinRel`, `CompareMeasurement`) compare two values in the same unit exactly. Otherwise they multiply each value by its unit's factor (`Table.Factor`), which gives the value in the base unit. The result doesn't depend on the order of the operands, so `a.Equal(b) == b.Equal(a)`; converting one value into the other's unit would break that at the last bit. `TestCompare_Symmetric` enforces it. `CompareMeasurement` falls back to the receiver's unit only for two tables that share a measure name.
 7. **Parsing.** `ParseString` accepts exactly `"<float> <unit>"`, two whitespace-separated fields. It rejects NaN and ±Inf.
+   - `Parser` (`parser.go`) is the configurable variant, a value handle like `rates.Table`: `NewParser` builds an immutable index of symbols and aliases (plus a lower-case index for `CaseInsensitive`), and `Parse` is one or two map lookups. Aliases and creator units live in the parser, never in the global tables (P2).
+   - **Its contract:** anything `ParseString` accepts, every `Parser` accepts with the same result; `FuzzParser` checks this, and the String round trip.
 
 Constructor conventions per measure:
 

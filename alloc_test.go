@@ -52,6 +52,11 @@ func TestAllocations(t *testing.T) {
 		t.Fatal(err)
 	}
 
+	parser, err := units.NewParser(units.AllowNoSpace(), units.CaseInsensitive())
+	if err != nil {
+		t.Fatal(err)
+	}
+
 	cases := []struct {
 		name  string
 		limit float64
@@ -74,6 +79,7 @@ func TestAllocations(t *testing.T) {
 		{"EqualWithinRel", 0, func() { sinkOK = km.EqualWithinRel(m500, 1e-9) }},
 		{"CompareMeasurement", 0, func() { sinkInt, errSink = km.CompareMeasurement(m500) }},
 		{"ToDuration", 0, func() { sinkDuration, errSink = hour.ToDuration() }},
+		{"Parser.Parse", 1, func() { sinkMeasurement, errSink = parser.Parse("10KM") }},
 		{"distance.Rate", 0, func() { sinkRate, sinkOK = distance.Rate(distance.Kilometer, distance.Meter) }},
 		{"unknown unit error", 1, func() { sinkDistance, errSink = units.NewDistance(1, "furlong") }},
 		{"invalid format error", 2, func() { sinkMeasurement, errSink = units.ParseString("10km") }},

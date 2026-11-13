@@ -22,6 +22,8 @@ var sentinels = []units.Error{
 	units.ErrInvalidFactors,
 	units.ErrInvalidMeasure,
 	units.ErrOutOfRange,
+	units.ErrAmbiguousUnit,
+	units.ErrInvalidOption,
 }
 
 // errOf discards a result and returns the error.
@@ -114,6 +116,21 @@ func TestErrors(t *testing.T) {
 		{
 			"ToDuration", errOf(mustTime(t, 293, time.Year).ToDuration()),
 			units.ErrOutOfRange, "time 293 yr can't be represented as a time.Duration",
+		},
+
+		{
+			"ambiguous unit", errOf(mustParser(t, units.CaseInsensitive()).Parse("1 KN")),
+			units.ErrAmbiguousUnit, "ambiguous unit KN: it could be any of kN, kn",
+		},
+		{
+			"invalid alias", errOf(units.NewParser(units.WithAliases(map[string]string{"fur": "furlong"}))),
+			units.ErrInvalidOption, "alias fur: furlong isn't a unit symbol",
+		},
+		{
+			"Parser no space",
+			errOf(mustParser(t, units.AllowNoSpace()).Parse("km")),
+			units.ErrInvalidFormat,
+			"invalid string format: km",
 		},
 
 		{"Div", errOf(km.Div(0)), units.ErrZeroDivision, "division by zero"},
@@ -251,4 +268,15 @@ func TestSentinelMessages(t *testing.T) {
 
 		seen[s.Error()] = true
 	}
+}
+
+func mustParser(t *testing.T, options ...units.ParserOption) units.Parser {
+	t.Helper()
+
+	p, err := units.NewParser(options...)
+	if err != nil {
+		t.Fatal(err)
+	}
+
+	return p
 }

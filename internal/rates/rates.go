@@ -5,6 +5,8 @@ package rates
 import (
 	"errors"
 	"fmt"
+	"iter"
+	"maps"
 	"math"
 	"strings"
 
@@ -158,6 +160,15 @@ func (t Table) Factor(unit string) (float64, bool) {
 	f, ok := t.t.factors[unit]
 
 	return f, ok
+}
+
+// Units returns the table's canonical unit symbols, in no particular order.
+func (t Table) Units() iter.Seq[string] {
+	if t.t == nil {
+		return func(func(string) bool) {}
+	}
+
+	return maps.Keys(t.t.factors)
 }
 
 // Has reports whether the canonical unit symbol belongs to the table.

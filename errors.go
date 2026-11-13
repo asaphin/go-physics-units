@@ -48,6 +48,12 @@ const (
 	// ErrOutOfRange: the value can't be represented in the target type, as in
 	// Time.ToDuration of NaN or of more than about 292 years.
 	ErrOutOfRange Error = "value out of range"
+	// ErrAmbiguousUnit: a case-insensitive Parser got a unit that matches
+	// several symbols differing only in case, such as "KN" for kN and kn.
+	ErrAmbiguousUnit Error = "ambiguous unit"
+	// ErrInvalidOption: NewParser got an invalid option, such as an alias that
+	// doesn't denote a unit, or two measures that share a symbol.
+	ErrInvalidOption Error = "invalid option"
 )
 
 // UnitError reports a unit that doesn't belong to a measure. It matches

@@ -146,6 +146,33 @@ func ExampleDistance_add() {
 	// 1250 m
 }
 
+func ExampleNewParser() {
+	p, err := units.NewParser(
+		units.WithAliases(map[string]string{"metres": distance.Meter, "kph": velocity.KilometerPerHour}),
+		units.CaseInsensitive(),
+		units.AllowNoSpace(),
+	)
+	if err != nil {
+		panic(err)
+	}
+
+	for _, s := range []string{"5 metres", "100kph", "10 KM", "1 KN"} {
+		m, err := p.Parse(s)
+		if err != nil {
+			fmt.Println(err)
+
+			continue
+		}
+
+		fmt.Println(m, m.Type())
+	}
+	// Output:
+	// 5 m distance
+	// 100 km/h velocity
+	// 10 km distance
+	// ambiguous unit KN: it could be any of kN, kn
+}
+
 func ExampleNewMeasurementCreator() {
 	type Currency interface {
 		units.Measurement

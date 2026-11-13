@@ -248,6 +248,7 @@ Serves **P3** and **P2**.
   - extra user units.
 - **Defaults.** The package-level `ParseString` stays strict.
 - **Immutability (P2).** Aliases live in the parser, not in the global tables.
+- **Status:** done, ahead of Phase 3 at the author's request: `NewParser` with `WithAliases`, `CaseInsensitive`, `AllowNoSpace` and `WithCreator`.
 
 ### 4.3 New measures, one per step
 
