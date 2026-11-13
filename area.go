@@ -1,6 +1,8 @@
 package units
 
 import (
+	"cmp"
+
 	"github.com/asaphin/go-physics-units/area"
 	"github.com/asaphin/go-physics-units/distance"
 )
@@ -10,6 +12,7 @@ type Area interface {
 	Measurement
 	UnitConverter[Area]
 	Arithmetics[Area]
+	Comparer[Area]
 
 	// DivideByDistance returns the distance a/d in distance.BaseUnit (m).
 	// It fails if d is zero.
@@ -85,6 +88,24 @@ func (a *areaImplementation) DivideByDistance(d Distance) (Distance, error) {
 	}
 
 	return newDistance(a.valueInBaseUnits()/d.valueInBaseUnits(), distance.BaseUnit), nil
+}
+
+// Compare compares the areas; see Comparer.
+func (a *areaImplementation) Compare(other Area) int {
+	return cmp.Compare(a.commonValues(other.base()))
+}
+
+// Equal reports whether the areas are equal; see Comparer.
+func (a *areaImplementation) Equal(other Area) bool {
+	return a.Compare(other) == 0
+}
+
+// EqualWithinRel reports whether the areas are equal within the relative
+// tolerance tol; see Comparer.
+func (a *areaImplementation) EqualWithinRel(other Area, tol float64) bool {
+	x, y := a.commonValues(other.base())
+
+	return equalWithinRel(x, y, tol)
 }
 
 // NewArea creates an area of value in unit, one of the symbols defined in the

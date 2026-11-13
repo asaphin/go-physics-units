@@ -85,6 +85,23 @@ func main() {
 `ToDistance`, `ToMass` and the other `ToX` functions narrow it to a specific measure.
 
 Adding or subtracting measurements of the same measure works across units, and the result keeps the receiver's unit.
+`Compare`, `Equal` and `EqualWithinRel` compare measurements across units too:
+
+```go
+mile, _ := units.NewDistance(1, distance.Mile)
+foot, _ := units.NewDistance(1, distance.Feet)
+inches, _ := units.NewDistance(12, distance.Inch)
+
+fmt.Println(mile.Compare(foot)) // 1
+
+// Conversions round: in metres, 12 in and 1 ft differ in the last bit.
+fmt.Println(foot.Equal(inches), foot.EqualWithinRel(inches, 1e-12)) // false true
+
+ds := []units.Distance{mile, foot, inches}
+slices.SortFunc(ds, units.Distance.Compare)
+fmt.Println(ds) // [12 in 1 ft 1 mi]
+```
+
 Operations that combine measures return their result in SI base units:
 
 | Operation                  | Result                    |

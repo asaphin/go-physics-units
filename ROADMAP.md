@@ -28,7 +28,7 @@ Size is relative effort: S < M < L.
 | ☑ | [1.2](#12-api-change-report-in-ci) | API-change report in CI | all | no | S | — |
 | ☑ | [1.3](#13-formatting-with-fmt-verbs) | `fmt.Formatter` (`%.2f` → `5.00 km`) | P1, P2 | no | S | v0.1.x |
 | ☑ | [1.4](#14-immutable-exported-errors) | Immutable exported errors for `errors.Is` | P2 | no | M | v0.1.x |
-| ☐ | [1.5](#15-compare-and-equal) | `Compare` and `Equal` | P3 | no | S | v0.1.x |
+| ☑ | [1.5](#15-compare-and-equal) | `Compare` and `Equal` | P3 | no | S | v0.1.x |
 | ☐ | [1.6](#16-timetoduration) | `Time.ToDuration` | P3 | no | S | v0.1.x |
 | ☐ | [1.7](#17-examples-for-every-measure) | Examples for every measure | docs | no | S | v0.1.x |
 | ☐ | [2.1](#21-decision-gate-design-rfc-and-prototype) | RFC and prototype: value types, typed units | P1–P3 | **Decision gate** | M | — |
@@ -129,8 +129,9 @@ Serves **P2**. Today, callers can only tell errors apart by their message.
 
 Serves **P3**.
 
-- Add `Compare(other X) int` (semantics of `cmp.Compare`) and `Equal(other X) bool` to each typed measure. `other` is converted to the receiver's unit first.
+- Add `Compare(other X) int` (semantics of `cmp.Compare`) and `Equal(other X) bool` to each typed measure.
 - Conversions round, so values that should be equal can differ in the last bit. Document this, and add a variant with a relative tolerance.
+- **As built:** values in different units are compared in the base unit, not in the receiver's unit, so the comparison is symmetric. `CompareMeasurement` gives custom measures the same comparison.
 
 ### 1.6 Time.ToDuration
 

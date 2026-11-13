@@ -53,6 +53,11 @@ func benchTypedMeasure[T typedMeasure[T]](b *testing.B, c typedCase[T]) {
 			_ = x.Mul(3)
 		}
 	})
+	b.Run("Compare", func(b *testing.B) {
+		for b.Loop() {
+			_ = x.Compare(y)
+		}
+	})
 	b.Run("String", func(b *testing.B) {
 		for b.Loop() {
 			_ = x.String()

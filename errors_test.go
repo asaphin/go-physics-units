@@ -102,6 +102,10 @@ func TestErrors(t *testing.T) {
 		},
 		{"SubMeasurement nil", errOf(km.SubMeasurement(nil)), units.ErrIncompatibleMeasures, "measurement is nil"},
 		{
+			"CompareMeasurement", errOf(km.CompareMeasurement(kg)),
+			units.ErrIncompatibleMeasures, "incompatible types distance and mass",
+		},
+		{
 			"AddMeasurement of measures with the same name", errOf(usd.AddMeasurement(gbp)),
 			units.ErrIncompatibleMeasures, "can't convert GBP to USD: the units belong to different currency measures",
 		},

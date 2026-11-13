@@ -19,8 +19,9 @@ The library rests on three principles. They take priority over convenience and o
 
 Measurements are created and combined in hot loops, so their cost is part of the API.
 
+- **Calculations come first.** Conversions, arithmetic, comparisons and cross-measure operations are what users run in loops; keep them fast. Constructors and table building may get somewhat slower when a feature needs it: say so in the PR, but it isn't a blocker (the author's call, 2026-11-13).
 - **Do the work once.** All conversion work happens at package init, or once per `NewMeasurementCreator`. A conversion at run time is one map lookup and one multiplication.
-- **Hot paths** are `NewX`, `ConvertTo`, `Add`/`Sub`/`Mul`/`Div`, the cross-measure operations, `String` and `ParseString`. Keep them free of reflection, `fmt`, and any allocation beyond the result value.
+- **Hot paths** are `NewX`, `ConvertTo`, `Add`/`Sub`/`Mul`/`Div`, `Compare`/`Equal`, the cross-measure operations, `String` and `ParseString`. Keep them free of reflection, `fmt`, and any allocation beyond the result value.
 - **Error paths too.** Build error messages by string concatenation, never with `fmt`, which formats named string types such as `MeasureType` through reflection. Return a constant where the message is fixed (`ErrZeroDivision`, the `errXConversion` constants): that costs no allocation. `*UnitError` builds its message in `Error()`, so returning one costs a single allocation. `TestAllocations` guards the error paths too.
 - **Inlining.** Keep the `rates.Table` methods small enough to inline. Check with `go build -gcflags=-m ./internal/rates`.
 - **Allocation guards.** `TestAllocations` (`alloc_test.go`) fixes the allocation count of each hot path, and CI fails if one rises. Unlike timings, allocation counts are deterministic. The race detector changes them, so the file is excluded from `-race` builds, and `make allocs` and CI run it separately. Lower a limit when you save an allocation; raise one only on purpose, and say why in the PR.
@@ -66,7 +67,7 @@ User-defined measures are first-class: they convert, combine and parse like the 
 | `distance/`, `area/`, `mass/`, `time/`, `velocity/` | One `units.go` per measure: unit symbol constants, `BaseUnit`, the `conversionFactors` table, `ConversionFactors()` (returns a copy) and `Rate(from, to)` |
 | `conversion/` | Public `Factors` type alias (`map[string]float64`) and `CopyConversionFactors` |
 | `measurement_creator.go` | Generic `NewMeasurementCreator[T]` for user-defined measures |
-| `internal/rates` | `Table`: the immutable, validated N×N rate table of one measure, a read-only handle passed by value. Also `CanonicalUnit` |
+| `internal/rates` | `Table`: the immutable, validated N×N rate table of one measure, plus each unit's factor, a read-only handle passed by value. Also `CanonicalUnit` |
 | `Makefile` | Task runner (see Commands) |
 | `.github/workflows/ci.yml` | CI: `go mod tidy` check, vet, race tests and coverage (the `go.mod` Go version and stable), a short fuzz run, golangci-lint (pinned version), govulncheck |
 | `CHANGELOG.md` | User-visible changes, under `## Unreleased` until the next tag |
@@ -87,6 +88,7 @@ User-defined measures are first-class: they convert, combine and parse like the 
    - `AddMeasurement` and `SubMeasurement` check that the types match *and* that a rate between the two units exists.
    - Typed `Add`/`Sub` need neither check: two values of one Go type share the same table.
    - Cross-measure operations (`Distance.DivideByTime`, `Distance.Square`, `Area.DivideByDistance`, `Velocity.MultiplyByTime`) convert to base units and return results in the target measure's base unit. Dividing by a zero measurement returns an error, as `Div` does for a zero divisor.
+   - **Comparisons** (`Compare`, `Equal`, `EqualWithinRel`, `CompareMeasurement`) compare two values in the same unit exactly. Otherwise they multiply each value by its unit's factor (`Table.Factor`), which gives the value in the base unit. The result doesn't depend on the order of the operands, so `a.Equal(b) == b.Equal(a)`; converting one value into the other's unit would break that at the last bit. `TestCompare_Symmetric` enforces it. `CompareMeasurement` falls back to the receiver's unit only for two tables that share a measure name.
 7. **Parsing.** `ParseString` accepts exactly `"<float> <unit>"`, two whitespace-separated fields. It rejects NaN and ±Inf.
 
 Constructor conventions per measure:
@@ -134,8 +136,8 @@ Mirror an existing measure, e.g. `area.go` and `area/units.go`, and update all o
 
 1. **`<measure>/units.go`:** constants, `BaseUnit`, `conversionFactors` (with canonical symbols), `ConversionFactors()` and `Rate()`.
 2. **`<measure>.go` in the root package:**
-   - a public interface embedding `Measurement`, `UnitConverter[X]` and `Arithmetics[X]`, plus an `xImplementation` struct;
-   - the methods `ConvertTo`, `MustConvertTo`, `ConvertToBaseUnits`, `valueInBaseUnits`, `valueInUnits`, `Add`, `Sub`, `Mul`, `Div`;
+   - a public interface embedding `Measurement`, `UnitConverter[X]`, `Arithmetics[X]` and `Comparer[X]`, plus an `xImplementation` struct;
+   - the methods `ConvertTo`, `MustConvertTo`, `ConvertToBaseUnits`, `valueInBaseUnits`, `valueInUnits`, `Add`, `Sub`, `Mul`, `Div`, `Compare`, `Equal`, `EqualWithinRel`;
    - the functions `NewX`, `ToX`, `StringToX` (and `newX` if a cross-measure operation returns this measure) and an `errXConversion` constant of type `incompatibleError`.
 3. **`measures.go`:** add a `MeasureType` constant, build the table with `xRates = rates.MustNewTable(string(MeasureX), x.ConversionFactors())`, and register the measure in **both** mapping maps.
 4. **Tests:**

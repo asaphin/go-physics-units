@@ -10,8 +10,8 @@
 //	d, err = units.ToDistance(m)              // narrowed to Distance
 //	nmi, err := d.ConvertTo(distance.NauticalMile)
 //
-// Measurements of the same measure can be added and subtracted in any unit; the
-// result keeps the receiver's unit. Operations that combine measures, such as
+// Measurements of the same measure can be added, subtracted and compared in any
+// unit; the result of arithmetic keeps the receiver's unit. Operations that combine measures, such as
 // Distance.DivideByTime, return results in the SI base unit of the result.
 //
 // Unit symbols are case-sensitive. U+00B5 MICRO SIGN and U+03BC GREEK SMALL

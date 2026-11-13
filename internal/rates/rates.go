@@ -26,6 +26,7 @@ type Table struct {
 type table struct {
 	measure string
 	rates   map[pair]float64
+	factors map[string]float64 // canonical unit → factor, a copy of the validated input
 }
 
 // pair is the lookup key of a rate. A struct key keeps (from, to) pairs distinct;
@@ -50,6 +51,7 @@ func NewTable(measure string, f conversion.Factors) (Table, error) {
 	}
 
 	rates := make(map[pair]float64, len(entries)*len(entries))
+	factors := make(map[string]float64, len(entries))
 
 	for i, from := range entries {
 		if _, ok := rates[pair{from.canonical, from.canonical}]; ok {
@@ -57,6 +59,7 @@ func NewTable(measure string, f conversion.Factors) (Table, error) {
 		}
 
 		rates[pair{from.canonical, from.canonical}] = 1
+		factors[from.canonical] = from.factor
 	}
 
 	for _, from := range entries {
@@ -67,7 +70,7 @@ func NewTable(measure string, f conversion.Factors) (Table, error) {
 		}
 	}
 
-	return Table{t: &table{measure: measure, rates: rates}}, nil
+	return Table{t: &table{measure: measure, rates: rates, factors: factors}}, nil
 }
 
 // validEntries checks the factors and returns them with canonical symbols.
@@ -140,6 +143,21 @@ func (t Table) Rate(from, to string) (float64, bool) {
 	r, ok := t.t.rates[pair{from, to}]
 
 	return r, ok
+}
+
+// Factor returns the factor of the canonical unit symbol, as given to NewTable,
+// and whether the unit belongs to the table. A value times its unit's factor is
+// the value in the reference unit of the factors (for the predefined measures,
+// the SI base unit), so values in different units of one table can be compared
+// through their factors.
+func (t Table) Factor(unit string) (float64, bool) {
+	if t.t == nil {
+		return 0, false
+	}
+
+	f, ok := t.t.factors[unit]
+
+	return f, ok
 }
 
 // Has reports whether the canonical unit symbol belongs to the table.
