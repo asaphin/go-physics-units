@@ -31,6 +31,7 @@
   - Creating a value with an unknown unit is almost twice as fast.
   - `NewBaseMeasurement` is two to four times as fast, depending on the number of units.
   - Most other operations allocate once instead of twice.
+  - `StringToDistance` and the other `StringToX` functions allocate once instead of twice. They parse and construct directly instead of going through `ParseString`, so a unit of another measure is reported as unknown for that measure (`unknown distance unit kg`) instead of `not a distance measure`.
 - `Distance.DivideByTime` and `Area.DivideByDistance` return `(X, error)` and fail when the divisor is zero, as `Div` does. They used to panic.
 - The minimum Go version is now 1.27.
 

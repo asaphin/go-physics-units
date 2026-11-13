@@ -107,13 +107,16 @@ func ToTime(m Measurement) (Time, error) {
 }
 
 // StringToTime parses a time from a string such as "10 min".
+// It fails if the unit isn't a time unit.
 func StringToTime(s string) (Time, error) {
-	m, err := ParseString(s)
+	// Parse and construct directly: one allocation, where ParseString
+	// followed by ToTime would allocate twice.
+	value, unit, err := parseValueAndUnit(s)
 	if err != nil {
 		return nil, err
 	}
 
-	return ToTime(m)
+	return NewTime(value, unit)
 }
 
 // ParseDuration converts a standard library time.Duration into a Time in seconds.

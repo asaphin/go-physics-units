@@ -115,11 +115,14 @@ func ToVelocity(m Measurement) (Velocity, error) {
 }
 
 // StringToVelocity parses a velocity from a string such as "10 km/h".
+// It fails if the unit isn't a velocity unit.
 func StringToVelocity(s string) (Velocity, error) {
-	m, err := ParseString(s)
+	// Parse and construct directly: one allocation, where ParseString
+	// followed by ToVelocity would allocate twice.
+	value, unit, err := parseValueAndUnit(s)
 	if err != nil {
 		return nil, err
 	}
 
-	return ToVelocity(m)
+	return NewVelocity(value, unit)
 }

@@ -130,11 +130,14 @@ func ToDistance(m Measurement) (Distance, error) {
 }
 
 // StringToDistance parses a distance from a string such as "10 km".
+// It fails if the unit isn't a distance unit.
 func StringToDistance(s string) (Distance, error) {
-	m, err := ParseString(s)
+	// Parse and construct directly: one allocation, where ParseString
+	// followed by ToDistance would allocate twice.
+	value, unit, err := parseValueAndUnit(s)
 	if err != nil {
 		return nil, err
 	}
 
-	return ToDistance(m)
+	return NewDistance(value, unit)
 }

@@ -119,11 +119,14 @@ func ToArea(m Measurement) (Area, error) {
 }
 
 // StringToArea parses an area from a string such as "10 m²".
+// It fails if the unit isn't a area unit.
 func StringToArea(s string) (Area, error) {
-	m, err := ParseString(s)
+	// Parse and construct directly: one allocation, where ParseString
+	// followed by ToArea would allocate twice.
+	value, unit, err := parseValueAndUnit(s)
 	if err != nil {
 		return nil, err
 	}
 
-	return ToArea(m)
+	return NewArea(value, unit)
 }
