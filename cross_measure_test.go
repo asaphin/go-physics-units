@@ -7,6 +7,9 @@ import (
 	units "github.com/asaphin/go-physics-units"
 	"github.com/asaphin/go-physics-units/acceleration"
 	"github.com/asaphin/go-physics-units/area"
+	"github.com/asaphin/go-physics-units/datarate"
+	"github.com/asaphin/go-physics-units/datasize"
+	"github.com/asaphin/go-physics-units/density"
 	"github.com/asaphin/go-physics-units/distance"
 	"github.com/asaphin/go-physics-units/energy"
 	"github.com/asaphin/go-physics-units/force"
@@ -75,6 +78,12 @@ func TestCrossMeasureOperations(t *testing.T) {
 	atm := must(units.NewPressure(1, pressure.Atmosphere))(t)
 	hz50 := must(units.NewFrequency(50, frequency.Hertz))(t)
 	rpm60 := must(units.NewFrequency(60, frequency.RevolutionPerMinute))(t)
+	water := must(units.NewDensity(1, density.GramPerCubicCentimeter))(t)
+	liter2 := must(units.NewVolume(2, volume.Liter))(t)
+	gb := must(units.NewDataSize(1, datasize.Gigabyte))(t)
+	s8 := must(units.NewTime(8, time.Second))(t)
+	mbit100 := must(units.NewDataRate(100, datarate.MegabitPerSecond))(t)
+	minute := must(units.NewTime(1, time.Minute))(t)
 
 	cases := []struct {
 		name  string
@@ -167,6 +176,40 @@ func TestCrossMeasureOperations(t *testing.T) {
 		},
 		{"period of 50 Hz", func() (units.Measurement, error) { return fallible(hz50.Period()) }, 0.02, time.BaseUnit},
 		{"period of 60 rpm", func() (units.Measurement, error) { return fallible(rpm60.Period()) }, 1, time.BaseUnit},
+		{
+			"1 kg / 1 L",
+			func() (units.Measurement, error) { return fallible(kg1.DivideByVolume(liter)) },
+			1000,
+			density.BaseUnit,
+		},
+		{
+			"1 g/cm³ × 2 L",
+			func() (units.Measurement, error) { return ok(water.MultiplyByVolume(liter2)) },
+			2,
+			mass.BaseUnit,
+		},
+		{
+			"1 kg / 1 g/cm³",
+			func() (units.Measurement, error) { return fallible(kg1.DivideByDensity(water)) },
+			1e-3,
+			volume.BaseUnit,
+		},
+		{
+			"1 GB / 8 s",
+			func() (units.Measurement, error) { return fallible(gb.DivideByTime(s8)) },
+			1.25e8,
+			datarate.BaseUnit,
+		},
+		{
+			"1 GB at 100 Mbit/s", func() (units.Measurement, error) { return fallible(gb.DivideByDataRate(mbit100)) },
+			80, time.BaseUnit,
+		},
+		{
+			"100 Mbit/s × 1 min",
+			func() (units.Measurement, error) { return ok(mbit100.MultiplyByTime(minute)) },
+			7.5e8,
+			datasize.BaseUnit,
+		},
 	}
 
 	for _, c := range cases {
@@ -192,6 +235,11 @@ func TestCrossMeasureOperations_ZeroDivision(t *testing.T) {
 	n := must(units.NewForce(1, force.Newton))(t)
 	j := must(units.NewEnergy(1, energy.Joule))(t)
 	noFrequency := must(units.NewFrequency(0, frequency.Hertz))(t)
+	kg := must(units.NewMass(1, mass.Kilogram))(t)
+	noVolume := must(units.NewVolume(0, volume.Liter))(t)
+	noDensity := must(units.NewDensity(0, density.GramPerLiter))(t)
+	gb := must(units.NewDataSize(1, datasize.Gigabyte))(t)
+	noRate := must(units.NewDataRate(0, datarate.BitPerSecond))(t)
 
 	cases := map[string]func() (units.Measurement, error){
 		"Volume.DivideByArea":        func() (units.Measurement, error) { return fallible(cubicM.DivideByArea(noArea)) },
@@ -203,6 +251,10 @@ func TestCrossMeasureOperations_ZeroDivision(t *testing.T) {
 		"Energy.DivideByTime":        func() (units.Measurement, error) { return fallible(j.DivideByTime(noTime)) },
 		"Energy.DivideByDistance":    func() (units.Measurement, error) { return fallible(j.DivideByDistance(noDistance)) },
 		"Frequency.Period":           func() (units.Measurement, error) { return fallible(noFrequency.Period()) },
+		"Mass.DivideByVolume":        func() (units.Measurement, error) { return fallible(kg.DivideByVolume(noVolume)) },
+		"Mass.DivideByDensity":       func() (units.Measurement, error) { return fallible(kg.DivideByDensity(noDensity)) },
+		"DataSize.DivideByTime":      func() (units.Measurement, error) { return fallible(gb.DivideByTime(noTime)) },
+		"DataSize.DivideByDataRate":  func() (units.Measurement, error) { return fallible(gb.DivideByDataRate(noRate)) },
 	}
 
 	for name, op := range cases {

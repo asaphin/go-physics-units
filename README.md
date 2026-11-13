@@ -3,7 +3,7 @@
 [![Go Reference](https://pkg.go.dev/badge/github.com/asaphin/go-physics-units.svg)](https://pkg.go.dev/github.com/asaphin/go-physics-units)
 [![CI](https://github.com/asaphin/go-physics-units/actions/workflows/ci.yml/badge.svg)](https://github.com/asaphin/go-physics-units/actions/workflows/ci.yml)
 
-go-physics-units is a Go library for working with physical measurements: distance, area, volume, mass, time, velocity, acceleration, force, energy, power, pressure, frequency, angle and data size.
+go-physics-units is a Go library for working with physical measurements: distance, area, volume, mass, time, velocity, acceleration, force, energy, power, pressure, frequency, angle, data size, density and data rate.
 You can create, parse, convert and combine measurements, and define measures of your own, such as currencies.
 It has no dependencies.
 
@@ -127,6 +127,12 @@ Operations that combine measures return their result in SI base units:
 | `Power.MultiplyByTime`        | `Energy` in J                                      |
 | `Pressure.MultiplyByArea`     | `Force` in N                                       |
 | `Frequency.Period`            | `Time` in s                                        |
+| `Mass.DivideByVolume`         | `Density` in kg/m³                                 |
+| `Mass.DivideByDensity`        | `Volume` in m³                                     |
+| `Density.MultiplyByVolume`    | `Mass` in kg                                       |
+| `DataSize.DivideByTime`       | `DataRate` in B/s                                  |
+| `DataSize.DivideByDataRate`   | `Time` in s                                        |
+| `DataRate.MultiplyByTime`     | `DataSize` in B                                    |
 | `ParseDuration`               | `Time` in s, from a `time.Duration`                |
 | `Time.ToDuration`             | `time.Duration`, rounded to the nearest nanosecond |
 
@@ -275,6 +281,8 @@ fmt.Println(err) // unknown distance unit fur
 | Frequency    | `frequency`    | Hz        | rpm, Hz, kHz, MHz, GHz, THz                                               |
 | Angle        | `angle`        | rad       | arcsec, arcmin, mrad, gon, °, rad, rev                                    |
 | Data size    | `datasize`     | B         | bit, B, kbit, kB, KiB, Mbit, MB, MiB, Gbit, GB, GiB, TB, TiB, PB, PiB     |
+| Density      | `density`      | kg/m³     | g/L, lb/ft³, kg/m³, lb/gal, kg/L, g/mL, g/cm³                             |
+| Data rate    | `datarate`     | B/s       | bit/s, B/s, kbit/s, kB/s, KiB/s, Mbit/s, MB/s, MiB/s, Gbit/s, GB/s, GiB/s |
 
 - Every symbol has a named constant in its package, for example `distance.LightYear` or `mass.Pound`.
 - Each unit package also provides `ConversionFactors()`, a copy of its factors, and `Rate(from, to)`, the multiplier between two units. For example, `distance.Rate(distance.Mile, distance.Kilometer)` returns 1.609344.

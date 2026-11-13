@@ -3,8 +3,10 @@ package units
 import (
 	"cmp"
 
+	"github.com/asaphin/go-physics-units/density"
 	"github.com/asaphin/go-physics-units/force"
 	"github.com/asaphin/go-physics-units/mass"
+	"github.com/asaphin/go-physics-units/volume"
 )
 
 // Mass is a mass measurement. Its unit symbols are defined in the mass package.
@@ -16,6 +18,12 @@ type Mass interface {
 
 	// MultiplyByAcceleration returns the force m·a in force.BaseUnit (N).
 	MultiplyByAcceleration(a Acceleration) Force
+	// DivideByVolume returns the density m/v in density.BaseUnit (kg/m³).
+	// It fails if v is zero.
+	DivideByVolume(v Volume) (Density, error)
+	// DivideByDensity returns the volume m/d in volume.BaseUnit (m³).
+	// It fails if d is zero.
+	DivideByDensity(d Density) (Volume, error)
 }
 
 // massImplementation is the concrete implementation of Mass.
@@ -83,6 +91,24 @@ func (m *massImplementation) Div(divisor float64) (Mass, error) {
 // MultiplyByAcceleration returns the force m·a in N.
 func (m *massImplementation) MultiplyByAcceleration(a Acceleration) Force {
 	return newForce(m.valueInBaseUnits()*a.valueInBaseUnits(), force.BaseUnit)
+}
+
+// DivideByVolume returns the density m/v in kg/m³, or an error if v is zero.
+func (m *massImplementation) DivideByVolume(v Volume) (Density, error) {
+	if v.Value() == 0 {
+		return nil, ErrZeroDivision
+	}
+
+	return newDensity(m.valueInBaseUnits()/v.valueInBaseUnits(), density.BaseUnit), nil
+}
+
+// DivideByDensity returns the volume m/d in m³, or an error if d is zero.
+func (m *massImplementation) DivideByDensity(d Density) (Volume, error) {
+	if d.Value() == 0 {
+		return nil, ErrZeroDivision
+	}
+
+	return newVolume(m.valueInBaseUnits()/d.valueInBaseUnits(), volume.BaseUnit), nil
 }
 
 // Compare compares the masses; see Comparer.

@@ -8,7 +8,9 @@ import (
 	"github.com/asaphin/go-physics-units/angle"
 	"github.com/asaphin/go-physics-units/area"
 	"github.com/asaphin/go-physics-units/conversion"
+	"github.com/asaphin/go-physics-units/datarate"
 	"github.com/asaphin/go-physics-units/datasize"
+	"github.com/asaphin/go-physics-units/density"
 	"github.com/asaphin/go-physics-units/distance"
 	"github.com/asaphin/go-physics-units/energy"
 	"github.com/asaphin/go-physics-units/force"
@@ -295,4 +297,31 @@ func ExampleNewDataSize() {
 	// What a "1 TB" disk shows in binary units.
 	fmt.Printf("%.1f\n", disk.MustConvertTo(datasize.Gibibyte))
 	// Output: 931.3 GiB
+}
+
+func ExampleNewDensity() {
+	steel, err := units.NewDensity(7.85, density.GramPerCubicCentimeter)
+	if err != nil {
+		panic(err)
+	}
+
+	beam, _ := units.NewVolume(0.02, volume.CubicMeter)
+
+	fmt.Println(steel.MultiplyByVolume(beam))
+	// Output: 157 kg
+}
+
+// How long a download takes: a data size divided by a data rate.
+func ExampleDataSize_DivideByDataRate() {
+	file, _ := units.NewDataSize(4.7, datasize.Gigabyte)
+	link, _ := units.NewDataRate(100, datarate.MegabitPerSecond)
+
+	t, err := file.DivideByDataRate(link)
+	if err != nil {
+		panic(err) // the rate is zero
+	}
+
+	d, _ := t.ToDuration()
+	fmt.Println(t, d)
+	// Output: 376 s 6m16s
 }

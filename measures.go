@@ -5,7 +5,9 @@ import (
 	"github.com/asaphin/go-physics-units/angle"
 	"github.com/asaphin/go-physics-units/area"
 	"github.com/asaphin/go-physics-units/conversion"
+	"github.com/asaphin/go-physics-units/datarate"
 	"github.com/asaphin/go-physics-units/datasize"
+	"github.com/asaphin/go-physics-units/density"
 	"github.com/asaphin/go-physics-units/distance"
 	"github.com/asaphin/go-physics-units/energy"
 	"github.com/asaphin/go-physics-units/force"
@@ -42,6 +44,8 @@ const (
 	MeasureFrequency    MeasureType = "frequency"
 	MeasureAngle        MeasureType = "angle"
 	MeasureDataSize     MeasureType = "data size"
+	MeasureDensity      MeasureType = "density"
+	MeasureDataRate     MeasureType = "data rate"
 	MeasureCustom       MeasureType = "custom"
 )
 
@@ -60,6 +64,8 @@ var measureToConversionFactorsMapping = map[MeasureType]conversion.Factors{
 	MeasureFrequency:    frequency.ConversionFactors(),
 	MeasureAngle:        angle.ConversionFactors(),
 	MeasureDataSize:     datasize.ConversionFactors(),
+	MeasureDensity:      density.ConversionFactors(),
+	MeasureDataRate:     datarate.ConversionFactors(),
 }
 
 // Rate tables of the predefined measures, built once at package init and never
@@ -80,6 +86,8 @@ var (
 	frequencyRates    = rates.MustNewTable(string(MeasureFrequency), frequency.ConversionFactors())
 	angleRates        = rates.MustNewTable(string(MeasureAngle), angle.ConversionFactors())
 	dataSizeRates     = rates.MustNewTable(string(MeasureDataSize), datasize.ConversionFactors())
+	densityRates      = rates.MustNewTable(string(MeasureDensity), density.ConversionFactors())
+	dataRateRates     = rates.MustNewTable(string(MeasureDataRate), datarate.ConversionFactors())
 )
 
 var measureToConversionRatesMapping = map[MeasureType]rates.Table{
@@ -97,6 +105,8 @@ var measureToConversionRatesMapping = map[MeasureType]rates.Table{
 	MeasureFrequency:    frequencyRates,
 	MeasureAngle:        angleRates,
 	MeasureDataSize:     dataSizeRates,
+	MeasureDensity:      densityRates,
+	MeasureDataRate:     dataRateRates,
 }
 
 // predefinedUnits indexes every predefined unit symbol, in canonical form, by

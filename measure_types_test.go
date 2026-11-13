@@ -10,7 +10,9 @@ import (
 	"github.com/asaphin/go-physics-units/acceleration"
 	"github.com/asaphin/go-physics-units/angle"
 	"github.com/asaphin/go-physics-units/area"
+	"github.com/asaphin/go-physics-units/datarate"
 	"github.com/asaphin/go-physics-units/datasize"
+	"github.com/asaphin/go-physics-units/density"
 	"github.com/asaphin/go-physics-units/distance"
 	"github.com/asaphin/go-physics-units/energy"
 	"github.com/asaphin/go-physics-units/force"
@@ -138,6 +140,18 @@ var (
 		unitA: datasize.Gibibyte, unitB: datasize.Megabyte, ratio: 1073.741824,
 		baseUnit: datasize.BaseUnit, baseRatio: 1 << 30, foreignUnit: time.Second,
 	}
+	densityCase = typedCase[units.Density]{
+		measureType: units.MeasureDensity,
+		newFn:       units.NewDensity, toFn: units.ToDensity, parseFn: units.StringToDensity,
+		unitA: density.GramPerCubicCentimeter, unitB: density.PoundPerCubicFoot, ratio: 62.42796057614462,
+		baseUnit: density.BaseUnit, baseRatio: 1000, foreignUnit: mass.Kilogram,
+	}
+	dataRateCase = typedCase[units.DataRate]{
+		measureType: units.MeasureDataRate,
+		newFn:       units.NewDataRate, toFn: units.ToDataRate, parseFn: units.StringToDataRate,
+		unitA: datarate.GigabitPerSecond, unitB: datarate.MegabytePerSecond, ratio: 125,
+		baseUnit: datarate.BaseUnit, baseRatio: 1.25e8, foreignUnit: datasize.Byte,
+	}
 )
 
 func TestTypedMeasures(t *testing.T) {
@@ -155,6 +169,8 @@ func TestTypedMeasures(t *testing.T) {
 	t.Run("frequency", func(t *testing.T) { testTypedMeasure(t, frequencyCase) })
 	t.Run("angle", func(t *testing.T) { testTypedMeasure(t, angleCase) })
 	t.Run("data size", func(t *testing.T) { testTypedMeasure(t, dataSizeCase) })
+	t.Run("density", func(t *testing.T) { testTypedMeasure(t, densityCase) })
+	t.Run("data rate", func(t *testing.T) { testTypedMeasure(t, dataRateCase) })
 }
 
 func testTypedMeasure[T typedMeasure[T]](t *testing.T, c typedCase[T]) {

@@ -3,7 +3,9 @@ package units
 import (
 	"cmp"
 
+	"github.com/asaphin/go-physics-units/datarate"
 	"github.com/asaphin/go-physics-units/datasize"
+	"github.com/asaphin/go-physics-units/time"
 )
 
 // DataSize is a data size measurement. Its unit symbols are defined in the datasize
@@ -13,6 +15,13 @@ type DataSize interface {
 	UnitConverter[DataSize]
 	Arithmetics[DataSize]
 	Comparer[DataSize]
+
+	// DivideByTime returns the data rate s/t in datarate.BaseUnit (B/s).
+	// It fails if t is zero.
+	DivideByTime(t Time) (DataRate, error)
+	// DivideByDataRate returns the time s/r, for example to transfer s at
+	// rate r, in time.BaseUnit (s). It fails if r is zero.
+	DivideByDataRate(r DataRate) (Time, error)
 }
 
 // dataSizeImplementation is the concrete implementation of DataSize.
@@ -77,6 +86,24 @@ func (s *dataSizeImplementation) Div(divisor float64) (DataSize, error) {
 	return &dataSizeImplementation{s.withValue(s.value / divisor)}, nil
 }
 
+// DivideByTime returns the data rate s/t in B/s, or an error if t is zero.
+func (s *dataSizeImplementation) DivideByTime(t Time) (DataRate, error) {
+	if t.Value() == 0 {
+		return nil, ErrZeroDivision
+	}
+
+	return newDataRate(s.valueInBaseUnits()/t.valueInBaseUnits(), datarate.BaseUnit), nil
+}
+
+// DivideByDataRate returns the time s/r in s, or an error if r is zero.
+func (s *dataSizeImplementation) DivideByDataRate(r DataRate) (Time, error) {
+	if r.Value() == 0 {
+		return nil, ErrZeroDivision
+	}
+
+	return newTime(s.valueInBaseUnits()/r.valueInBaseUnits(), time.BaseUnit), nil
+}
+
 // Compare compares the data sizes; see Comparer.
 func (s *dataSizeImplementation) Compare(other DataSize) int {
 	return cmp.Compare(s.commonValues(other.base()))
@@ -104,6 +131,12 @@ func NewDataSize(value float64, unit string) (DataSize, error) {
 	}
 
 	return &dataSizeImplementation{msm}, nil
+}
+
+// newDataSize is an unchecked constructor for internal use with valid, canonical
+// units.
+func newDataSize(value float64, unit string) DataSize {
+	return &dataSizeImplementation{baseMeasurement{value: value, unit: unit, conversionRates: dataSizeRates}}
 }
 
 const errDataSizeConversion incompatibleError = "not a data size measure"

@@ -9,7 +9,9 @@ import (
 	"github.com/asaphin/go-physics-units/angle"
 	"github.com/asaphin/go-physics-units/area"
 	"github.com/asaphin/go-physics-units/conversion"
+	"github.com/asaphin/go-physics-units/datarate"
 	"github.com/asaphin/go-physics-units/datasize"
+	"github.com/asaphin/go-physics-units/density"
 	"github.com/asaphin/go-physics-units/distance"
 	"github.com/asaphin/go-physics-units/energy"
 	"github.com/asaphin/go-physics-units/force"
@@ -37,6 +39,8 @@ var predefinedFactors = map[units.MeasureType]conversion.Factors{
 	units.MeasureFrequency:    frequency.ConversionFactors(),
 	units.MeasureAngle:        angle.ConversionFactors(),
 	units.MeasureDataSize:     datasize.ConversionFactors(),
+	units.MeasureDensity:      density.ConversionFactors(),
+	units.MeasureDataRate:     datarate.ConversionFactors(),
 }
 
 // TestConversion_AllUnitPairs converts between every ordered pair of units of
@@ -189,6 +193,18 @@ func TestConversion_ReferenceValues(t *testing.T) {
 		{datasize.Megabit, datasize.Kilobit, 1000},
 		{datasize.Gigabit, datasize.Megabyte, 125},
 		{datasize.Megabyte, datasize.Megabit, 8},
+		{density.GramPerCubicCentimeter, density.KilogramPerCubicMeter, 1000},
+		{density.KilogramPerLiter, density.GramPerMilliliter, 1},
+		{density.GramPerLiter, density.KilogramPerCubicMeter, 1},
+		{density.PoundPerCubicFoot, density.KilogramPerCubicMeter, 16.018463373960138},
+		{density.PoundPerGallon, density.KilogramPerCubicMeter, 119.82642731689663},
+		{datarate.MegabitPerSecond, datarate.KilobitPerSecond, 1000},
+		{datarate.BytePerSecond, datarate.BitPerSecond, 8},
+		{datarate.MegabytePerSecond, datarate.MegabitPerSecond, 8},
+		{datarate.GibibytePerSecond, datarate.MebibytePerSecond, 1024},
+		{datarate.GigabitPerSecond, datarate.MegabytePerSecond, 125},
+		{datarate.KibibytePerSecond, datarate.BytePerSecond, 1024},
+		{datarate.GigabytePerSecond, datarate.MegabytePerSecond, 1000},
 	}
 
 	for _, c := range cases {
@@ -275,6 +291,8 @@ func TestRate(t *testing.T) {
 		units.MeasureFrequency:    frequency.Rate,
 		units.MeasureAngle:        angle.Rate,
 		units.MeasureDataSize:     datasize.Rate,
+		units.MeasureDensity:      density.Rate,
+		units.MeasureDataRate:     datarate.Rate,
 	}
 
 	for mt, rate := range rateFuncs {
@@ -318,6 +336,8 @@ func TestRate(t *testing.T) {
 		{"frequency", frequency.Rate, frequency.Kilohertz, frequency.Hertz, 1000},
 		{"angle", angle.Rate, angle.Revolution, angle.Degree, 360},
 		{"data size", datasize.Rate, datasize.Kibibyte, datasize.Byte, 1024},
+		{"density", density.Rate, density.KilogramPerLiter, density.KilogramPerCubicMeter, 1000},
+		{"data rate", datarate.Rate, datarate.MegabytePerSecond, datarate.MegabitPerSecond, 8},
 	}
 
 	for _, e := range examples {
@@ -343,6 +363,8 @@ func TestConversionFactors_ReturnsCopy(t *testing.T) {
 		units.MeasureFrequency:    frequency.ConversionFactors,
 		units.MeasureAngle:        angle.ConversionFactors,
 		units.MeasureDataSize:     datasize.ConversionFactors,
+		units.MeasureDensity:      density.ConversionFactors,
+		units.MeasureDataRate:     datarate.ConversionFactors,
 	} {
 		f := factorsFn()
 		for unit := range f {

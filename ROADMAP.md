@@ -259,7 +259,7 @@ Serves **P3**.
 - **How.** Follow the "Add a new measure type" recipe in AGENTS.md.
 - **Candidates**, in rough order of demand: volume, acceleration, force, energy, power, pressure, frequency, angle and data size. Each comes with its cross-measure operations, such as area × distance → volume and velocity ÷ time → acceleration.
 - **Symbols.** Every symbol must stay unique across all measures (`TestMeasuresSelfCheck`). Check new symbols for clashes before starting a measure.
-- **Status:** all nine are done, ahead of Phase 3 at the author's request: volume, acceleration, force, energy, power, pressure, frequency, angle and data size. Further candidates: angular velocity, data rate, density, electric units.
+- **Status:** done, ahead of Phase 3 at the author's request: volume, acceleration, force, energy, power, pressure, frequency, angle and data size, plus density and data rate. Further candidates: angular velocity, electric units (current, voltage, charge, resistance).
 
 ### 4.4 Decision: temperature
 
