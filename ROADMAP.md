@@ -31,7 +31,7 @@ Size is relative effort: S < M < L.
 | ☑ | [1.5](#15-compare-and-equal) | `Compare` and `Equal` | P3 | no | S | v0.1.x |
 | ☑ | [1.6](#16-timetoduration) | `Time.ToDuration` | P3 | no | S | v0.1.x |
 | ☑ | [1.7](#17-examples-for-every-measure) | Examples for every measure | docs | no | S | v0.1.x |
-| ☐ | [2.1](#21-decision-gate-design-rfc-and-prototype) | RFC and prototype: value types, typed units | P1–P3 | **Decision gate** | M | — |
+| ☑ | [2.1](#21-decision-gate-design-rfc-and-prototype) | RFC and prototype: value types, typed units | P1–P3 | **Decision gate** | M | — |
 | ☐ | [3.1](#31-typed-unit-symbols) | Typed unit symbols | P1, safety | yes | M | v0.2.0 |
 | ☐ | [3.2A](#32a-value-type-measures) | Value-type measures (Path A) | P1, P2 | yes | L | v0.2.0 |
 | ☐ | [3.3A](#33a-typed-custom-measures) | Typed custom measures (Path A) | P3 | yes | M | v0.2.0 |
@@ -174,6 +174,7 @@ Prototype on a branch and benchmark it against v0.1.x.
   - a custom measure gets the typed API in about 10 lines;
   - the README examples need only mechanical changes.
 - **Outcome:** Path A (value types) or Path B (keep the interfaces) in Phase 3.
+- **Status:** the RFC and the prototype are written: [docs/rfc-value-types.md](docs/rfc-value-types.md). It recommends Path A with integer units; the decision is the author's.
 
 ## Phase 3: the breaking batch (v0.2.0)
 
