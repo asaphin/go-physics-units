@@ -161,8 +161,64 @@ func TestConversion_MicroSignVariants(t *testing.T) {
 
 	assertMeasurement(t, g, 5, mass.Microgram)
 
+	if r, ok := distance.Rate(microSign+"m", distance.Nanometer); !ok || !almostEqual(r, 1000, 1e-12) {
+		t.Errorf("Rate(%sm, nm) = %v, %v; want 1000, true", microSign, r, ok)
+	}
+
 	if mt := units.DetectMeasureType(microSign + "s"); mt != units.MeasureTime {
 		t.Errorf("DetectMeasureType(\u00b5s) = %s, want %s", mt, units.MeasureTime)
+	}
+}
+
+// TestRate checks each unit package's Rate against its factors and against the
+// examples in its doc comment.
+func TestRate(t *testing.T) {
+	rateFuncs := map[units.MeasureType]func(from, to string) (float64, bool){
+		units.MeasureDistance: distance.Rate,
+		units.MeasureArea:     area.Rate,
+		units.MeasureMass:     mass.Rate,
+		units.MeasureTime:     time.Rate,
+		units.MeasureVelocity: velocity.Rate,
+	}
+
+	for mt, rate := range rateFuncs {
+		factors := predefinedFactors[mt]
+
+		for from, fromFactor := range factors {
+			for to, toFactor := range factors {
+				if got, ok := rate(from, to); !ok || !almostEqual(got, fromFactor/toFactor, 1e-15) {
+					t.Errorf("%s: Rate(%s, %s) = %v, %v; want %v, true", mt, from, to, got, ok, fromFactor/toFactor)
+				}
+			}
+
+			if got, ok := rate(from, "unknown"); ok || got != 0 {
+				t.Errorf("%s: Rate(%s, unknown) = %v, %v; want 0, false", mt, from, got, ok)
+			}
+
+			if got, ok := rate("unknown", from); ok || got != 0 {
+				t.Errorf("%s: Rate(unknown, %s) = %v, %v; want 0, false", mt, from, got, ok)
+			}
+		}
+	}
+
+	examples := []struct {
+		name string
+		rate func(from, to string) (float64, bool)
+		from string
+		to   string
+		want float64
+	}{
+		{"distance", distance.Rate, distance.Kilometer, distance.Meter, 1000},
+		{"area", area.Rate, area.SquareKilometer, area.SquareMeter, 1e6},
+		{"mass", mass.Rate, mass.Kilogram, mass.Gram, 1000},
+		{"time", time.Rate, time.Hour, time.Minute, 60},
+		{"velocity", velocity.Rate, velocity.MeterPerSecond, velocity.KilometerPerHour, 3.6},
+	}
+
+	for _, e := range examples {
+		if got, ok := e.rate(e.from, e.to); !ok || !almostEqual(got, e.want, 1e-15) {
+			t.Errorf("%s.Rate(%s, %s) = %v, %v; want %v, true", e.name, e.from, e.to, got, ok, e.want)
+		}
 	}
 }
 

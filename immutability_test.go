@@ -6,48 +6,65 @@ import (
 	"go/parser"
 	"go/token"
 	"io/fs"
+	"path"
 	"path/filepath"
-	"reflect"
+	"strconv"
 	"strings"
 	"sync"
 	"testing"
 
 	units "github.com/asaphin/go-physics-units"
-	"github.com/asaphin/go-physics-units/area"
 	"github.com/asaphin/go-physics-units/distance"
-	"github.com/asaphin/go-physics-units/mass"
-	"github.com/asaphin/go-physics-units/time"
-	"github.com/asaphin/go-physics-units/velocity"
 )
 
-// TestNoExportedPackageVariables guards immutability after init: any importer
-// can reassign an exported package-level variable, so the library has none.
-// Use constants, or functions that return copies.
-func TestNoExportedPackageVariables(t *testing.T) {
+// libraryFiles parses the module's non-test Go files.
+func libraryFiles(t *testing.T) (*token.FileSet, []*ast.File) {
+	t.Helper()
+
 	fset := token.NewFileSet()
 
-	err := filepath.WalkDir(".", func(path string, d fs.DirEntry, err error) error {
+	var files []*ast.File
+
+	err := filepath.WalkDir(".", func(p string, d fs.DirEntry, err error) error {
 		if err != nil {
 			return err
 		}
 
 		if d.IsDir() {
-			if path != "." && (strings.HasPrefix(d.Name(), ".") || d.Name() == "testdata" || d.Name() == "coverage") {
+			if p != "." && (strings.HasPrefix(d.Name(), ".") || d.Name() == "testdata" || d.Name() == "coverage") {
 				return filepath.SkipDir
 			}
 
 			return nil
 		}
 
-		if !strings.HasSuffix(path, ".go") || strings.HasSuffix(path, "_test.go") {
+		if !strings.HasSuffix(p, ".go") || strings.HasSuffix(p, "_test.go") {
 			return nil
 		}
 
-		file, err := parser.ParseFile(fset, path, nil, parser.SkipObjectResolution)
+		file, err := parser.ParseFile(fset, p, nil, parser.SkipObjectResolution)
 		if err != nil {
-			return fmt.Errorf("parse %s: %w", path, err)
+			return fmt.Errorf("parse %s: %w", p, err)
 		}
 
+		files = append(files, file)
+
+		return nil
+	})
+	if err != nil {
+		t.Fatal(err)
+	}
+
+	return fset, files
+}
+
+// TestNoExportedPackageVariables guards immutability after init: any importer
+// can reassign an exported package-level variable, so the library has none.
+// Use constants, or functions that return copies.
+func TestNoExportedPackageVariables(t *testing.T) {
+	fset, files := libraryFiles(t)
+
+	for _, file := range files {
 		for _, decl := range file.Decls {
 			gen, ok := decl.(*ast.GenDecl)
 			if !ok || gen.Tok != token.VAR {
@@ -63,37 +80,108 @@ func TestNoExportedPackageVariables(t *testing.T) {
 				}
 			}
 		}
-
-		return nil
-	})
-	if err != nil {
-		t.Fatal(err)
 	}
 }
 
-// TestConversionRates_CannotModifySharedTable guards the package-level rate
-// tables. ConversionRates must return a value with no exported fields: a
-// pointer would let callers overwrite the shared table with *p = other.
-func TestConversionRates_CannotModifySharedTable(t *testing.T) {
-	tables := map[string]any{
-		"area":     area.ConversionRates(),
-		"distance": distance.ConversionRates(),
-		"mass":     mass.ConversionRates(),
-		"time":     time.ConversionRates(),
-		"velocity": velocity.ConversionRates(),
+// TestNoInternalTypesInExportedAPI keeps the shared rate tables out of reach:
+// no exported function, method, field or interface method may use a type from
+// an internal package. Callers can't name such types, and a handle to shared
+// state could let them modify it.
+func TestNoInternalTypesInExportedAPI(t *testing.T) {
+	fset, files := libraryFiles(t)
+
+	for _, file := range files {
+		if strings.Contains(filepath.ToSlash(fset.Position(file.Package).Filename), "internal/") {
+			continue
+		}
+
+		internal := internalImports(file)
+		if len(internal) == 0 {
+			continue
+		}
+
+		check := func(name string, node ast.Node) {
+			ast.Inspect(node, func(n ast.Node) bool {
+				sel, ok := n.(*ast.SelectorExpr)
+				if !ok {
+					return true
+				}
+
+				if pkg, ok := sel.X.(*ast.Ident); ok && internal[pkg.Name] {
+					t.Errorf("%s: exported %s uses internal type %s.%s",
+						fset.Position(sel.Pos()), name, pkg.Name, sel.Sel.Name)
+				}
+
+				return true
+			})
+		}
+
+		for _, decl := range file.Decls {
+			switch decl := decl.(type) {
+			case *ast.FuncDecl:
+				if decl.Name.IsExported() {
+					check(decl.Name.Name, decl.Type)
+				}
+			case *ast.GenDecl:
+				for _, spec := range decl.Specs {
+					if ts, ok := spec.(*ast.TypeSpec); ok && ts.Name.IsExported() {
+						checkExportedType(ts, check)
+					}
+				}
+			}
+		}
+	}
+}
+
+// internalImports returns the local names of the file's imports of internal
+// packages.
+func internalImports(file *ast.File) map[string]bool {
+	names := make(map[string]bool)
+
+	for _, imp := range file.Imports {
+		importPath, err := strconv.Unquote(imp.Path.Value)
+		if err != nil || !strings.Contains(importPath, "/internal/") {
+			continue
+		}
+
+		name := path.Base(importPath)
+		if imp.Name != nil {
+			name = imp.Name.Name
+		}
+
+		names[name] = true
 	}
 
-	for name, table := range tables {
-		typ := reflect.TypeOf(table)
-		if typ.Kind() != reflect.Struct {
-			t.Errorf("%s.ConversionRates() returns a %s, want a struct value", name, typ.Kind())
+	return names
+}
+
+// checkExportedType checks the parts of an exported type that callers can see:
+// exported fields of a struct, exported methods of an interface, or the whole
+// type otherwise.
+func checkExportedType(ts *ast.TypeSpec, check func(name string, node ast.Node)) {
+	var fields *ast.FieldList
+
+	switch typ := ts.Type.(type) {
+	case *ast.StructType:
+		fields = typ.Fields
+	case *ast.InterfaceType:
+		fields = typ.Methods
+	default:
+		check(ts.Name.Name, ts.Type)
+
+		return
+	}
+
+	for _, field := range fields.List {
+		if len(field.Names) == 0 {
+			check(ts.Name.Name, field.Type) // embedded
 
 			continue
 		}
 
-		for i := range typ.NumField() {
-			if f := typ.Field(i); f.IsExported() {
-				t.Errorf("%s.ConversionRates() result has exported field %s", name, f.Name)
+		for _, name := range field.Names {
+			if name.IsExported() {
+				check(ts.Name.Name+"."+name.Name, field.Type)
 			}
 		}
 	}
@@ -150,7 +238,9 @@ func useConcurrently(t *testing.T, mc units.MeasurementCreator[Currency]) {
 	f := distance.ConversionFactors()
 	f[distance.Millimeter] = 1
 
-	_ = distance.ConversionRates()
+	if r, ok := distance.Rate(distance.Kilometer, distance.Meter); !ok || r != 1000 {
+		t.Errorf("Rate(km, m) = %v, %v; want 1000, true", r, ok)
+	}
 
 	eur, err := mc.New(1, "EUR")
 	if err != nil {

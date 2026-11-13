@@ -21,7 +21,7 @@ Size is relative effort: S < M < L.
 | Done | Step | What | Serves | Breaking | Size | Release |
 |:-:|---|---|---|---|:-:|---|
 | ☐ | [0.1](#01-commit-the-current-work-and-get-ci-green) | Commit the current work, first CI run | — | — | S | — |
-| ☐ | [0.2](#02-decision-replace-conversionrates-with-rate) | Replace `ConversionRates()` with `Rate()` | P2 | yes, **Decision** | S | v0.1.0 |
+| ☑ | [0.2](#02-decision-replace-conversionrates-with-rate) | Replace `ConversionRates()` with `Rate()` | P2 | yes, **Decision** | S | v0.1.0 |
 | ☐ | [0.3](#03-decision-zero-division-returns-an-error-everywhere) | Zero division returns an error everywhere | correctness | yes, **Decision** | S | v0.1.0 |
 | ☐ | [0.4](#04-release-v010) | Release v0.1.0 | — | — | S | v0.1.0 |
 | ☐ | [1.1](#11-allocation-guards-and-wider-benchmarks) | Allocation guards and wider benchmarks | P1 | no | S | — |
@@ -45,7 +45,7 @@ Size is relative effort: S < M < L.
 
 ## Phase 0: finish and ship v0.1.0
 
-The uncommitted work already breaks the API: it changes the `mass.Quintal` symbol, the `ConversionRates()` type, the names of custom measures and the minimum Go version. Steps 0.2 and 0.3 add the two remaining small breaks to the same release, so users migrate once.
+The work since v0.0.4 already breaks the API: it changes the `mass.Quintal` symbol, the `ConversionRates()` type, the names of custom measures and the minimum Go version. Steps 0.2 and 0.3 add the two remaining small breaks to the same release, so users migrate once.
 
 ### 0.1 Commit the current work and get CI green
 

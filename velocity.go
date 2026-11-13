@@ -88,7 +88,7 @@ func (v *velocityImplementation) MultiplyByTime(t Time) Distance {
 // NewVelocity creates a velocity of value in unit, one of the symbols defined in
 // the velocity package.
 func NewVelocity(value float64, unit string) (Velocity, error) {
-	msm, err := newBaseMeasurement(value, unit, velocity.ConversionRates())
+	msm, err := newBaseMeasurement(value, unit, velocityRates)
 	if err != nil {
 		return nil, err
 	}
@@ -99,7 +99,7 @@ func NewVelocity(value float64, unit string) (Velocity, error) {
 // newVelocity is an unchecked constructor for internal use with valid,
 // canonical units.
 func newVelocity(value float64, unit string) Velocity {
-	return &velocityImplementation{baseMeasurement{value: value, unit: unit, conversionRates: velocity.ConversionRates()}}
+	return &velocityImplementation{baseMeasurement{value: value, unit: unit, conversionRates: velocityRates}}
 }
 
 var errVelocityConversion = errors.New("not a velocity measure")

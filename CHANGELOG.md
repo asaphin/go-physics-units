@@ -5,7 +5,7 @@
 ### Fixed
 
 - Converting between metres and millimetres no longer gives a wrong result. The internal rate table keyed pairs by concatenating the two symbols, and `"m"+"mm"` equals `"mm"+"m"`, so one of the two directions was wrong in every process.
-- Calling a unit package's `ConversionRates()` concurrently no longer causes a data race.
+- Using measurements from several goroutines no longer causes a data race. The conversion tables were built lazily on first use, and are now built once at startup.
 - `ToDistance`, `ToArea`, `ToMass`, `ToTime` and `ToVelocity` now accept a value that already is that measure, and return an error instead of panicking on `nil`.
 - `NewMeasurementCreator[T]` returns an error instead of panicking later when `T` is a predefined measure interface such as `units.Distance`.
 - On error, `MeasurementCreator.New`, `MeasurementCreator.ParseString` and `ConvertToMeasurement` return a nil interface, not an interface that wraps a nil pointer.
@@ -24,7 +24,6 @@
   - empty unit symbols;
   - measure types that are empty or the same as a predefined one.
 - `NewBaseMeasurement` always returns a measurement of type `custom`.
-- `ConversionRates()` in the unit packages now returns a read-only `rates.Table` value, looked up by unit pair with `Rate(from, to)`. It used to return an `immutable.Float64Map` keyed by concatenated symbols.
 - Error messages name the measure, for example `unknown distance unit kg`.
 - Faster, with fewer allocations:
   - `ParseString` is about twice as fast, because `DetectMeasureType` uses an index instead of a linear scan.
@@ -34,6 +33,11 @@
   - Most other operations allocate once instead of twice.
 - The minimum Go version is now 1.22.
 
+### Removed
+
+- `ConversionRates()` in the unit packages. It returned `immutable.Float64Map`, a type from an internal package that callers couldn't name, keyed by concatenated symbols. Use `Rate(from, to)` instead.
+
 ### Added
 
+- `Rate(from, to string) (float64, bool)` in each unit package: the multiplier that converts a value from one unit to another, for example `distance.Rate(distance.Mile, distance.Kilometer)` is 1.609344. Both forms of the micro sign are accepted.
 - `distance.PlanckLength` and `time.PlanckTime`. The misspelled `PlankLength` and `PlankTime` remain as deprecated aliases.

@@ -149,6 +149,21 @@ func (t Table) Has(unit string) bool {
 	return ok
 }
 
+// FactorRate returns the multiplier that converts a value in unit from into
+// unit to, f[from] / f[to], and whether both units are in f. It accepts both
+// forms of the micro sign; the keys of f must be canonical. The result equals
+// the rate a Table built from f returns.
+func FactorRate(f conversion.Factors, from, to string) (float64, bool) {
+	fromFactor, okFrom := f[CanonicalUnit(from)]
+	toFactor, okTo := f[CanonicalUnit(to)]
+
+	if !okFrom || !okTo {
+		return 0, false
+	}
+
+	return fromFactor / toFactor, true
+}
+
 // CanonicalUnit returns unit with U+00B5 MICRO SIGN replaced by U+03BC GREEK
 // SMALL LETTER MU, the same mapping Unicode NFKC applies. Both characters are
 // in common use for the micro prefix, so "µm" and "μm" denote the same unit.

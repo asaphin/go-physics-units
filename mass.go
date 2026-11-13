@@ -78,7 +78,7 @@ func (m *massImplementation) Div(divisor float64) (Mass, error) {
 // NewMass creates a mass of value in unit, one of the symbols defined in the
 // mass package.
 func NewMass(value float64, unit string) (Mass, error) {
-	msm, err := newBaseMeasurement(value, unit, mass.ConversionRates())
+	msm, err := newBaseMeasurement(value, unit, massRates)
 	if err != nil {
 		return nil, err
 	}

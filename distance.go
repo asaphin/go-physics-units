@@ -103,7 +103,7 @@ func (d *distanceImplementation) Square() Area {
 // NewDistance creates a distance of value in unit, one of the symbols defined in
 // the distance package.
 func NewDistance(value float64, unit string) (Distance, error) {
-	msm, err := newBaseMeasurement(value, unit, distance.ConversionRates())
+	msm, err := newBaseMeasurement(value, unit, distanceRates)
 	if err != nil {
 		return nil, err
 	}
@@ -114,7 +114,7 @@ func NewDistance(value float64, unit string) (Distance, error) {
 // newDistance is an unchecked constructor for internal use with valid,
 // canonical units.
 func newDistance(value float64, unit string) Distance {
-	return &distanceImplementation{baseMeasurement{value: value, unit: unit, conversionRates: distance.ConversionRates()}}
+	return &distanceImplementation{baseMeasurement{value: value, unit: unit, conversionRates: distanceRates}}
 }
 
 var errDistanceConversion = errors.New("not a distance measure")

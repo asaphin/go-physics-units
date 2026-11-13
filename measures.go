@@ -35,12 +35,23 @@ var measureToConversionFactorsMapping = map[MeasureType]conversion.Factors{
 	MeasureArea:     area.ConversionFactors(),
 }
 
+// Rate tables of the predefined measures, built once at package init and never
+// written again. Each is named after its MeasureType, which is how a value
+// knows its measure.
+var (
+	distanceRates = rates.MustNewTable(string(MeasureDistance), distance.ConversionFactors())
+	timeRates     = rates.MustNewTable(string(MeasureTime), time.ConversionFactors())
+	massRates     = rates.MustNewTable(string(MeasureMass), mass.ConversionFactors())
+	velocityRates = rates.MustNewTable(string(MeasureVelocity), velocity.ConversionFactors())
+	areaRates     = rates.MustNewTable(string(MeasureArea), area.ConversionFactors())
+)
+
 var measureToConversionRatesMapping = map[MeasureType]rates.Table{
-	MeasureDistance: distance.ConversionRates(),
-	MeasureTime:     time.ConversionRates(),
-	MeasureMass:     mass.ConversionRates(),
-	MeasureVelocity: velocity.ConversionRates(),
-	MeasureArea:     area.ConversionRates(),
+	MeasureDistance: distanceRates,
+	MeasureTime:     timeRates,
+	MeasureMass:     massRates,
+	MeasureVelocity: velocityRates,
+	MeasureArea:     areaRates,
 }
 
 // unitToMeasureType indexes every predefined unit symbol by its measure.

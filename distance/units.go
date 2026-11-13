@@ -68,16 +68,15 @@ var conversionFactors = conversion.Factors{
 	Parsec:           astronomicalUnit * 648000 / math.Pi, // exact by definition (IAU 2015)
 }
 
-var conversionRates = rates.MustNewTable("distance", conversionFactors)
-
 // ConversionFactors returns a copy of the distance conversion factors: how many
 // base units (m) there are in one unit of each symbol.
 func ConversionFactors() conversion.Factors {
 	return conversion.CopyConversionFactors(conversionFactors)
 }
 
-// ConversionRates returns the shared, immutable table of conversion rates
-// between every pair of distance units.
-func ConversionRates() rates.Table {
-	return conversionRates
+// Rate returns the multiplier that converts a value in unit from into unit to,
+// and whether both are distance units. For example, Rate(Kilometer, Meter) is 1000.
+// Both forms of the micro sign are accepted.
+func Rate(from, to string) (float64, bool) {
+	return rates.FactorRate(conversionFactors, from, to)
 }

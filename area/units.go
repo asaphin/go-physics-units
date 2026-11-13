@@ -31,16 +31,15 @@ var conversionFactors = conversion.Factors{
 	SquareMile:       2589988.110336,
 }
 
-var conversionRates = rates.MustNewTable("area", conversionFactors)
-
 // ConversionFactors returns a copy of the area conversion factors: how many
 // base units (m²) there are in one unit of each symbol.
 func ConversionFactors() conversion.Factors {
 	return conversion.CopyConversionFactors(conversionFactors)
 }
 
-// ConversionRates returns the shared, immutable table of conversion rates
-// between every pair of area units.
-func ConversionRates() rates.Table {
-	return conversionRates
+// Rate returns the multiplier that converts a value in unit from into unit to,
+// and whether both are area units. For example, Rate(SquareKilometer, SquareMeter) is 1e6.
+// Both forms of the micro sign are accepted.
+func Rate(from, to string) (float64, bool) {
+	return rates.FactorRate(conversionFactors, from, to)
 }

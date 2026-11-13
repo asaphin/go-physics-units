@@ -80,7 +80,7 @@ func (t *timeImplementation) Div(divisor float64) (Time, error) {
 // NewTime creates a time of value in unit, one of the symbols defined in the
 // time package of this module.
 func NewTime(value float64, unit string) (Time, error) {
-	msm, err := newBaseMeasurement(value, unit, time.ConversionRates())
+	msm, err := newBaseMeasurement(value, unit, timeRates)
 	if err != nil {
 		return nil, err
 	}
@@ -91,7 +91,7 @@ func NewTime(value float64, unit string) (Time, error) {
 // newTime is an unchecked constructor for internal use with valid, canonical
 // units.
 func newTime(value float64, unit string) Time {
-	return &timeImplementation{baseMeasurement{value: value, unit: unit, conversionRates: time.ConversionRates()}}
+	return &timeImplementation{baseMeasurement{value: value, unit: unit, conversionRates: timeRates}}
 }
 
 var errTimeConversion = errors.New("not a time measure")

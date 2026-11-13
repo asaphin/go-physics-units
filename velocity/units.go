@@ -29,16 +29,16 @@ var conversionFactors = conversion.Factors{
 	SpeedOfLight:     299792458, // exact by definition
 }
 
-var conversionRates = rates.MustNewTable("velocity", conversionFactors)
-
 // ConversionFactors returns a copy of the velocity conversion factors: how many
 // base units (m/s) there are in one unit of each symbol.
 func ConversionFactors() conversion.Factors {
 	return conversion.CopyConversionFactors(conversionFactors)
 }
 
-// ConversionRates returns the shared, immutable table of conversion rates
-// between every pair of velocity units.
-func ConversionRates() rates.Table {
-	return conversionRates
+// Rate returns the multiplier that converts a value in unit from into unit to,
+// and whether both are velocity units. For example, Rate(MeterPerSecond,
+// KilometerPerHour) is 3.6, up to floating-point rounding.
+// Both forms of the micro sign are accepted.
+func Rate(from, to string) (float64, bool) {
+	return rates.FactorRate(conversionFactors, from, to)
 }

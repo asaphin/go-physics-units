@@ -45,16 +45,15 @@ var conversionFactors = conversion.Factors{
 	Year:        31557600,
 }
 
-var conversionRates = rates.MustNewTable("time", conversionFactors)
-
 // ConversionFactors returns a copy of the time conversion factors: how many
 // base units (s) there are in one unit of each symbol.
 func ConversionFactors() conversion.Factors {
 	return conversion.CopyConversionFactors(conversionFactors)
 }
 
-// ConversionRates returns the shared, immutable table of conversion rates
-// between every pair of time units.
-func ConversionRates() rates.Table {
-	return conversionRates
+// Rate returns the multiplier that converts a value in unit from into unit to,
+// and whether both are time units. For example, Rate(Hour, Minute) is 60.
+// Both forms of the micro sign are accepted.
+func Rate(from, to string) (float64, bool) {
+	return rates.FactorRate(conversionFactors, from, to)
 }

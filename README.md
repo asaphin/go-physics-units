@@ -146,6 +146,7 @@ func main() {
 | Velocity | `velocity` | m/s       | km/h, ft/s, mph, kn, m/s, c |
 
 - Every symbol has a named constant in its package, for example `distance.LightYear` or `mass.Pound`.
+- Each unit package also provides `ConversionFactors()`, a copy of its factors, and `Rate(from, to)`, the multiplier between two units. For example, `distance.Rate(distance.Mile, distance.Kilometer)` returns 1.609344.
 - Symbols are case-sensitive.
 - The micro prefix can be written as `μ` (U+03BC GREEK SMALL LETTER MU) or `µ` (U+00B5 MICRO SIGN). Values always carry the `μ` form.
 - `yr` is the Julian year of 365.25 days.

@@ -31,9 +31,9 @@ Shared state is built during package initialisation and never written afterwards
 
 - **No exported package-level variables.** Any importer can reassign one, so exported names are constants or functions. `TestNoExportedPackageVariables` enforces this.
 - **Never hand out a reference to shared state.** Return copies, as `ConversionFactors()` does, or read-only handles.
-  - `rates.Table` is a struct whose only field points to unexported data, and it is passed by value.
-  - Don't return `*rates.Table`. A caller can't name that type, but can still write `*distance.ConversionRates() = *area.ConversionRates()` and overwrite the global table.
-  - `TestConversionRates_CannotModifySharedTable` enforces this.
+  - The predefined rate tables are unexported variables of the root package. Unit packages expose rates only as numbers, through `Rate(from, to)`.
+  - No exported signature may use a type from an internal package. `TestNoInternalTypesInExportedAPI` enforces this.
+  - `rates.Table` is a read-only handle passed by value: a struct whose only field points to unexported data. Never hand out a `*rates.Table`. A caller who can't name the type can still write `*p = other` through a pointer and overwrite a shared table.
 - **Copy caller data on the way in.** `rates.NewTable` copies the factors, so later changes to the caller's map have no effect.
 - **No writes after init.** That rules out lazy initialisation, caches and memoisation of shared state. `TestConcurrentUse` catches them under `-race`.
 - **Immutable values.** Value fields are unexported, and every operation returns a new value. `Measurement` is sealed by an unexported method, so no outside type can pose as a measurement.
@@ -58,10 +58,10 @@ User-defined measures are first-class: they convert, combine and parse like the 
 |---|---|
 | `doc.go` | Package documentation |
 | `measurement.go` | `Measurement` interface (sealed: it has unexported methods), `baseMeasurement`, `NewMeasurement`, `ParseString`, `NewBaseMeasurement`, shared helpers |
-| `measures.go` | `MeasureType` constants, the registries `measureToConversionFactorsMapping` and `measureToConversionRatesMapping`, the `unitToMeasureType` index, `DetectMeasureType` |
+| `measures.go` | `MeasureType` constants, the predefined rate tables (`distanceRates`, …), the registries `measureToConversionFactorsMapping` and `measureToConversionRatesMapping`, the `unitToMeasureType` index, `DetectMeasureType` |
 | `common.go` | Generic `Arithmetics[T]` and `UnitConverter[T]` interfaces, `errZeroDivision` |
 | `distance.go`, `area.go`, `mass.go`, `time.go`, `velocity.go` | One file per measure: the public interface, the `xxxImplementation` struct embedding `baseMeasurement`, constructors and cross-measure operations. All five follow the same pattern |
-| `distance/`, `area/`, `mass/`, `time/`, `velocity/` | One `units.go` per measure: unit symbol constants, `BaseUnit`, the `conversionFactors` table, the eagerly built `conversionRates` table, `ConversionFactors()` (returns a copy) and `ConversionRates()` |
+| `distance/`, `area/`, `mass/`, `time/`, `velocity/` | One `units.go` per measure: unit symbol constants, `BaseUnit`, the `conversionFactors` table, `ConversionFactors()` (returns a copy) and `Rate(from, to)` |
 | `conversion/` | Public `Factors` type alias (`map[string]float64`) and `CopyConversionFactors` |
 | `measurement_creator.go` | Generic `NewMeasurementCreator[T]` for user-defined measures |
 | `internal/rates` | `Table`: the immutable, validated N×N rate table of one measure, a read-only handle passed by value. Also `CanonicalUnit` |
@@ -73,7 +73,7 @@ User-defined measures are first-class: they convert, combine and parse like the 
 ## How it works
 
 1. **Factors.** Each unit subpackage defines how many base units are in one unit: `distance.Kilometer: 1000` means 1 km = 1000 m. Base units are coherent SI units (m, m², kg, s, m/s).
-2. **Rate table.** `rates.NewTable(measure, factors)` validates the factors and expands them into a `map[pair{from, to}]float64` with value `f[from] / f[to]`. Validation requires every factor to be positive and finite and every symbol to be non-empty. Unit packages build their table at package init with `rates.MustNewTable`, so a bad factor panics at startup. A `Table` is a one-pointer handle to unexported data: copying it is cheap, and a copy can't be used to change the original (see Design principles).
+2. **Rate table.** `rates.NewTable(measure, factors)` validates the factors and expands them into a `map[pair{from, to}]float64` with value `f[from] / f[to]`. Validation requires every factor to be positive and finite and every symbol to be non-empty. The root package builds the predefined tables at package init in `measures.go` with `rates.MustNewTable`, so a bad factor panics at startup. A `Table` is a one-pointer handle to unexported data: copying it is cheap, and a copy can't be used to change the original (see Design principles).
 3. **Values.** A measurement is `baseMeasurement{value, unit, conversionRates}`. Measure-specific types embed it (`distanceImplementation{baseMeasurement}`) and are returned as interfaces. Values are immutable: every operation allocates and returns a new value.
 4. **Measure identity.** A measurement's measure is the name of its table: `Type()` returns `MeasureType(table.Measure())`.
    - Predefined tables are named after their `MeasureType` constant, and `TestMeasureRegistriesAreConsistent` enforces this.
@@ -127,12 +127,12 @@ staticcheck ./...
 
 Mirror an existing measure, e.g. `area.go` and `area/units.go`, and update all of these:
 
-1. **`<measure>/units.go`:** constants, `BaseUnit`, `conversionFactors`, `var conversionRates = rates.MustNewTable("<name>", conversionFactors)`, `ConversionFactors()`, `ConversionRates()`. `<name>` must equal the new `MeasureType` constant's value.
+1. **`<measure>/units.go`:** constants, `BaseUnit`, `conversionFactors` (with canonical symbols), `ConversionFactors()` and `Rate()`.
 2. **`<measure>.go` in the root package:**
    - a public interface embedding `Measurement`, `UnitConverter[X]` and `Arithmetics[X]`, plus an `xImplementation` struct;
    - the methods `ConvertTo`, `MustConvertTo`, `ConvertToBaseUnits`, `valueInBaseUnits`, `valueInUnits`, `Add`, `Sub`, `Mul`, `Div`;
    - the functions `NewX`, `ToX`, `StringToX` (and `newX` if a cross-measure operation returns this measure) and an `errXConversion` sentinel.
-3. **`measures.go`:** add a `MeasureType` constant and register the package in **both** mapping maps.
+3. **`measures.go`:** add a `MeasureType` constant, build the table with `xRates = rates.MustNewTable(string(MeasureX), x.ConversionFactors())`, and register the measure in **both** mapping maps.
 4. **Tests:**
    - a `t.Run` case in `TestTypedMeasures` (`measure_types_test.go`), which covers the whole shared API;
    - an entry in `predefinedFactors` and in `TestConversionFactors_ReturnsCopy` (`conversion_test.go`);
@@ -161,7 +161,7 @@ The factor model is multiplicative only. It can't express measures with an offse
 - `Example*` functions in `example_test.go` mirror `README.md` and have verified `// Output:` blocks. Keep the README snippets in sync with them.
 - If a test fails because of a library bug, fix the library or skip the test with `t.Skip("known defect: …")`. Never change expected values to match wrong output.
 - Benchmarks are in `distance_benchmark_test.go` and use the `generateRandom*` helpers.
-- `immutability_test.go` enforces the immutability principle (no exported variables, no writable handles to shared tables, race-free concurrent use). If one of its tests fails, fix the code, not the test.
+- `immutability_test.go` enforces the immutability principle (no exported variables, no internal types in the exported API, race-free concurrent use). If one of its tests fails, fix the code, not the test.
 
 ## Known defects and design debt
 
@@ -169,7 +169,6 @@ Verified on 2026-11-13. Delete each entry once it is fixed. Each of these needs 
 
 - **Inconsistent zero division.** `DivideByTime` and `DivideByDistance` panic on zero, while `Div` returns an error. Fixing this means changing the `Distance` and `Area` interfaces.
 - **`XxxMeasurement` methods lose the type.** `AddMeasurement` and the other `XxxMeasurement` methods on a typed value (e.g. a `Distance`) return a generic `Measurement`, not a `Distance`.
-- **Internal type in the public API.** `ConversionRates()` in the unit packages returns `rates.Table` from an internal package, which callers can use but not name.
 - **Costly `NewBaseMeasurement`.** It builds a full N×N table on every call; `NewMeasurementCreator` is the efficient path.
 - **Interface-based design.** Every value is a heap-allocated interface (about 65–200 ns per operation, one allocation). Units are plain strings, so `NewDistance(1, mass.Kilogram)` compiles. A value-type redesign with typed units was prototyped at about 1.4 ns with 0 allocations, but it hasn't been decided.
 

@@ -16,6 +16,11 @@ func TestMeasuresSelfCheck(t *testing.T) {
 	for measureType, factors := range measureToConversionFactorsMapping {
 		for unit := range factors {
 			canonical := rates.CanonicalUnit(unit)
+			if canonical != unit {
+				t.Errorf("%s unit %q isn't in canonical form %q; Rate looks factors up by canonical symbol",
+					measureType, unit, canonical)
+			}
+
 			if other, ok := seen[canonical]; ok {
 				duplicates = append(duplicates, canonical+" ("+string(other)+", "+string(measureType)+")")
 

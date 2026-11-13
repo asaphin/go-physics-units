@@ -39,16 +39,15 @@ var conversionFactors = conversion.Factors{
 	SolarMass: 1.98847e30,
 }
 
-var conversionRates = rates.MustNewTable("mass", conversionFactors)
-
 // ConversionFactors returns a copy of the mass conversion factors: how many
 // base units (kg) there are in one unit of each symbol.
 func ConversionFactors() conversion.Factors {
 	return conversion.CopyConversionFactors(conversionFactors)
 }
 
-// ConversionRates returns the shared, immutable table of conversion rates
-// between every pair of mass units.
-func ConversionRates() rates.Table {
-	return conversionRates
+// Rate returns the multiplier that converts a value in unit from into unit to,
+// and whether both are mass units. For example, Rate(Kilogram, Gram) is 1000.
+// Both forms of the micro sign are accepted.
+func Rate(from, to string) (float64, bool) {
+	return rates.FactorRate(conversionFactors, from, to)
 }

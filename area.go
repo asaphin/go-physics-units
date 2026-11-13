@@ -92,7 +92,7 @@ func (a *areaImplementation) DivideByDistance(d Distance) Distance {
 // NewArea creates an area of value in unit, one of the symbols defined in the
 // area package.
 func NewArea(value float64, unit string) (Area, error) {
-	msm, err := newBaseMeasurement(value, unit, area.ConversionRates())
+	msm, err := newBaseMeasurement(value, unit, areaRates)
 	if err != nil {
 		return nil, err
 	}
@@ -103,7 +103,7 @@ func NewArea(value float64, unit string) (Area, error) {
 // newArea is an unchecked constructor for internal use with valid, canonical
 // units.
 func newArea(value float64, unit string) Area {
-	return &areaImplementation{baseMeasurement{value: value, unit: unit, conversionRates: area.ConversionRates()}}
+	return &areaImplementation{baseMeasurement{value: value, unit: unit, conversionRates: areaRates}}
 }
 
 var errAreaConversion = errors.New("not an area measure")

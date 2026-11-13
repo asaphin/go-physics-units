@@ -92,6 +92,32 @@ func TestNewTable_DoesNotKeepFactors(t *testing.T) {
 	}
 }
 
+func TestFactorRate(t *testing.T) {
+	f := conversion.Factors{"m": 1, "km": 1000, "in": 0.0254}
+
+	table, err := rates.NewTable("distance", f)
+	if err != nil {
+		t.Fatal(err)
+	}
+
+	for from := range f {
+		for to := range f {
+			got, ok := rates.FactorRate(f, from, to)
+			want, _ := table.Rate(from, to)
+
+			if !ok || got != want {
+				t.Errorf("FactorRate(%s, %s) = %v, %v; want %v, true, as the table", from, to, got, ok, want)
+			}
+		}
+	}
+
+	for _, pair := range [][2]string{{"m", "ft"}, {"ft", "m"}, {"ft", "ft"}} {
+		if got, ok := rates.FactorRate(f, pair[0], pair[1]); ok || got != 0 {
+			t.Errorf("FactorRate(%s, %s) = %v, %v; want 0, false", pair[0], pair[1], got, ok)
+		}
+	}
+}
+
 func TestTable_Zero(t *testing.T) {
 	var zero rates.Table
 
