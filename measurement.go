@@ -1,7 +1,6 @@
 package units
 
 import (
-	"errors"
 	"fmt"
 	"io"
 	"math"
@@ -55,8 +54,6 @@ type baseMeasurement struct {
 	unit            string
 	conversionRates rates.Table
 }
-
-var errNilMeasurement = errors.New("measurement is nil")
 
 func (b *baseMeasurement) base() *baseMeasurement {
 	return b
@@ -159,7 +156,7 @@ func (b *baseMeasurement) MulMeasurement(multiplier float64) Measurement {
 // DivMeasurement returns b divided by divisor.
 func (b *baseMeasurement) DivMeasurement(divisor float64) (Measurement, error) {
 	if divisor == 0 {
-		return nil, errZeroDivision
+		return nil, ErrZeroDivision
 	}
 
 	bm := b.withValue(b.value / divisor)
@@ -213,15 +210,19 @@ func (b *baseMeasurement) valueOf(m Measurement) (float64, error) {
 	}
 
 	if b.Type() != m.Type() {
-		return 0, fmt.Errorf("incompatible types %s and %s", b.Type(), m.Type())
+		return 0, newError(
+			ErrIncompatibleMeasures,
+			"incompatible types "+string(b.Type())+" and "+string(m.Type()),
+			nil,
+		)
 	}
 
 	other := m.base()
 
 	rate, ok := other.conversionRates.Rate(other.unit, b.unit)
 	if !ok {
-		return 0, fmt.Errorf("can't convert %s to %s: the units belong to different %s measures",
-			other.unit, b.unit, b.Type())
+		return 0, newError(ErrIncompatibleMeasures, "can't convert "+other.unit+" to "+b.unit+
+			": the units belong to different "+string(b.Type())+" measures", nil)
 	}
 
 	return other.value * rate, nil
@@ -238,7 +239,7 @@ func (b *baseMeasurement) withValue(value float64) baseMeasurement {
 func NewMeasurement(value float64, unit string) (Measurement, error) {
 	mt := DetectMeasureType(unit)
 	if mt == MeasureCustom {
-		return nil, errors.New("unknown unit " + unit)
+		return nil, unknownUnitError("", unit)
 	}
 
 	bm, err := newBaseMeasurement(value, unit, measureToConversionRatesMapping[mt])
@@ -269,7 +270,7 @@ func ParseString(s string) (Measurement, error) {
 func NewBaseMeasurement(value float64, unit string, conversionFactors conversion.Factors) (Measurement, error) {
 	table, err := rates.NewTable(string(MeasureCustom), conversionFactors)
 	if err != nil {
-		return nil, err
+		return nil, newError(ErrInvalidFactors, err.Error(), nil)
 	}
 
 	bm, err := newBaseMeasurement(value, unit, table)
@@ -308,24 +309,17 @@ func parseValueAndUnit(s string) (float64, string, error) {
 	}
 
 	if n != len(parts) {
-		return 0, "", fmt.Errorf("invalid string format: %s", s)
+		return 0, "", newError(ErrInvalidFormat, "invalid string format: "+s, nil)
 	}
 
 	value, err := strconv.ParseFloat(parts[0], 64)
 	if err != nil {
-		return 0, "", fmt.Errorf("failed to parse value %v: %w", parts[0], err)
+		return 0, "", newError(ErrInvalidFormat, "failed to parse value "+parts[0]+": "+err.Error(), err)
 	}
 
 	if math.IsNaN(value) || math.IsInf(value, 0) {
-		return 0, "", fmt.Errorf("value %s is not a finite number", parts[0])
+		return 0, "", newError(ErrInvalidFormat, "value "+parts[0]+" is not a finite number", nil)
 	}
 
 	return value, parts[1], nil
-}
-
-// unknownUnitError builds the error for a unit that doesn't belong to measure mt.
-// It concatenates instead of using fmt.Errorf, which formats the named string
-// type MeasureType through reflection.
-func unknownUnitError(mt MeasureType, unit string) error {
-	return errors.New("unknown " + string(mt) + " unit " + unit)
 }

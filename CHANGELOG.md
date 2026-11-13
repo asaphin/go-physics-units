@@ -28,7 +28,7 @@
 - Faster, with fewer allocations:
   - `ParseString` is about twice as fast and allocates once instead of three times. `DetectMeasureType` uses an index instead of a linear scan, and the parser no longer builds a slice of fields.
   - `String()` is about twice as fast and allocates once.
-  - Creating a value with an unknown unit is almost twice as fast.
+  - Errors are cheaper. Creating a value with an unknown unit is about three times as fast and allocates once instead of four times. Parsing a malformed string is about twice as fast and allocates twice instead of four times.
   - `NewBaseMeasurement` is two to four times as fast, depending on the number of units.
   - Most other operations allocate once instead of twice.
   - `StringToDistance` and the other `StringToX` functions allocate once instead of twice. They parse and construct directly instead of going through `ParseString`, so a unit of another measure is reported as unknown for that measure (`unknown distance unit kg`) instead of `not a distance measure`.
@@ -41,6 +41,7 @@
 
 ### Added
 
+- Sentinel errors for `errors.Is`: `ErrUnknownUnit`, `ErrIncompatibleMeasures`, `ErrZeroDivision`, `ErrInvalidFormat`, `ErrInvalidFactors` and `ErrInvalidMeasure`. Every error the package returns matches exactly one of them and keeps its detailed message. They are constants of the new type `Error`, so no importer can reassign them, and `errors.AsType[units.Error](err)` finds the kind. Unknown-unit errors are `*UnitError` values, which carry the measure and the unit, and an unparsable value wraps its `*strconv.NumError`.
 - Measurements implement `fmt.Formatter`. `%f`, `%e`, `%g` and the other float verbs format the value with the given flags, width and precision and append the unit: `fmt.Sprintf("%.2f", d)` gives `5.00 km`. `%v` and `%s` print `String()` with width, `%q` quotes it, and `%#v` prints `units.Measurement{Value:5, Unit:"km", Type:"distance"}`. Previously, verbs other than `%v` and `%s` printed the internal struct, including the whole conversion table.
 - The area measure: the `area` package (mm², cm², in², ft², m², km², mi²), `Area`, `NewArea`, `ToArea`, `StringToArea` and `MeasureArea`, with the cross-measure operations `Distance.Square` and `Area.DivideByDistance`.
 - `Rate(from, to string) (float64, bool)` in each unit package: the multiplier that converts a value from one unit to another, for example `distance.Rate(distance.Mile, distance.Kilometer)` is 1.609344. Both forms of the micro sign are accepted.

@@ -1,8 +1,6 @@
 package units
 
 import (
-	"errors"
-
 	"github.com/asaphin/go-physics-units/distance"
 	"github.com/asaphin/go-physics-units/velocity"
 )
@@ -74,7 +72,7 @@ func (v *velocityImplementation) Mul(multiplier float64) Velocity {
 // Div returns the velocity divided by divisor. It fails if divisor is zero.
 func (v *velocityImplementation) Div(divisor float64) (Velocity, error) {
 	if divisor == 0 {
-		return nil, errZeroDivision
+		return nil, ErrZeroDivision
 	}
 
 	return &velocityImplementation{v.withValue(v.value / divisor)}, nil
@@ -102,7 +100,7 @@ func newVelocity(value float64, unit string) Velocity {
 	return &velocityImplementation{baseMeasurement{value: value, unit: unit, conversionRates: velocityRates}}
 }
 
-var errVelocityConversion = errors.New("not a velocity measure")
+const errVelocityConversion incompatibleError = "not a velocity measure"
 
 // ToVelocity converts m, for example a result of ParseString, into a Velocity.
 // It fails if m isn't a velocity.

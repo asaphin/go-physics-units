@@ -1,6 +1,7 @@
 package units_test
 
 import (
+	"errors"
 	"fmt"
 
 	units "github.com/asaphin/go-physics-units"
@@ -78,6 +79,24 @@ func ExampleParseString() {
 	// Output:
 	// distance
 	// 1.5 km
+}
+
+func ExampleUnitError() {
+	_, err := units.StringToDistance("3 kg")
+
+	// Every error matches one of the sentinels, such as ErrUnknownUnit.
+	fmt.Println(errors.Is(err, units.ErrUnknownUnit))
+
+	// Unknown-unit errors carry the measure and the unit.
+	if ue, ok := errors.AsType[*units.UnitError](err); ok {
+		fmt.Println(ue.Measure, ue.Unit)
+	}
+
+	fmt.Println(err)
+	// Output:
+	// true
+	// distance kg
+	// unknown distance unit kg
 }
 
 func ExampleDistance_add() {

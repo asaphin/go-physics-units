@@ -21,7 +21,7 @@ Measurements are created and combined in hot loops, so their cost is part of the
 
 - **Do the work once.** All conversion work happens at package init, or once per `NewMeasurementCreator`. A conversion at run time is one map lookup and one multiplication.
 - **Hot paths** are `NewX`, `ConvertTo`, `Add`/`Sub`/`Mul`/`Div`, the cross-measure operations, `String` and `ParseString`. Keep them free of reflection, `fmt`, and any allocation beyond the result value.
-- **Error paths too.** Build errors with `errors.New` and string concatenation. `fmt.Errorf` is for wrapping with `%w`, and it formats named string types such as `MeasureType` through reflection. Example: `unknownUnitError`.
+- **Error paths too.** Build error messages by string concatenation, never with `fmt`, which formats named string types such as `MeasureType` through reflection. Return a constant where the message is fixed (`ErrZeroDivision`, the `errXConversion` constants): that costs no allocation. `*UnitError` builds its message in `Error()`, so returning one costs a single allocation. `TestAllocations` guards the error paths too.
 - **Inlining.** Keep the `rates.Table` methods small enough to inline. Check with `go build -gcflags=-m ./internal/rates`.
 - **Allocation guards.** `TestAllocations` (`alloc_test.go`) fixes the allocation count of each hot path, and CI fails if one rises. Unlike timings, allocation counts are deterministic. The race detector changes them, so the file is excluded from `-race` builds, and `make allocs` and CI run it separately. Lower a limit when you save an allocation; raise one only on purpose, and say why in the PR.
 - **Measure.** For any change that touches a hot path, run `make bench-compare` (`BENCH_BASE=<ref>`, default the latest tag). It benchmarks both sides on the same Go toolchain and compares them with benchstat. Differences around ±10% are noise on this suite. Report every regression to the user; don't accept one silently.
@@ -38,7 +38,7 @@ Shared state is built during package initialisation and never written afterwards
 - **Copy caller data on the way in.** `rates.NewTable` copies the factors, so later changes to the caller's map have no effect.
 - **No writes after init.** That rules out lazy initialisation, caches and memoisation of shared state. `TestConcurrentUse` catches them under `-race`.
 - **Immutable values.** Value fields are unexported, and every operation returns a new value. `Measurement` is sealed by an unexported method, so no outside type can pose as a measurement.
-- **Exported errors.** These are planned but not yet added, and an exported `var ErrX = errors.New(…)` would be reassignable. Agree on an immutable form before adding them, for example constants of an exported error type.
+- **Exported errors are constants.** The sentinels are constants of the exported type `Error` (`errors.go`). Never add `var ErrX = errors.New(…)`: any importer could reassign it. Detail errors such as `*UnitError` are allocated on every call, so a caller who changes one changes only their own copy. Never return a shared pointer to an error.
 
 ### 3. Customization
 
@@ -60,7 +60,8 @@ User-defined measures are first-class: they convert, combine and parse like the 
 | `doc.go` | Package documentation |
 | `measurement.go` | `Measurement` interface (sealed: it has unexported methods), `baseMeasurement`, `NewMeasurement`, `ParseString`, `NewBaseMeasurement`, shared helpers |
 | `measures.go` | `MeasureType` constants, the predefined rate tables (`distanceRates`, …), the registries `measureToConversionFactorsMapping` and `measureToConversionRatesMapping`, the `unitToMeasureType` index, `DetectMeasureType` |
-| `common.go` | Generic `Arithmetics[T]` and `UnitConverter[T]` interfaces, `errZeroDivision` |
+| `common.go` | Generic `Arithmetics[T]` and `UnitConverter[T]` interfaces |
+| `errors.go` | The sentinel errors (constants of type `Error`), `UnitError`, and the unexported error types and constructors the package uses |
 | `distance.go`, `area.go`, `mass.go`, `time.go`, `velocity.go` | One file per measure: the public interface, the `xxxImplementation` struct embedding `baseMeasurement`, constructors and cross-measure operations. All five follow the same pattern |
 | `distance/`, `area/`, `mass/`, `time/`, `velocity/` | One `units.go` per measure: unit symbol constants, `BaseUnit`, the `conversionFactors` table, `ConversionFactors()` (returns a copy) and `Rate(from, to)` |
 | `conversion/` | Public `Factors` type alias (`map[string]float64`) and `CopyConversionFactors` |
@@ -135,7 +136,7 @@ Mirror an existing measure, e.g. `area.go` and `area/units.go`, and update all o
 2. **`<measure>.go` in the root package:**
    - a public interface embedding `Measurement`, `UnitConverter[X]` and `Arithmetics[X]`, plus an `xImplementation` struct;
    - the methods `ConvertTo`, `MustConvertTo`, `ConvertToBaseUnits`, `valueInBaseUnits`, `valueInUnits`, `Add`, `Sub`, `Mul`, `Div`;
-   - the functions `NewX`, `ToX`, `StringToX` (and `newX` if a cross-measure operation returns this measure) and an `errXConversion` sentinel.
+   - the functions `NewX`, `ToX`, `StringToX` (and `newX` if a cross-measure operation returns this measure) and an `errXConversion` constant of type `incompatibleError`.
 3. **`measures.go`:** add a `MeasureType` constant, build the table with `xRates = rates.MustNewTable(string(MeasureX), x.ConversionFactors())`, and register the measure in **both** mapping maps.
 4. **Tests:**
    - an `xCase` value in `measure_types_test.go`, used by `TestTypedMeasures` (the whole shared API) and `BenchmarkMeasures`;
@@ -149,7 +150,8 @@ The factor model is multiplicative only. It can't express measures with an offse
 ## Code conventions
 
 - Format with `make fmt`. It runs gofumpt and goimports, with stdlib imports first, a blank line, then module imports, and golines wraps lines longer than 120 columns.
-- Error strings are lower-case with no trailing punctuation and include the offending unit. Use `unknownUnitError(mt, unit)` for unknown units, and wrap underlying errors with `%w`.
+- Error strings are lower-case with no trailing punctuation and include the offending unit.
+- **Every returned error matches exactly one sentinel** (`TestErrors` checks each one). Use `unknownUnitError(mt, unit)` for unknown units, `ErrZeroDivision` itself, an `incompatibleError` constant for a fixed message, or `newError(kind, msg, cause)` for anything else; `cause` is the underlying error, or nil. A new kind of error needs a new sentinel, added to `sentinels` in `errors_test.go` and to the README table.
 - Return errors rather than panicking. The only intended panics are `Must*` methods and `rates.MustNewTable` on constant data.
 - Exported identifiers need doc comments that start with the identifier's name, as do package clauses (`revive` enforces both).
 - **Look-alike characters:** U+00B5 and U+03BC look identical. Wherever the difference matters in code (comparisons, tests), write them as Go escape sequences, as `internal/rates.CanonicalUnit` and the tests do. Unit constants keep the readable literal symbol.

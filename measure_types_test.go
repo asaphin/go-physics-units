@@ -1,6 +1,7 @@
 package units_test
 
 import (
+	"errors"
 	"testing"
 
 	units "github.com/asaphin/go-physics-units"
@@ -113,8 +114,8 @@ func testTypedMeasure[T typedMeasure[T]](t *testing.T, c typedCase[T]) {
 		assertMeasurement(t, got, 2*c.ratio, c.unitB)
 
 		bad, err := x.ConvertTo(c.foreignUnit)
-		if err == nil || any(bad) != nil {
-			t.Errorf("ConvertTo(%s) = %v, %v; want nil and an error", c.foreignUnit, bad, err)
+		if !errors.Is(err, units.ErrUnknownUnit) || any(bad) != nil {
+			t.Errorf("ConvertTo(%s) = %v, %v; want nil and ErrUnknownUnit", c.foreignUnit, bad, err)
 		}
 	})
 
@@ -148,8 +149,8 @@ func testTypedMeasure[T typedMeasure[T]](t *testing.T, c typedCase[T]) {
 		assertMeasurement(t, got, 0.5, c.unitA)
 
 		bad, err := x.Div(0)
-		if err == nil || any(bad) != nil {
-			t.Errorf("Div(0) = %v, %v; want nil and an error", bad, err)
+		if !errors.Is(err, units.ErrZeroDivision) || any(bad) != nil {
+			t.Errorf("Div(0) = %v, %v; want nil and ErrZeroDivision", bad, err)
 		}
 	})
 
@@ -159,8 +160,8 @@ func testTypedMeasure[T typedMeasure[T]](t *testing.T, c typedCase[T]) {
 
 	t.Run("New with a unit of another measure", func(t *testing.T) {
 		bad, err := c.newFn(1, c.foreignUnit)
-		if err == nil || any(bad) != nil {
-			t.Errorf("New(1, %s) = %v, %v; want nil and an error", c.foreignUnit, bad, err)
+		if !errors.Is(err, units.ErrUnknownUnit) || any(bad) != nil {
+			t.Errorf("New(1, %s) = %v, %v; want nil and ErrUnknownUnit", c.foreignUnit, bad, err)
 		}
 	})
 
@@ -189,12 +190,12 @@ func testTypedMeasure[T typedMeasure[T]](t *testing.T, c typedCase[T]) {
 			t.Fatal(err)
 		}
 
-		if _, err := c.toFn(foreign); err == nil {
-			t.Errorf("converting a %s measurement succeeded", foreign.Type())
+		if _, err := c.toFn(foreign); !errors.Is(err, units.ErrIncompatibleMeasures) {
+			t.Errorf("converting a %s measurement: %v, want ErrIncompatibleMeasures", foreign.Type(), err)
 		}
 
-		if _, err := c.toFn(nil); err == nil {
-			t.Error("converting nil succeeded")
+		if _, err := c.toFn(nil); !errors.Is(err, units.ErrIncompatibleMeasures) {
+			t.Errorf("converting nil: %v, want ErrIncompatibleMeasures", err)
 		}
 	})
 

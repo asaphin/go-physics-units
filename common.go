@@ -1,11 +1,5 @@
 package units
 
-import (
-	"errors"
-)
-
-var errZeroDivision = errors.New("division by zero")
-
 // Arithmetics is the arithmetic implemented by every predefined measure type T.
 // Add and Sub accept an operand in any unit of the same measure and return the
 // result in the receiver's unit.

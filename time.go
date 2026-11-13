@@ -1,7 +1,6 @@
 package units
 
 import (
-	"errors"
 	builtintime "time"
 
 	"github.com/asaphin/go-physics-units/time"
@@ -71,7 +70,7 @@ func (t *timeImplementation) Mul(multiplier float64) Time {
 // Div returns the time divided by divisor. It fails if divisor is zero.
 func (t *timeImplementation) Div(divisor float64) (Time, error) {
 	if divisor == 0 {
-		return nil, errZeroDivision
+		return nil, ErrZeroDivision
 	}
 
 	return &timeImplementation{t.withValue(t.value / divisor)}, nil
@@ -94,7 +93,7 @@ func newTime(value float64, unit string) Time {
 	return &timeImplementation{baseMeasurement{value: value, unit: unit, conversionRates: timeRates}}
 }
 
-var errTimeConversion = errors.New("not a time measure")
+const errTimeConversion incompatibleError = "not a time measure"
 
 // ToTime converts m, for example a result of ParseString, into a Time.
 // It fails if m isn't a time.
