@@ -17,7 +17,7 @@ jobs:
       matrix:
         include:
           # The minimum version declared in go.mod, and the latest release.
-          - name: go.mod
+          - name: minimum
             go-version-file: go.mod
           - name: stable
             go-version: stable
@@ -31,6 +31,8 @@ jobs:
       - run: go vet ./...
       - run: go test -race -count=1 -coverpkg=./... -coverprofile=coverage.out ./...
       - run: go tool cover -func=coverage.out | tail -n 1
+      - name: allocation guards (excluded from -race builds)
+        run: go test -count=1 -run='^TestAllocations$' .
       - name: fuzz ParseString
         run: go test -run='^$' -fuzz=FuzzParseString -fuzztime=20s .
 

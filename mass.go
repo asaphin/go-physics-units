@@ -99,11 +99,14 @@ func ToMass(m Measurement) (Mass, error) {
 }
 
 // StringToMass parses a mass from a string such as "10 kg".
+// It fails if the unit isn't a mass unit.
 func StringToMass(s string) (Mass, error) {
-	m, err := ParseString(s)
+	// Parse and construct directly: one allocation, where ParseString
+	// followed by ToMass would allocate twice.
+	value, unit, err := parseValueAndUnit(s)
 	if err != nil {
 		return nil, err
 	}
 
-	return ToMass(m)
+	return NewMass(value, unit)
 }
