@@ -156,11 +156,11 @@ Method names don't change: `ConvertTo`, `Add`, `Compare`, `DivideByTime` and the
 Phase 3 of the roadmap, adapted:
 
 1. **3.1 (adapted)** Each unit package gets `type Unit uint8`, constants, the factor and symbol arrays, `String`, `Factor`, `ParseUnit` and `Units`, generated from one list per package so the arrays can't drift apart.
-2. **3.2A** Value-type measures, one per PR: mass, time, velocity, area, distance. Then lower the allocation guards to 0.
+2. **3.2A** Value-type measures. The library now has fourteen, all with the same shape (the nine added in step 4.3 were generated from the area pattern), so generate them from one template plus hand-written cross-measure operations, rather than converting each by hand. Then lower the allocation guards to 0.
 3. **3.3A** `UnitSet`, `U[M]` and `Quantity[M]`, plus the deprecation of `NewMeasurementCreator` and `NewBaseMeasurement`.
 4. **3.4** `MIGRATION.md`, built from the table above, and the release.
 
-New measures added before the decision (step 4.3) convert the same way as the existing five.
+The measures added in steps 4.3 (volume through data rate) convert the same way as the original five.
 
 ## Decisions for the author
 
