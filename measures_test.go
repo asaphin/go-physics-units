@@ -1,7 +1,7 @@
 package units //nolint:testpackage // inspects the unexported measure registries
 
 import (
-	"sort"
+	"slices"
 	"strings"
 	"testing"
 
@@ -32,7 +32,7 @@ func TestMeasuresSelfCheck(t *testing.T) {
 	}
 
 	if len(duplicates) != 0 {
-		sort.Strings(duplicates)
+		slices.Sort(duplicates)
 		t.Errorf("non unique units found: %s", strings.Join(duplicates, "; "))
 	}
 }

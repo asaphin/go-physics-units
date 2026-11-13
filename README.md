@@ -20,7 +20,7 @@ It has no dependencies.
 go get github.com/asaphin/go-physics-units@latest
 ```
 
-Requires Go 1.22 or later.
+Requires Go 1.27 or later.
 
 ## Usage
 
@@ -167,6 +167,8 @@ make cover   # coverage summary, plus an HTML report in coverage/
 make bench   # benchmarks
 make fuzz    # fuzz the string parser (FUZZTIME=30s by default)
 ```
+
+`make check` needs golangci-lint v2.15.0, the version CI uses. With any other version it stops and prints the install command.
 
 Guidelines for contributors and AI coding agents are in [AGENTS.md](AGENTS.md).
 

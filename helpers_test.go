@@ -2,7 +2,7 @@ package units_test
 
 import (
 	"math"
-	"math/rand"
+	"math/rand/v2"
 	"testing"
 
 	units "github.com/asaphin/go-physics-units"
@@ -69,7 +69,7 @@ func getValidUnits(factors conversion.Factors) []string {
 }
 
 func randFloat(lo, hi float64) float64 {
-	return lo + rand.Float64()*(hi-lo) //nolint:gosec // benchmark data needs no cryptographic randomness
+	return lo + rand.Float64()*(hi-lo)
 }
 
 func randFloats(lo, hi float64, n int) []float64 {
@@ -87,7 +87,7 @@ func randStringElement(arr []string) string {
 		panic("empty array")
 	}
 
-	return arr[rand.Intn(len(arr))] //nolint:gosec // benchmark data needs no cryptographic randomness
+	return arr[rand.IntN(len(arr))]
 }
 
 func generateRandomDistances(n int) []units.Distance {

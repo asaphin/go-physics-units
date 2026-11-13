@@ -72,7 +72,12 @@ func TestNoExportedPackageVariables(t *testing.T) {
 			}
 
 			for _, spec := range gen.Specs {
-				for _, name := range spec.(*ast.ValueSpec).Names {
+				vs, ok := spec.(*ast.ValueSpec)
+				if !ok {
+					continue
+				}
+
+				for _, name := range vs.Names {
 					if name.IsExported() {
 						t.Errorf("%s: exported package variable %s can be reassigned by any importer",
 							fset.Position(name.Pos()), name.Name)
@@ -195,15 +200,11 @@ func TestConcurrentUse(t *testing.T) {
 	var wg sync.WaitGroup
 
 	for range 8 {
-		wg.Add(1)
-
-		go func() {
-			defer wg.Done()
-
+		wg.Go(func() {
 			for range 100 {
 				useConcurrently(t, mc)
 			}
-		}()
+		})
 	}
 
 	wg.Wait()
