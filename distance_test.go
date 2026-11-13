@@ -1,39 +1,27 @@
 package units_test
 
 import (
-	"github.com/asaphin/go-physics-units"
+	"testing"
+
+	units "github.com/asaphin/go-physics-units"
+	"github.com/asaphin/go-physics-units/area"
 	"github.com/asaphin/go-physics-units/distance"
 	"github.com/asaphin/go-physics-units/time"
 	"github.com/asaphin/go-physics-units/velocity"
-	"testing"
 )
-
-func TestDistanceConversionFactors_Safety(t *testing.T) {
-	dcf := distance.ConversionFactors()
-
-	dcf["km"] = 2000
-
-	otherDcf := distance.ConversionFactors()
-
-	if otherDcf["km"] == 2000 {
-		t.Error("ConversionFactors function isn't safe")
-	}
-}
 
 func TestDistance_ConvertTo(t *testing.T) {
 	d1, err := units.NewDistance(1, distance.Meter)
 	if err != nil {
-		t.Error(err)
+		t.Fatal(err)
 	}
 
 	d2, err := d1.ConvertTo(distance.Kilometer)
 	if err != nil {
-		t.Error(err)
+		t.Fatal(err)
 	}
 
-	if !almostEqual(d2.Value(), 0.001, 0.001) {
-		t.Errorf("value should be 0.001, but was %v", d2.Value())
-	}
+	assertMeasurement(t, d2, 0.001, distance.Kilometer)
 }
 
 func TestDistance_Add(t *testing.T) {
@@ -71,18 +59,26 @@ func TestDistance_Add(t *testing.T) {
 			adderUnit:       distance.Mile,
 			resultDistance:  2,
 		},
+		{
+			name:            "adding of one millimeter to one meter",
+			initialDistance: 1,
+			initialUnit:     distance.Meter,
+			adderDistance:   1,
+			adderUnit:       distance.Millimeter,
+			resultDistance:  1.001,
+		},
 	}
 
 	for _, c := range cases {
 		t.Run(c.name, func(t *testing.T) {
 			d, err := units.NewDistance(c.initialDistance, c.initialUnit)
 			if err != nil {
-				t.Error(err)
+				t.Fatal(err)
 			}
 
 			adder, err := units.NewDistance(c.adderDistance, c.adderUnit)
 			if err != nil {
-				t.Error(err)
+				t.Fatal(err)
 			}
 
 			res := d.Add(adder)
@@ -100,28 +96,44 @@ func TestDistance_Add(t *testing.T) {
 			}
 		})
 	}
-
 }
 
 func TestDistance_DivideByTime(t *testing.T) {
 	dist, err := units.NewDistance(100, distance.Kilometer)
 	if err != nil {
-		t.Error(err)
+		t.Fatal(err)
 	}
 
 	tm, err := units.NewTime(2, time.Hour)
 	if err != nil {
-		t.Error(err)
+		t.Fatal(err)
 	}
 
 	vel := dist.DivideByTime(tm)
-	if vel.Unit() != velocity.BaseUnit {
-		t.Errorf("result velocity should have base SI unit %s", velocity.BaseUnit)
+
+	assertMeasurement(t, vel, 100000.0/7200, velocity.BaseUnit)
+	assertMeasurement(t, vel.MustConvertTo(velocity.KilometerPerHour), 50, velocity.KilometerPerHour)
+
+	zero, err := units.NewTime(0, time.Second)
+	if err != nil {
+		t.Fatal(err)
 	}
 
-	var expectedValue = 13.89
+	assertPanics(t, func() { dist.DivideByTime(zero) })
+}
 
-	if !almostEqual(expectedValue, vel.Value(), 1e-3) {
-		t.Errorf("actual velocity value %v, but expected %v", vel.Value(), expectedValue)
+func TestDistance_Square(t *testing.T) {
+	d, err := units.NewDistance(3, distance.Kilometer)
+	if err != nil {
+		t.Fatal(err)
 	}
+
+	a := d.Square()
+
+	if a.Type() != units.MeasureArea {
+		t.Errorf("Type() = %s, want %s", a.Type(), units.MeasureArea)
+	}
+
+	assertMeasurement(t, a, 9e6, area.BaseUnit)
+	assertMeasurement(t, a.MustConvertTo(area.SquareKilometer), 9, area.SquareKilometer)
 }

@@ -1,8 +1,9 @@
 package units_test
 
 import (
-	units "github.com/asaphin/go-physics-units"
 	"testing"
+
+	units "github.com/asaphin/go-physics-units"
 )
 
 func BenchmarkDistance_AddSub(b *testing.B) {
@@ -14,7 +15,7 @@ func BenchmarkDistance_AddSub(b *testing.B) {
 	var index int
 
 	b.Run("Addition of two random distances", func(b *testing.B) {
-		for i := 0; i < b.N; i++ {
+		for i := range b.N {
 			index = i % n
 
 			_ = distances1[index].Add(distances2[index])
@@ -22,10 +23,10 @@ func BenchmarkDistance_AddSub(b *testing.B) {
 	})
 
 	b.Run("Subtraction of two random distances", func(b *testing.B) {
-		for i := 0; i < b.N; i++ {
+		for i := range b.N {
 			index = i % n
 
-			_ = distances1[index].Add(distances2[index])
+			_ = distances1[index].Sub(distances2[index])
 		}
 	})
 }
@@ -39,7 +40,7 @@ func BenchmarkDistance_MulDiv(b *testing.B) {
 	var index int
 
 	b.Run("Multiplying of distance", func(b *testing.B) {
-		for i := 0; i < b.N; i++ {
+		for i := range b.N {
 			index = i % n
 
 			_ = distances[index].Mul(multipliers[index])
@@ -47,7 +48,7 @@ func BenchmarkDistance_MulDiv(b *testing.B) {
 	})
 
 	b.Run("Division of distance", func(b *testing.B) {
-		for i := 0; i < b.N; i++ {
+		for i := range b.N {
 			index = i % n
 
 			_, _ = distances[index].Div(multipliers[index])
@@ -64,7 +65,7 @@ func BenchmarkDistance_DivideByTime(b *testing.B) {
 	var index int
 
 	b.Run("Division of distance by time to get a velocity", func(b *testing.B) {
-		for i := 0; i < b.N; i++ {
+		for i := range b.N {
 			index = i % n
 
 			_ = distances[index].DivideByTime(times[index])
@@ -80,7 +81,7 @@ func BenchmarkDistance_ConvertToBaseUnit(b *testing.B) {
 	var index int
 
 	b.Run("Conversion of distances to basic units - meters", func(b *testing.B) {
-		for i := 0; i < b.N; i++ {
+		for i := range b.N {
 			index = i % n
 
 			_ = distances[index].ConvertToBaseUnits()
@@ -96,7 +97,7 @@ func BenchmarkDistance_ToString(b *testing.B) {
 	var index int
 
 	b.Run("Conversion of distances to strings", func(b *testing.B) {
-		for i := 0; i < b.N; i++ {
+		for i := range b.N {
 			index = i % n
 
 			_ = distances[index].String()
@@ -116,7 +117,7 @@ func BenchmarkDistance_ParseString(b *testing.B) {
 	}
 
 	b.Run("Parse strings to distances", func(b *testing.B) {
-		for i := 0; i < b.N; i++ {
+		for i := range b.N {
 			index := i % n
 
 			_, err := units.ParseString(str[index])
@@ -129,7 +130,7 @@ func BenchmarkDistance_ParseString(b *testing.B) {
 
 func BenchmarkDistance_Creation(b *testing.B) {
 	b.Run("NewDistanceMeters", func(b *testing.B) {
-		for i := 0; i < b.N; i++ {
+		for range b.N {
 			_, _ = units.NewDistance(10.0, "m")
 		}
 	})
@@ -137,7 +138,7 @@ func BenchmarkDistance_Creation(b *testing.B) {
 
 func BenchmarkDistance_ErrorHandling(b *testing.B) {
 	b.Run("NewDistanceUnknownUnit", func(b *testing.B) {
-		for i := 0; i < b.N; i++ {
+		for range b.N {
 			_, _ = units.NewDistance(10.0, "unk")
 		}
 	})

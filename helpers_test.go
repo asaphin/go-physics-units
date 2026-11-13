@@ -1,14 +1,17 @@
 package units_test
 
 import (
+	"math"
+	"math/rand"
+	"testing"
+
 	units "github.com/asaphin/go-physics-units"
 	"github.com/asaphin/go-physics-units/conversion"
 	"github.com/asaphin/go-physics-units/distance"
 	"github.com/asaphin/go-physics-units/time"
-	"math"
-	"math/rand"
 )
 
+// almostEqual reports whether a and b are equal within the relative error epsilon.
 func almostEqual(a, b, epsilon float64) bool {
 	if a == b {
 		return true
@@ -20,9 +23,40 @@ func almostEqual(a, b, epsilon float64) bool {
 
 	if a == 0 || b == 0 || absA+absB < math.SmallestNonzeroFloat64 {
 		return diff < epsilon
-	} else {
-		return diff/(absA+absB) < epsilon
 	}
+
+	return diff/(absA+absB) < epsilon
+}
+
+// assertMeasurement fails the test unless m has the given value (within a
+// relative error of 1e-12) and unit.
+func assertMeasurement(t *testing.T, m units.Measurement, value float64, unit string) {
+	t.Helper()
+
+	if m == nil {
+		t.Fatalf("measurement is nil, want %v %s", value, unit)
+	}
+
+	if m.Unit() != unit {
+		t.Errorf("unit is %s, want %s", m.Unit(), unit)
+	}
+
+	if !almostEqual(m.Value(), value, 1e-12) {
+		t.Errorf("value is %v, want %v", m.Value(), value)
+	}
+}
+
+// assertPanics fails the test unless f panics.
+func assertPanics(t *testing.T, f func()) {
+	t.Helper()
+
+	defer func() {
+		if recover() == nil {
+			t.Error("expected a panic")
+		}
+	}()
+
+	f()
 }
 
 func getValidUnits(factors conversion.Factors) []string {
@@ -34,15 +68,15 @@ func getValidUnits(factors conversion.Factors) []string {
 	return keys
 }
 
-func randFloat(min, max float64) float64 {
-	return min + rand.Float64()*(max-min)
+func randFloat(lo, hi float64) float64 {
+	return lo + rand.Float64()*(hi-lo) //nolint:gosec // benchmark data needs no cryptographic randomness
 }
 
-func randFloats(min, max float64, n int) []float64 {
+func randFloats(lo, hi float64, n int) []float64 {
 	floats := make([]float64, n)
 
 	for i := range floats {
-		floats[i] = randFloat(min, max)
+		floats[i] = randFloat(lo, hi)
 	}
 
 	return floats
@@ -53,9 +87,7 @@ func randStringElement(arr []string) string {
 		panic("empty array")
 	}
 
-	index := rand.Intn(len(arr))
-
-	return arr[index]
+	return arr[rand.Intn(len(arr))] //nolint:gosec // benchmark data needs no cryptographic randomness
 }
 
 func generateRandomDistances(n int) []units.Distance {
@@ -63,7 +95,7 @@ func generateRandomDistances(n int) []units.Distance {
 
 	distances := make([]units.Distance, n)
 
-	for i := 0; i < n; i++ {
+	for i := range n {
 		dist, err := units.NewDistance(randFloat(-100, 100), randStringElement(validDistanceUnits))
 		if err != nil {
 			panic(err)
@@ -80,7 +112,7 @@ func generateRandomTimes(n int) []units.Time {
 
 	times := make([]units.Time, n)
 
-	for i := 0; i < n; i++ {
+	for i := range n {
 		tm, err := units.NewTime(randFloat(-100, 100), randStringElement(validTimeUnits))
 		if err != nil {
 			panic(err)
