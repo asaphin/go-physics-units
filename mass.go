@@ -1,8 +1,6 @@
 package units
 
 import (
-	"errors"
-
 	"github.com/asaphin/go-physics-units/mass"
 )
 
@@ -69,7 +67,7 @@ func (m *massImplementation) Mul(multiplier float64) Mass {
 // Div returns the mass divided by divisor. It fails if divisor is zero.
 func (m *massImplementation) Div(divisor float64) (Mass, error) {
 	if divisor == 0 {
-		return nil, errZeroDivision
+		return nil, ErrZeroDivision
 	}
 
 	return &massImplementation{m.withValue(m.value / divisor)}, nil
@@ -86,7 +84,7 @@ func NewMass(value float64, unit string) (Mass, error) {
 	return &massImplementation{msm}, nil
 }
 
-var errMassConversion = errors.New("not a mass measure")
+const errMassConversion incompatibleError = "not a mass measure"
 
 // ToMass converts m, for example a result of ParseString, into a Mass.
 // It fails if m isn't a mass.

@@ -1,8 +1,6 @@
 package units
 
 import (
-	"errors"
-
 	"github.com/asaphin/go-physics-units/area"
 	"github.com/asaphin/go-physics-units/distance"
 )
@@ -74,7 +72,7 @@ func (a *areaImplementation) Mul(multiplier float64) Area {
 // Div returns the area divided by divisor. It fails if divisor is zero.
 func (a *areaImplementation) Div(divisor float64) (Area, error) {
 	if divisor == 0 {
-		return nil, errZeroDivision
+		return nil, ErrZeroDivision
 	}
 
 	return &areaImplementation{a.withValue(a.value / divisor)}, nil
@@ -83,7 +81,7 @@ func (a *areaImplementation) Div(divisor float64) (Area, error) {
 // DivideByDistance returns the distance a/d in m, or an error if d is zero.
 func (a *areaImplementation) DivideByDistance(d Distance) (Distance, error) {
 	if d.Value() == 0 {
-		return nil, errZeroDivision
+		return nil, ErrZeroDivision
 	}
 
 	return newDistance(a.valueInBaseUnits()/d.valueInBaseUnits(), distance.BaseUnit), nil
@@ -106,7 +104,7 @@ func newArea(value float64, unit string) Area {
 	return &areaImplementation{baseMeasurement{value: value, unit: unit, conversionRates: areaRates}}
 }
 
-var errAreaConversion = errors.New("not an area measure")
+const errAreaConversion incompatibleError = "not an area measure"
 
 // ToArea converts m, for example a result of ParseString, into an Area.
 // It fails if m isn't an area.

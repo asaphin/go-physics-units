@@ -95,6 +95,34 @@ Operations that combine measures return their result in SI base units:
 | `Velocity.MultiplyByTime`  | `Distance` in m           |
 | `ParseDuration`            | `Time` in s, from a `time.Duration` |
 
+## Errors
+
+Every error matches exactly one sentinel, which you can test for with `errors.Is`:
+
+| Sentinel                  | Returned when                                                                            |
+|---------------------------|------------------------------------------------------------------------------------------|
+| `ErrUnknownUnit`          | the unit doesn't belong to the measure (a `*UnitError`)                                  |
+| `ErrIncompatibleMeasures` | the measurements belong to different measures, or one is nil                             |
+| `ErrZeroDivision`         | the divisor is zero                                                                      |
+| `ErrInvalidFormat`        | the string isn't `"<value> <unit>"` with a finite value                                  |
+| `ErrInvalidFactors`       | custom conversion factors are invalid or lack the base unit                              |
+| `ErrInvalidMeasure`       | `NewMeasurementCreator` gets an empty or predefined measure name, or an unsupported type |
+
+```go
+_, err := units.StringToDistance("3 kg")
+
+fmt.Println(errors.Is(err, units.ErrUnknownUnit)) // true
+
+// Unknown-unit errors carry the measure and the unit.
+if ue, ok := errors.AsType[*units.UnitError](err); ok {
+	fmt.Println(ue.Measure, ue.Unit) // distance kg
+}
+
+fmt.Println(err) // unknown distance unit kg
+```
+
+The sentinels are constants of type `units.Error`, so no other package can reassign them.
+
 ## Custom measures
 
 You can also create a factory for a measure of your own.

@@ -20,6 +20,10 @@
 //
 // User-defined measures are created with NewMeasurementCreator.
 //
+// Every error the package returns matches exactly one of the sentinel errors,
+// such as ErrUnknownUnit; test for them with errors.Is. Unknown-unit errors are
+// *UnitError values, which carry the measure and the unit.
+//
 // Measurements never change after they are created, and the package's
 // conversion tables never change after initialisation. Values and functions are
 // therefore safe for concurrent use by multiple goroutines without additional

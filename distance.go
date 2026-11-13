@@ -1,8 +1,6 @@
 package units
 
 import (
-	"errors"
-
 	"github.com/asaphin/go-physics-units/area"
 	"github.com/asaphin/go-physics-units/distance"
 	"github.com/asaphin/go-physics-units/velocity"
@@ -78,7 +76,7 @@ func (d *distanceImplementation) Mul(multiplier float64) Distance {
 // Div returns the distance divided by divisor. It fails if divisor is zero.
 func (d *distanceImplementation) Div(divisor float64) (Distance, error) {
 	if divisor == 0 {
-		return nil, errZeroDivision
+		return nil, ErrZeroDivision
 	}
 
 	return &distanceImplementation{d.withValue(d.value / divisor)}, nil
@@ -87,7 +85,7 @@ func (d *distanceImplementation) Div(divisor float64) (Distance, error) {
 // DivideByTime returns the velocity d/t in m/s, or an error if t is zero.
 func (d *distanceImplementation) DivideByTime(t Time) (Velocity, error) {
 	if t.Value() == 0 {
-		return nil, errZeroDivision
+		return nil, ErrZeroDivision
 	}
 
 	return newVelocity(d.valueInBaseUnits()/t.valueInBaseUnits(), velocity.BaseUnit), nil
@@ -117,7 +115,7 @@ func newDistance(value float64, unit string) Distance {
 	return &distanceImplementation{baseMeasurement{value: value, unit: unit, conversionRates: distanceRates}}
 }
 
-var errDistanceConversion = errors.New("not a distance measure")
+const errDistanceConversion incompatibleError = "not a distance measure"
 
 // ToDistance converts m, for example a result of ParseString, into a Distance.
 // It fails if m isn't a distance.

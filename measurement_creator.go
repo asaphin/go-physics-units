@@ -1,8 +1,6 @@
 package units
 
 import (
-	"errors"
-	"fmt"
 	"reflect"
 
 	"github.com/asaphin/go-physics-units/conversion"
@@ -40,25 +38,29 @@ func NewMeasurementCreator[T Measurement](
 	measureType, baseUnit string, factors conversion.Factors,
 ) (MeasurementCreator[T], error) {
 	if _, ok := Measurement(&baseMeasurement{}).(T); !ok {
-		return nil, fmt.Errorf("unsupported measurement type %s: it must be satisfied by units.Measurement alone",
-			reflect.TypeFor[T]())
+		return nil, newError(ErrInvalidMeasure, "unsupported measurement type "+reflect.TypeFor[T]().String()+
+			": it must be satisfied by units.Measurement alone", nil)
 	}
 
 	if measureType == "" {
-		return nil, errors.New("measure type must not be empty")
+		return nil, newError(ErrInvalidMeasure, "measure type must not be empty", nil)
 	}
 
 	if isReservedMeasureType(MeasureType(measureType)) {
-		return nil, fmt.Errorf("measure type %s is reserved for a predefined measure", measureType)
+		return nil, newError(
+			ErrInvalidMeasure,
+			"measure type "+measureType+" is reserved for a predefined measure",
+			nil,
+		)
 	}
 
 	table, err := rates.NewTable(measureType, factors)
 	if err != nil {
-		return nil, err
+		return nil, newError(ErrInvalidFactors, err.Error(), nil)
 	}
 
 	if !table.Has(rates.CanonicalUnit(baseUnit)) {
-		return nil, fmt.Errorf("provided factors doesn't contain unit %s", baseUnit)
+		return nil, newError(ErrInvalidFactors, "provided factors doesn't contain unit "+baseUnit, nil)
 	}
 
 	return &measurementCreator[T]{conversionRates: table}, nil

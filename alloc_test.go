@@ -68,7 +68,10 @@ func TestAllocations(t *testing.T) {
 		{"StringToDistance", 1, func() { sinkDistance, errSink = units.StringToDistance("10 km") }},
 		{"MeasurementCreator.New", 1, func() { sinkCurrency, errSink = mc.New(1, "EUR") }},
 		{"distance.Rate", 0, func() { sinkRate, sinkOK = distance.Rate(distance.Kilometer, distance.Meter) }},
-		{"unknown unit error", 2, func() { sinkDistance, errSink = units.NewDistance(1, "furlong") }},
+		{"unknown unit error", 1, func() { sinkDistance, errSink = units.NewDistance(1, "furlong") }},
+		{"invalid format error", 2, func() { sinkMeasurement, errSink = units.ParseString("10km") }},
+		{"zero division error", 0, func() { sinkDistance, errSink = km.Div(0) }},
+		{"incompatible measures error", 0, func() { sinkDistance, errSink = units.ToDistance(nil) }},
 	}
 
 	for _, c := range cases {
