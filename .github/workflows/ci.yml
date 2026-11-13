@@ -66,14 +66,16 @@ jobs:
         # Report only, until v1.0.0 (ROADMAP 5.1): in v0 a release may break the API.
         # It fails only if gorelease itself reports errors. GOTOOLCHAIN builds the
         # tool with this module's Go, so its type checker understands the code.
-        # Keep the version in sync with GORELEASE in the Makefile.
+        # Keep the version in sync with GORELEASE in the Makefile. The report goes
+        # to RUNNER_TEMP: gorelease refuses to run on a checkout with untracked files.
         shell: bash
         run: |
-          GOTOOLCHAIN="$(go env GOVERSION)" go run golang.org/x/exp/cmd/gorelease@v0.0.0-20261014143641-f0251eb4aa3e | tee gorelease.txt
+          GOTOOLCHAIN="$(go env GOVERSION)" go run golang.org/x/exp/cmd/gorelease@v0.0.0-20261014143641-f0251eb4aa3e \
+            | tee "$RUNNER_TEMP/gorelease.txt"
           {
             echo '## Exported API changes since the latest release'
             echo '```'
-            cat gorelease.txt
+            cat "$RUNNER_TEMP/gorelease.txt"
             echo '```'
           } >> "$GITHUB_STEP_SUMMARY"
 
