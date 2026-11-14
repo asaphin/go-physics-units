@@ -344,7 +344,7 @@ var predefinedSets = [...]*unitSet{ {{range .}}
 }
 {{range .}}
 // New{{.Type}} returns {{a .Noun}} of value in unit, such as
-// New{{.Type}}(10, {{.Pkg}}.BaseUnit).
+// New{{.Type}}(10, [{{.Pkg}}.BaseUnit]).
 func New{{.Type}}(value float64, unit {{.Pkg}}.Unit) {{.Type}} {
 	return {{.Type}}{value: value, unit: unit}
 }
@@ -387,7 +387,8 @@ func ({{.Recv}} {{.Type}}) ConvertTo(unit {{.Pkg}}.Unit) {{.Type}} {
 	return {{.Type}}{value: {{.Recv}}.value * {{.Pkg}}.Rate({{.Recv}}.unit, unit), unit: unit}
 }
 
-// MustConvertTo is ConvertTo.
+// MustConvertTo is ConvertTo: like ConvertTo, it panics only if unit isn't
+// valid.
 //
 // Deprecated: Use ConvertTo, which no longer fails.
 //
@@ -421,7 +422,7 @@ func ({{.Recv}} {{.Type}}) Mul(multiplier float64) {{.Type}} {
 	return {{.Type}}{value: {{.Recv}}.value * multiplier, unit: {{.Recv}}.unit}
 }
 
-// Div returns the {{.Noun}} divided by divisor. It fails with ErrZeroDivision if
+// Div returns the {{.Noun}} divided by divisor. It fails with [ErrZeroDivision] if
 // divisor is zero.
 func ({{.Recv}} {{.Type}}) Div(divisor float64) ({{.Type}}, error) {
 	if divisor == 0 {
@@ -449,9 +450,9 @@ func ({{.Recv}} {{.Type}}) EqualWithinRel(other {{.Type}}, tol float64) bool {
 	return equalWithinRel(x, y, tol)
 }
 
-// Ratio returns {{.Recv}}/other, the ratio of the {{.Plural}}, in ratio.BaseUnit:
+// Ratio returns {{.Recv}}/other, the ratio of the {{.Plural}}, in [ratio.BaseUnit]:
 // convert it with ConvertTo(ratio.Percent) for a percentage. It fails with
-// ErrZeroDivision if other is zero.
+// [ErrZeroDivision] if other is zero.
 func ({{.Recv}} {{.Type}}) Ratio(other {{.Type}}) (Ratio, error) {
 	x, y := {{.Recv}}.common(other)
 	if y == 0 {
@@ -473,7 +474,7 @@ func ({{.Recv}} {{.Type}}) common(other {{.Type}}) (float64, float64) {
 }
 
 // ConvertToMeasurement is ConvertTo for generic code: it takes a unit symbol.
-// It fails with ErrUnknownUnit if symbol isn't {{a .Noun}} unit.
+// It fails with [ErrUnknownUnit] if symbol isn't {{a .Noun}} unit.
 func ({{.Recv}} {{.Type}}) ConvertToMeasurement(symbol string) (Measurement, error) {
 	unit, ok := {{.Pkg}}.ParseUnit(symbol)
 	if !ok {
@@ -484,7 +485,7 @@ func ({{.Recv}} {{.Type}}) ConvertToMeasurement(symbol string) (Measurement, err
 }
 
 // AddMeasurement is Add for generic code. It fails with
-// ErrIncompatibleMeasures if other isn't {{a .Noun}}.
+// [ErrIncompatibleMeasures] if other isn't {{a .Noun}}.
 func ({{.Recv}} {{.Type}}) AddMeasurement(other Measurement) (Measurement, error) {
 	value, err := {{.Pkg}}Set.valueIn(other, uint16({{.Recv}}.unit))
 	if err != nil {
@@ -495,7 +496,7 @@ func ({{.Recv}} {{.Type}}) AddMeasurement(other Measurement) (Measurement, error
 }
 
 // SubMeasurement is Sub for generic code. It fails with
-// ErrIncompatibleMeasures if other isn't {{a .Noun}}.
+// [ErrIncompatibleMeasures] if other isn't {{a .Noun}}.
 func ({{.Recv}} {{.Type}}) SubMeasurement(other Measurement) (Measurement, error) {
 	value, err := {{.Pkg}}Set.valueIn(other, uint16({{.Recv}}.unit))
 	if err != nil {
@@ -510,7 +511,8 @@ func ({{.Recv}} {{.Type}}) MulMeasurement(multiplier float64) Measurement {
 	return {{.Recv}}.Mul(multiplier)
 }
 
-// DivMeasurement is Div for generic code.
+// DivMeasurement is Div for generic code. It fails with [ErrZeroDivision] if
+// divisor is zero.
 func ({{.Recv}} {{.Type}}) DivMeasurement(divisor float64) (Measurement, error) {
 	if divisor == 0 {
 		return nil, ErrZeroDivision
@@ -520,7 +522,7 @@ func ({{.Recv}} {{.Type}}) DivMeasurement(divisor float64) (Measurement, error) 
 }
 
 // CompareMeasurement is Compare for generic code. It fails with
-// ErrIncompatibleMeasures if other isn't {{a .Noun}}.
+// [ErrIncompatibleMeasures] if other isn't {{a .Noun}}.
 func ({{.Recv}} {{.Type}}) CompareMeasurement(other Measurement) (int, error) {
 	return {{.Pkg}}Set.compare({{.Recv}}.value, uint16({{.Recv}}.unit), other)
 }
@@ -532,7 +534,7 @@ func ({{.Recv}} {{.Type}}) generic() genericValue {
 const err{{.Type}}Conversion incompatibleError = "not {{a .Noun}} measure"
 
 // To{{.Type}} returns m as a {{.Type}}, for example a result of ParseString. It fails
-// with ErrIncompatibleMeasures if m isn't {{a .Noun}}.
+// with [ErrIncompatibleMeasures] if m isn't {{a .Noun}}.
 func To{{.Type}}(m Measurement) ({{.Type}}, error) {
 	value, ok := m.({{.Type}})
 	if !ok {
@@ -543,8 +545,8 @@ func To{{.Type}}(m Measurement) ({{.Type}}, error) {
 }
 
 // StringTo{{.Type}} parses {{a .Noun}} from a string such as "{{.Example}}". It fails with
-// ErrInvalidFormat unless the string has the form "<value> <symbol>" with a
-// finite value, and with ErrUnknownUnit if the symbol isn't {{a .Noun}} unit.
+// [ErrInvalidFormat] unless the string has the form "<value> <symbol>" with a
+// finite value, and with [ErrUnknownUnit] if the symbol isn't {{a .Noun}} unit.
 func StringTo{{.Type}}(s string) ({{.Type}}, error) {
 	value, symbol, err := parseValueAndUnit(s)
 	if err != nil {
@@ -560,8 +562,8 @@ func StringTo{{.Type}}(s string) ({{.Type}}, error) {
 }
 
 // AppendText implements encoding.TextAppender: it appends the String form,
-// such as "{{.Example}}". It fails with ErrOutOfRange if the value isn't finite, and
-// with ErrUnknownUnit if the unit isn't valid, so that the text always parses
+// such as "{{.Example}}". It fails with [ErrOutOfRange] if the value isn't finite, and
+// with [ErrUnknownUnit] if the unit isn't valid, so that the text always parses
 // back.
 func ({{.Recv}} {{.Type}}) AppendText(b []byte) ([]byte, error) {
 	if !{{.Recv}}.unit.Valid() {
@@ -579,7 +581,8 @@ func ({{.Recv}} {{.Type}}) MarshalText() ([]byte, error) {
 
 // UnmarshalText implements encoding.TextUnmarshaler: it parses text as
 // StringTo{{.Type}} does and stores the result in {{.Recv}}. Unmarshalling needs a
-// pointer receiver; it changes only the value it is called on.
+// pointer receiver; it changes only the value it is called on. It fails like
+// [StringTo{{.Type}}], and leaves {{.Recv}} unchanged when it does.
 func ({{.Recv}} *{{.Type}}) UnmarshalText(text []byte) error {
 	value, err := StringTo{{.Type}}(string(text))
 	if err != nil {

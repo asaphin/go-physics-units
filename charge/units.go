@@ -1,5 +1,13 @@
 // Package charge defines the electric charge units of the units package and their
 // conversion factors to the base unit, the coulomb.
+//
+// Use the units with units.NewCharge, from the root package
+// github.com/asaphin/go-physics-units:
+//
+//	q := units.NewCharge(3000, charge.MilliampereHour)
+//
+// ParseUnit turns a symbol such as "mAh" into a Unit, and String turns a
+// Unit into its symbol.
 package charge
 
 // Unit is an electric charge unit: one of the constants below. String returns its

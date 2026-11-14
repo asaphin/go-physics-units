@@ -1,5 +1,13 @@
 // Package momentum defines the momentum and impulse units of the units package
 // and their conversion factors to the base unit, the kilogram metre per second.
+//
+// Use the units with units.NewMomentum, from the root package
+// github.com/asaphin/go-physics-units:
+//
+//	p := units.NewMomentum(10, momentum.NewtonSecond)
+//
+// ParseUnit turns a symbol such as "N·s" into a Unit, and String turns a
+// Unit into its symbol.
 package momentum
 
 // Unit is a momentum unit: one of the constants below. String returns its

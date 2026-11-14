@@ -16,8 +16,8 @@ type DataSize struct {
 	unit  datasize.Unit
 }
 
-// DivideByTime returns the data rate s/t (B/s) in datarate.BaseUnit. It fails with
-// ErrZeroDivision if t is zero.
+// DivideByTime returns the data rate s/t (B/s) in [datarate.BaseUnit]. It fails with
+// [ErrZeroDivision] if t is zero.
 func (s DataSize) DivideByTime(t Time) (DataRate, error) {
 	if t.value == 0 {
 		return DataRate{}, ErrZeroDivision
@@ -27,7 +27,7 @@ func (s DataSize) DivideByTime(t Time) (DataRate, error) {
 }
 
 // DivideByDataRate returns the time s/r (s), for example to transfer s at rate
-// r, in time.BaseUnit. It fails with ErrZeroDivision if r is zero.
+// r, in [time.BaseUnit]. It fails with [ErrZeroDivision] if r is zero.
 func (s DataSize) DivideByDataRate(r DataRate) (Time, error) {
 	if r.value == 0 {
 		return Time{}, ErrZeroDivision

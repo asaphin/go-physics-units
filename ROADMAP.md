@@ -44,7 +44,7 @@ Size is relative effort: S < M < L.
 | ☑ | [4.3](#43-new-measures-one-per-step) | New measures, one per step | P3 | no | S each | v0.2.x |
 | ☑ | [4.4](#44-decision-temperature) | Temperature (design first) | P3 | **Decision** | M | v0.2.x |
 | ☑ | [4.5](#45-science-and-everyday-measures) | Science and everyday measures, calculators, physics, constants | P3 | no | L | v0.2.0 |
-| ☐ | [4.6](#46-documentation-pass) | Documentation pass: godoc as contracts, for people and AI agents | docs | no | M | v0.2.0 |
+| ☑ | [4.6](#46-documentation-pass) | Documentation pass: godoc as contracts, for people and AI agents | docs | no | M | v0.2.0 |
 | ☐ | [4.7](#47-release-v020) | Release v0.2.0 | — | no | S | v0.2.0 |
 | ☐ | [5.1](#51-stabilise-and-release-v100) | Stabilise and release v1.0.0 | — | removals | M | v1.0.0 |
 
@@ -294,6 +294,7 @@ Serves **P3**. The author chose the groups and the API shape on 2026-11-14.
 - Write the doc comment of every exported identifier as a contract: what it returns and in which unit, how it fails (the sentinel), and when it panics.
 - Use doc links (`[ErrZeroDivision]`), and turn the package documentation into a task guide: which function to use for what, and the common mistakes.
 - A test checks that every exported function that returns an error names its sentinel.
+- **Status:** done. `TestDocContracts` checks the contracts, doc links point to the sentinels and base units, `doc.go` is a task guide, and every unit package's documentation shows how to use its units.
 
 ### 4.7 Release v0.2.0
 

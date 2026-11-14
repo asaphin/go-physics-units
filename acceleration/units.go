@@ -1,5 +1,13 @@
 // Package acceleration defines the acceleration units of the units package
 // and their conversion factors to the base unit, the metre per second squared.
+//
+// Use the units with units.NewAcceleration, from the root package
+// github.com/asaphin/go-physics-units:
+//
+//	a := units.NewAcceleration(9.8, acceleration.MeterPerSecondSquared)
+//
+// ParseUnit turns a symbol such as "m/s²" into a Unit, and String turns a
+// Unit into its symbol.
 package acceleration
 
 // Unit is an acceleration unit: one of the constants below. String returns its

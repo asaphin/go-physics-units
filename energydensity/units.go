@@ -1,6 +1,14 @@
 // Package energydensity defines the energy density (energy per volume) units of
 // the units package and their conversion factors to the base unit, the joule
 // per cubic metre.
+//
+// Use the units with units.NewEnergyDensity, from the root package
+// github.com/asaphin/go-physics-units:
+//
+//	u := units.NewEnergyDensity(700, energydensity.WattHourPerLiter)
+//
+// ParseUnit turns a symbol such as "Wh/L" into a Unit, and String turns a
+// Unit into its symbol.
 package energydensity
 
 // Unit is an energy density unit: one of the constants below. String returns

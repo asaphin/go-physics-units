@@ -1,5 +1,13 @@
 // Package power defines the power units of the units package
 // and their conversion factors to the base unit, the watt.
+//
+// Use the units with units.NewPower, from the root package
+// github.com/asaphin/go-physics-units:
+//
+//	p := units.NewPower(100, power.Watt)
+//
+// ParseUnit turns a symbol such as "W" into a Unit, and String turns a
+// Unit into its symbol.
 package power
 
 // Unit is a power unit: one of the constants below. String returns its

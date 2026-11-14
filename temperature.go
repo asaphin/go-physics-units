@@ -19,7 +19,7 @@ import (
 //     physical meaning.
 //   - A temperature is never below absolute zero: the constructors, the
 //     parsers and the operations that could go below it fail with
-//     ErrOutOfRange instead.
+//     [ErrOutOfRange] instead.
 //   - Temperature doesn't implement Measurement, whose AddMeasurement and
 //     MulMeasurement it couldn't support; ParseString rejects temperature
 //     units.
@@ -40,8 +40,8 @@ type TemperatureDifference struct {
 }
 
 // NewTemperature returns a temperature of value in unit, such as
-// NewTemperature(20, temperature.Celsius). It fails with ErrOutOfRange if the
-// value is below absolute zero (-273.15 °C) or NaN, and with ErrUnknownUnit if
+// NewTemperature(20, temperature.Celsius). It fails with [ErrOutOfRange] if the
+// value is below absolute zero (-273.15 °C) or NaN, and with [ErrUnknownUnit] if
 // unit isn't valid.
 func NewTemperature(value float64, unit temperature.Unit) (Temperature, error) {
 	if !unit.Valid() {
@@ -62,9 +62,9 @@ func belowAbsoluteZero(value float64, unit temperature.Unit) error {
 }
 
 // StringToTemperature parses a temperature from a string such as "20 °C". It
-// fails with ErrInvalidFormat unless the string has the form "<value> <symbol>"
-// with a finite value, with ErrUnknownUnit if the symbol isn't a temperature
-// unit, and with ErrOutOfRange if the temperature is below absolute zero.
+// fails with [ErrInvalidFormat] unless the string has the form "<value> <symbol>"
+// with a finite value, with [ErrUnknownUnit] if the symbol isn't a temperature
+// unit, and with [ErrOutOfRange] if the temperature is below absolute zero.
 func StringToTemperature(s string) (Temperature, error) {
 	value, unit, err := parseTemperature(s)
 	if err != nil {
@@ -137,13 +137,13 @@ func (t Temperature) Sub(other Temperature) TemperatureDifference {
 }
 
 // Add returns t raised by d, in t's unit: 20 °C + 18 °F is 30 °C. It fails
-// with ErrOutOfRange if the result is below absolute zero.
+// with [ErrOutOfRange] if the result is below absolute zero.
 func (t Temperature) Add(d TemperatureDifference) (Temperature, error) {
 	return NewTemperature(t.value+d.value*temperature.DifferenceRate(d.unit, t.unit), t.unit)
 }
 
 // SubDifference returns t lowered by d, in t's unit. It fails with
-// ErrOutOfRange if the result is below absolute zero.
+// [ErrOutOfRange] if the result is below absolute zero.
 func (t Temperature) SubDifference(d TemperatureDifference) (Temperature, error) {
 	return NewTemperature(t.value-d.value*temperature.DifferenceRate(d.unit, t.unit), t.unit)
 }
@@ -177,7 +177,7 @@ func (t Temperature) common(other Temperature) (float64, float64) {
 }
 
 // AppendText implements encoding.TextAppender: it appends the String form,
-// such as "20 °C". It fails with ErrOutOfRange if the value is +Inf.
+// such as "20 °C". It fails with [ErrOutOfRange] if the value is +Inf.
 func (t Temperature) AppendText(b []byte) ([]byte, error) {
 	return appendText(b, t.value, t.unit.String())
 }
@@ -189,7 +189,8 @@ func (t Temperature) MarshalText() ([]byte, error) {
 }
 
 // UnmarshalText implements encoding.TextUnmarshaler: it parses text as
-// StringToTemperature does and stores the result in t.
+// StringToTemperature does and stores the result in t. It fails like
+// [StringToTemperature], and leaves t unchanged when it does.
 func (t *Temperature) UnmarshalText(text []byte) error {
 	value, err := StringToTemperature(string(text))
 	if err != nil {
@@ -208,8 +209,8 @@ func NewTemperatureDifference(value float64, unit temperature.Unit) TemperatureD
 }
 
 // StringToTemperatureDifference parses a temperature difference from a string
-// such as "10 °C". It fails with ErrInvalidFormat unless the string has the
-// form "<value> <symbol>" with a finite value, and with ErrUnknownUnit if the
+// such as "10 °C". It fails with [ErrInvalidFormat] unless the string has the
+// form "<value> <symbol>" with a finite value, and with [ErrUnknownUnit] if the
 // symbol isn't a temperature unit.
 func StringToTemperatureDifference(s string) (TemperatureDifference, error) {
 	value, unit, err := parseTemperature(s)
@@ -273,7 +274,7 @@ func (d TemperatureDifference) Mul(multiplier float64) TemperatureDifference {
 }
 
 // Div returns the difference divided by divisor. It fails with
-// ErrZeroDivision if divisor is zero.
+// [ErrZeroDivision] if divisor is zero.
 func (d TemperatureDifference) Div(divisor float64) (TemperatureDifference, error) {
 	if divisor == 0 {
 		return TemperatureDifference{}, ErrZeroDivision
@@ -309,8 +310,8 @@ func (d TemperatureDifference) common(other TemperatureDifference) (float64, flo
 }
 
 // AppendText implements encoding.TextAppender: it appends the String form,
-// such as "10 °C". It fails with ErrOutOfRange if the value isn't finite, and
-// with ErrUnknownUnit if the unit isn't valid.
+// such as "10 °C". It fails with [ErrOutOfRange] if the value isn't finite, and
+// with [ErrUnknownUnit] if the unit isn't valid.
 func (d TemperatureDifference) AppendText(b []byte) ([]byte, error) {
 	if !d.unit.Valid() {
 		return b, unknownUnitError(MeasureTemperature, d.unit.String())
@@ -325,7 +326,8 @@ func (d TemperatureDifference) MarshalText() ([]byte, error) {
 }
 
 // UnmarshalText implements encoding.TextUnmarshaler: it parses text as
-// StringToTemperatureDifference does and stores the result in d.
+// StringToTemperatureDifference does and stores the result in d. It fails like
+// [StringToTemperatureDifference], and leaves d unchanged when it does.
 func (d *TemperatureDifference) UnmarshalText(text []byte) error {
 	value, err := StringToTemperatureDifference(string(text))
 	if err != nil {

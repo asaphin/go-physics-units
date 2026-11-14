@@ -26,7 +26,7 @@ func ParseDuration(d builtintime.Duration) Time {
 }
 
 // ToDuration converts the time into a standard library time.Duration, rounded
-// to the nearest nanosecond. It fails with ErrOutOfRange if the time is NaN or
+// to the nearest nanosecond. It fails with [ErrOutOfRange] if the time is NaN or
 // outside the range of time.Duration, about ±292 years.
 func (t Time) ToDuration() (builtintime.Duration, error) {
 	// Through seconds: 1e9 is exact, while the s→ns rate, 1/1e-9 in binary
@@ -42,7 +42,7 @@ func (t Time) ToDuration() (builtintime.Duration, error) {
 	return builtintime.Duration(ns), nil
 }
 
-// DivideByDistance returns the pace t/d (s/m) in pace.BaseUnit. It fails with ErrZeroDivision if d is
+// DivideByDistance returns the pace t/d (s/m) in [pace.BaseUnit]. It fails with [ErrZeroDivision] if d is
 // zero.
 func (t Time) DivideByDistance(d Distance) (Pace, error) {
 	if d.value == 0 {
@@ -52,8 +52,8 @@ func (t Time) DivideByDistance(d Distance) (Pace, error) {
 	return Pace{value: t.baseValue() / d.baseValue(), unit: pace.BaseUnit}, nil
 }
 
-// Frequency returns the frequency 1/t (Hz) in frequency.BaseUnit of something
-// that happens once every t. It fails with ErrZeroDivision if t is zero.
+// Frequency returns the frequency 1/t (Hz) in [frequency.BaseUnit] of something
+// that happens once every t. It fails with [ErrZeroDivision] if t is zero.
 func (t Time) Frequency() (Frequency, error) {
 	if t.value == 0 {
 		return Frequency{}, ErrZeroDivision

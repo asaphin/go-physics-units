@@ -15,7 +15,7 @@ type SpecificEnergy struct {
 	unit  specificenergy.Unit
 }
 
-// MultiplyByMass returns the energy e·m (J) in energy.BaseUnit.
+// MultiplyByMass returns the energy e·m (J) in [energy.BaseUnit].
 func (e SpecificEnergy) MultiplyByMass(m Mass) Energy {
 	return Energy{value: e.baseValue() * m.baseValue(), unit: energy.BaseUnit}
 }

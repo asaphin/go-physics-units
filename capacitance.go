@@ -16,12 +16,12 @@ type Capacitance struct {
 	unit  capacitance.Unit
 }
 
-// MultiplyByVoltage returns the charge c·v (C) in charge.BaseUnit: the charge a capacitor holds at v.
+// MultiplyByVoltage returns the charge c·v (C) in [charge.BaseUnit]: the charge a capacitor holds at v.
 func (c Capacitance) MultiplyByVoltage(v Voltage) Charge {
 	return Charge{value: c.baseValue() * v.baseValue(), unit: charge.BaseUnit}
 }
 
-// MultiplyByResistance returns the time c·r (s) in time.BaseUnit: the time constant of an RC circuit.
+// MultiplyByResistance returns the time c·r (s) in [time.BaseUnit]: the time constant of an RC circuit.
 func (c Capacitance) MultiplyByResistance(r Resistance) Time {
 	return Time{value: c.baseValue() * r.baseValue(), unit: time.BaseUnit}
 }

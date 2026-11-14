@@ -1,5 +1,13 @@
 // Package mass defines the mass units of the units package and
 // their conversion factors to the base unit, the kilogram.
+//
+// Use the units with units.NewMass, from the root package
+// github.com/asaphin/go-physics-units:
+//
+//	m := units.NewMass(10, mass.Kilogram)
+//
+// ParseUnit turns a symbol such as "kg" into a Unit, and String turns a
+// Unit into its symbol.
 package mass
 
 // Unit is a mass unit: one of the constants below. String returns its

@@ -20,8 +20,8 @@ type Volume struct {
 	unit  volume.Unit
 }
 
-// DivideByArea returns the distance v/a (m) in distance.BaseUnit. It fails with
-// ErrZeroDivision if a is zero.
+// DivideByArea returns the distance v/a (m) in [distance.BaseUnit]. It fails with
+// [ErrZeroDivision] if a is zero.
 func (v Volume) DivideByArea(a Area) (Distance, error) {
 	if a.value == 0 {
 		return Distance{}, ErrZeroDivision
@@ -30,8 +30,8 @@ func (v Volume) DivideByArea(a Area) (Distance, error) {
 	return Distance{value: v.baseValue() / a.baseValue(), unit: distance.BaseUnit}, nil
 }
 
-// DivideByDistance returns the area v/d (m²) in area.BaseUnit. It fails with
-// ErrZeroDivision if d is zero.
+// DivideByDistance returns the area v/d (m²) in [area.BaseUnit]. It fails with
+// [ErrZeroDivision] if d is zero.
 func (v Volume) DivideByDistance(d Distance) (Area, error) {
 	if d.value == 0 {
 		return Area{}, ErrZeroDivision
@@ -40,7 +40,7 @@ func (v Volume) DivideByDistance(d Distance) (Area, error) {
 	return Area{value: v.baseValue() / d.baseValue(), unit: area.BaseUnit}, nil
 }
 
-// DivideByTime returns the flow rate v/t (m³/s) in flowrate.BaseUnit. It fails with ErrZeroDivision if
+// DivideByTime returns the flow rate v/t (m³/s) in [flowrate.BaseUnit]. It fails with [ErrZeroDivision] if
 // t is zero.
 func (v Volume) DivideByTime(t Time) (FlowRate, error) {
 	if t.value == 0 {
@@ -50,8 +50,8 @@ func (v Volume) DivideByTime(t Time) (FlowRate, error) {
 	return FlowRate{value: v.baseValue() / t.baseValue(), unit: flowrate.BaseUnit}, nil
 }
 
-// DivideByFlowRate returns the time v/q (s) in time.BaseUnit: the time to move v at q. It fails with
-// ErrZeroDivision if q is zero.
+// DivideByFlowRate returns the time v/q (s) in [time.BaseUnit]: the time to move v at q. It fails with
+// [ErrZeroDivision] if q is zero.
 func (v Volume) DivideByFlowRate(q FlowRate) (Time, error) {
 	if q.value == 0 {
 		return Time{}, ErrZeroDivision
@@ -60,8 +60,8 @@ func (v Volume) DivideByFlowRate(q FlowRate) (Time, error) {
 	return Time{value: v.baseValue() / q.baseValue(), unit: time.BaseUnit}, nil
 }
 
-// DivideByFuelConsumption returns the distance v/fc (m) in distance.BaseUnit: the range on v. It fails
-// with ErrZeroDivision if fc is zero.
+// DivideByFuelConsumption returns the distance v/fc (m) in [distance.BaseUnit]: the range on v. It fails
+// with [ErrZeroDivision] if fc is zero.
 func (v Volume) DivideByFuelConsumption(fc FuelConsumption) (Distance, error) {
 	if fc.value == 0 {
 		return Distance{}, ErrZeroDivision
@@ -70,13 +70,13 @@ func (v Volume) DivideByFuelConsumption(fc FuelConsumption) (Distance, error) {
 	return Distance{value: v.baseValue() / fc.baseValue(), unit: distance.BaseUnit}, nil
 }
 
-// CubeEdge returns the edge ∛v (m) in distance.BaseUnit of a cube of volume v:
+// CubeEdge returns the edge ∛v (m) in [distance.BaseUnit] of a cube of volume v:
 // the edge of the equivalent cube.
 func (v Volume) CubeEdge() Distance {
 	return Distance{value: math.Cbrt(v.baseValue()), unit: distance.BaseUnit}
 }
 
-// SphereRadius returns the radius ∛(3v/4π) (m) in distance.BaseUnit of a sphere
+// SphereRadius returns the radius ∛(3v/4π) (m) in [distance.BaseUnit] of a sphere
 // of volume v: the radius of the volume-equivalent sphere. Double it for the
 // equivalent spherical diameter of particle sizing.
 func (v Volume) SphereRadius() Distance {

@@ -19,8 +19,8 @@ type Charge struct {
 	unit  charge.Unit
 }
 
-// DivideByTime returns the current q/t (A) in current.BaseUnit. It fails with
-// ErrZeroDivision if t is zero.
+// DivideByTime returns the current q/t (A) in [current.BaseUnit]. It fails with
+// [ErrZeroDivision] if t is zero.
 func (q Charge) DivideByTime(t Time) (Current, error) {
 	if t.value == 0 {
 		return Current{}, ErrZeroDivision
@@ -29,8 +29,8 @@ func (q Charge) DivideByTime(t Time) (Current, error) {
 	return Current{value: q.baseValue() / t.baseValue(), unit: current.BaseUnit}, nil
 }
 
-// DivideByCurrent returns the time q/i (s), for example to drain a battery in time.BaseUnit. It fails with
-// ErrZeroDivision if i is zero.
+// DivideByCurrent returns the time q/i (s), for example to drain a battery in [time.BaseUnit]. It fails with
+// [ErrZeroDivision] if i is zero.
 func (q Charge) DivideByCurrent(i Current) (Time, error) {
 	if i.value == 0 {
 		return Time{}, ErrZeroDivision
@@ -39,13 +39,13 @@ func (q Charge) DivideByCurrent(i Current) (Time, error) {
 	return Time{value: q.baseValue() / i.baseValue(), unit: time.BaseUnit}, nil
 }
 
-// MultiplyByVoltage returns the energy q·v (J) in energy.BaseUnit.
+// MultiplyByVoltage returns the energy q·v (J) in [energy.BaseUnit].
 func (q Charge) MultiplyByVoltage(v Voltage) Energy {
 	return Energy{value: q.baseValue() * v.baseValue(), unit: energy.BaseUnit}
 }
 
-// DivideByVoltage returns the capacitance q/v (F) in capacitance.BaseUnit. It fails with
-// ErrZeroDivision if v is zero.
+// DivideByVoltage returns the capacitance q/v (F) in [capacitance.BaseUnit]. It fails with
+// [ErrZeroDivision] if v is zero.
 func (q Charge) DivideByVoltage(v Voltage) (Capacitance, error) {
 	if v.value == 0 {
 		return Capacitance{}, ErrZeroDivision
@@ -54,8 +54,8 @@ func (q Charge) DivideByVoltage(v Voltage) (Capacitance, error) {
 	return Capacitance{value: q.baseValue() / v.baseValue(), unit: capacitance.BaseUnit}, nil
 }
 
-// DivideByCapacitance returns the voltage q/c (V) in voltage.BaseUnit: the voltage across a capacitor
-// c holding q. It fails with ErrZeroDivision if c is zero.
+// DivideByCapacitance returns the voltage q/c (V) in [voltage.BaseUnit]: the voltage across a capacitor
+// c holding q. It fails with [ErrZeroDivision] if c is zero.
 func (q Charge) DivideByCapacitance(c Capacitance) (Voltage, error) {
 	if c.value == 0 {
 		return Voltage{}, ErrZeroDivision

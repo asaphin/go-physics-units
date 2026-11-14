@@ -1,6 +1,14 @@
 // Package fuelconsumption defines the fuel consumption (volume per distance)
 // units of the units package and their conversion factors to the base unit, the
 // cubic metre per metre.
+//
+// Use the units with units.NewFuelConsumption, from the root package
+// github.com/asaphin/go-physics-units:
+//
+//	fc := units.NewFuelConsumption(6.5, fuelconsumption.LiterPer100Kilometers)
+//
+// ParseUnit turns a symbol such as "L/100km" into a Unit, and String turns a
+// Unit into its symbol.
 package fuelconsumption
 
 // Unit is a fuel consumption unit: one of the constants below. String returns

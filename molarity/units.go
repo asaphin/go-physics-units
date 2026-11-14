@@ -1,6 +1,14 @@
 // Package molarity defines the molar concentration (molarity) units of the
 // units package and their conversion factors to the base unit, the mole per
 // cubic metre.
+//
+// Use the units with units.NewMolarity, from the root package
+// github.com/asaphin/go-physics-units:
+//
+//	c := units.NewMolarity(150, molarity.Millimolar)
+//
+// ParseUnit turns a symbol such as "mM" into a Unit, and String turns a
+// Unit into its symbol.
 package molarity
 
 // Unit is a molar concentration unit: one of the constants below. String

@@ -1,5 +1,13 @@
 // Package flowrate defines the volumetric flow rate units of the units package
 // and their conversion factors to the base unit, the cubic metre per second.
+//
+// Use the units with units.NewFlowRate, from the root package
+// github.com/asaphin/go-physics-units:
+//
+//	q := units.NewFlowRate(12, flowrate.LiterPerMinute)
+//
+// ParseUnit turns a symbol such as "L/min" into a Unit, and String turns a
+// Unit into its symbol.
 package flowrate
 
 // Unit is a flow rate unit: one of the constants below. String returns its

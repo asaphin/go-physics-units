@@ -1,6 +1,6 @@
 package units
 
-// Error is the type of the package's sentinel errors, such as ErrUnknownUnit.
+// Error is the type of the package's sentinel errors, such as [ErrUnknownUnit].
 // Test for them with errors.Is:
 //
 //	if errors.Is(err, units.ErrUnknownUnit) { … }
@@ -87,12 +87,12 @@ func (e *UnitError) Error() string {
 	return "unknown " + string(e.Measure) + " unit " + e.Unit
 }
 
-// Unwrap returns ErrUnknownUnit.
+// Unwrap returns [ErrUnknownUnit].
 func (*UnitError) Unwrap() error {
 	return ErrUnknownUnit
 }
 
-// incompatibleError is an ErrIncompatibleMeasures with a fixed message of its
+// incompatibleError is an [ErrIncompatibleMeasures] with a fixed message of its
 // own. Its values are constants, so returning one doesn't allocate.
 type incompatibleError string
 
@@ -101,7 +101,7 @@ const (
 	errNoUnits        incompatibleError = "the measurement's measure has no units: its Units method returns the zero UnitSet"
 )
 
-// rangeError is an ErrOutOfRange error with a fixed message of its own. Its
+// rangeError is an [ErrOutOfRange] error with a fixed message of its own. Its
 // values are constants, so returning one doesn't allocate.
 type rangeError string
 

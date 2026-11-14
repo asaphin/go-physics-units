@@ -15,8 +15,8 @@ type Inductance struct {
 	unit  inductance.Unit
 }
 
-// DivideByResistance returns the time l/r (s) in time.BaseUnit: the time constant of an RL circuit. It
-// fails with ErrZeroDivision if r is zero.
+// DivideByResistance returns the time l/r (s) in [time.BaseUnit]: the time constant of an RL circuit. It
+// fails with [ErrZeroDivision] if r is zero.
 func (l Inductance) DivideByResistance(r Resistance) (Time, error) {
 	if r.value == 0 {
 		return Time{}, ErrZeroDivision

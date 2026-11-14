@@ -16,12 +16,12 @@ type Acceleration struct {
 	unit  acceleration.Unit
 }
 
-// MultiplyByTime returns the velocity a·t (m/s) in velocity.BaseUnit.
+// MultiplyByTime returns the velocity a·t (m/s) in [velocity.BaseUnit].
 func (a Acceleration) MultiplyByTime(t Time) Velocity {
 	return Velocity{value: a.baseValue() * t.baseValue(), unit: velocity.BaseUnit}
 }
 
-// MultiplyByMass returns the force m·a (N) in force.BaseUnit.
+// MultiplyByMass returns the force m·a (N) in [force.BaseUnit].
 func (a Acceleration) MultiplyByMass(m Mass) Force {
 	return Force{value: a.baseValue() * m.baseValue(), unit: force.BaseUnit}
 }

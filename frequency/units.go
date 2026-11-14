@@ -1,5 +1,13 @@
 // Package frequency defines the frequency units of the units package
 // and their conversion factors to the base unit, the hertz.
+//
+// Use the units with units.NewFrequency, from the root package
+// github.com/asaphin/go-physics-units:
+//
+//	f := units.NewFrequency(50, frequency.Hertz)
+//
+// ParseUnit turns a symbol such as "Hz" into a Unit, and String turns a
+// Unit into its symbol.
 package frequency
 
 // Unit is a frequency unit: one of the constants below. String returns its

@@ -16,12 +16,12 @@ type Pressure struct {
 	unit  pressure.Unit
 }
 
-// MultiplyByArea returns the force p·a (N) in force.BaseUnit.
+// MultiplyByArea returns the force p·a (N) in [force.BaseUnit].
 func (p Pressure) MultiplyByArea(a Area) Force {
 	return Force{value: p.baseValue() * a.baseValue(), unit: force.BaseUnit}
 }
 
-// MultiplyByFlowRate returns the power p·q (W) in power.BaseUnit: the hydraulic power.
+// MultiplyByFlowRate returns the power p·q (W) in [power.BaseUnit]: the hydraulic power.
 func (p Pressure) MultiplyByFlowRate(q FlowRate) Power {
 	return Power{value: p.baseValue() * q.baseValue(), unit: power.BaseUnit}
 }

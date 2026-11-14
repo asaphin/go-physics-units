@@ -17,7 +17,7 @@ type Momentum struct {
 	unit  momentum.Unit
 }
 
-// DivideByMass returns the velocity p/m (m/s) in velocity.BaseUnit. It fails with ErrZeroDivision if m
+// DivideByMass returns the velocity p/m (m/s) in [velocity.BaseUnit]. It fails with [ErrZeroDivision] if m
 // is zero.
 func (p Momentum) DivideByMass(m Mass) (Velocity, error) {
 	if m.value == 0 {
@@ -27,7 +27,7 @@ func (p Momentum) DivideByMass(m Mass) (Velocity, error) {
 	return Velocity{value: p.baseValue() / m.baseValue(), unit: velocity.BaseUnit}, nil
 }
 
-// DivideByVelocity returns the mass p/v (kg) in mass.BaseUnit. It fails with ErrZeroDivision if v is
+// DivideByVelocity returns the mass p/v (kg) in [mass.BaseUnit]. It fails with [ErrZeroDivision] if v is
 // zero.
 func (p Momentum) DivideByVelocity(v Velocity) (Mass, error) {
 	if v.value == 0 {
@@ -37,8 +37,8 @@ func (p Momentum) DivideByVelocity(v Velocity) (Mass, error) {
 	return Mass{value: p.baseValue() / v.baseValue(), unit: mass.BaseUnit}, nil
 }
 
-// DivideByTime returns the force p/t (N) in force.BaseUnit: the mean force. It fails with
-// ErrZeroDivision if t is zero.
+// DivideByTime returns the force p/t (N) in [force.BaseUnit]: the mean force. It fails with
+// [ErrZeroDivision] if t is zero.
 func (p Momentum) DivideByTime(t Time) (Force, error) {
 	if t.value == 0 {
 		return Force{}, ErrZeroDivision

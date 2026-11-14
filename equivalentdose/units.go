@@ -1,6 +1,14 @@
 // Package equivalentdose defines the equivalent and effective dose of ionising
 // radiation units of the units package and their conversion factors to the base
 // unit, the sievert.
+//
+// Use the units with units.NewEquivalentDose, from the root package
+// github.com/asaphin/go-physics-units:
+//
+//	h := units.NewEquivalentDose(2.4, equivalentdose.Millisievert)
+//
+// ParseUnit turns a symbol such as "mSv" into a Unit, and String turns a
+// Unit into its symbol.
 package equivalentdose
 
 // Unit is an equivalent dose unit: one of the constants below. String returns

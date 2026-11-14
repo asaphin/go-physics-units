@@ -1,5 +1,13 @@
 // Package inductance defines the inductance units of the units package and
 // their conversion factors to the base unit, the henry.
+//
+// Use the units with units.NewInductance, from the root package
+// github.com/asaphin/go-physics-units:
+//
+//	l := units.NewInductance(10, inductance.Millihenry)
+//
+// ParseUnit turns a symbol such as "mH" into a Unit, and String turns a
+// Unit into its symbol.
 package inductance
 
 // Unit is an inductance unit: one of the constants below. String returns its

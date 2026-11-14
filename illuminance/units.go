@@ -1,5 +1,13 @@
 // Package illuminance defines the illuminance units of the units package and
 // their conversion factors to the base unit, the lux.
+//
+// Use the units with units.NewIlluminance, from the root package
+// github.com/asaphin/go-physics-units:
+//
+//	e := units.NewIlluminance(500, illuminance.Lux)
+//
+// ParseUnit turns a symbol such as "lx" into a Unit, and String turns a
+// Unit into its symbol.
 package illuminance
 
 // Unit is an illuminance unit: one of the constants below. String returns its

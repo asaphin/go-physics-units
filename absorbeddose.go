@@ -15,7 +15,7 @@ type AbsorbedDose struct {
 	unit  absorbeddose.Unit
 }
 
-// Equivalent returns the equivalent dose d·w_R (Sv) in equivalentdose.BaseUnit
+// Equivalent returns the equivalent dose d·w_R (Sv) in [equivalentdose.BaseUnit]
 // of the absorbed dose d of radiation with the weighting factor w_R: 1 for
 // photons and electrons, 20 for alpha particles (ICRP Publication 103).
 func (d AbsorbedDose) Equivalent(weightingFactor float64) EquivalentDose {

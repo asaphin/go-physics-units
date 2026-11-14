@@ -3,6 +3,14 @@
 //
 // It shares its name with the standard library package; import one of them
 // under an alias when both are needed.
+//
+// Use the units with units.NewTime, from the root package
+// github.com/asaphin/go-physics-units:
+//
+//	t := units.NewTime(10, time.Minute)
+//
+// ParseUnit turns a symbol such as "min" into a Unit, and String turns a
+// Unit into its symbol.
 package time
 
 // Unit is a time unit: one of the constants below. String returns its

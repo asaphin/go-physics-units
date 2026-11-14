@@ -1,6 +1,14 @@
 // Package fueleconomy defines the fuel economy (distance per volume) units of
 // the units package and their conversion factors to the base unit, the metre
 // per cubic metre.
+//
+// Use the units with units.NewFuelEconomy, from the root package
+// github.com/asaphin/go-physics-units:
+//
+//	fe := units.NewFuelEconomy(15, fueleconomy.KilometerPerLiter)
+//
+// ParseUnit turns a symbol such as "km/L" into a Unit, and String turns a
+// Unit into its symbol.
 package fueleconomy
 
 // Unit is a fuel economy unit: one of the constants below. String returns its

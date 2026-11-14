@@ -1,5 +1,13 @@
 // Package distance defines the distance (length) units of the units package and
 // their conversion factors to the base unit, the metre.
+//
+// Use the units with units.NewDistance, from the root package
+// github.com/asaphin/go-physics-units:
+//
+//	d := units.NewDistance(10, distance.Kilometer)
+//
+// ParseUnit turns a symbol such as "km" into a Unit, and String turns a
+// Unit into its symbol.
 package distance
 
 import "math"

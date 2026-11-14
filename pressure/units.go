@@ -1,5 +1,13 @@
 // Package pressure defines the pressure units of the units package
 // and their conversion factors to the base unit, the pascal.
+//
+// Use the units with units.NewPressure, from the root package
+// github.com/asaphin/go-physics-units:
+//
+//	p := units.NewPressure(101.3, pressure.Kilopascal)
+//
+// ParseUnit turns a symbol such as "kPa" into a Unit, and String turns a
+// Unit into its symbol.
 package pressure
 
 // Unit is a pressure unit: one of the constants below. String returns its

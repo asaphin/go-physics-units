@@ -16,13 +16,13 @@ type Pace struct {
 	unit  pace.Unit
 }
 
-// MultiplyByDistance returns the time p·d (s) in time.BaseUnit: the time to cover d at the pace.
+// MultiplyByDistance returns the time p·d (s) in [time.BaseUnit]: the time to cover d at the pace.
 func (p Pace) MultiplyByDistance(d Distance) Time {
 	return Time{value: p.baseValue() * d.baseValue(), unit: time.BaseUnit}
 }
 
-// Velocity returns the speed 1/p (m/s) in velocity.BaseUnit at the pace p. It
-// fails with ErrZeroDivision if p is zero.
+// Velocity returns the speed 1/p (m/s) in [velocity.BaseUnit] at the pace p. It
+// fails with [ErrZeroDivision] if p is zero.
 func (p Pace) Velocity() (Velocity, error) {
 	if p.value == 0 {
 		return Velocity{}, ErrZeroDivision

@@ -1,5 +1,13 @@
 // Package magneticfield defines the magnetic flux density units of the units
 // package and their conversion factors to the base unit, the tesla.
+//
+// Use the units with units.NewMagneticField, from the root package
+// github.com/asaphin/go-physics-units:
+//
+//	mf := units.NewMagneticField(50, magneticfield.Microtesla)
+//
+// ParseUnit turns a symbol such as "μT" into a Unit, and String turns a
+// Unit into its symbol.
 package magneticfield
 
 // Unit is a magnetic flux density unit: one of the constants below. String

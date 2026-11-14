@@ -1,5 +1,13 @@
 // Package amount defines the amount of substance units of the units package and
 // their conversion factors to the base unit, the mole.
+//
+// Use the units with units.NewAmount, from the root package
+// github.com/asaphin/go-physics-units:
+//
+//	n := units.NewAmount(2.5, amount.Millimole)
+//
+// ParseUnit turns a symbol such as "mmol" into a Unit, and String turns a
+// Unit into its symbol.
 package amount
 
 // Unit is an amount of substance unit: one of the constants below. String

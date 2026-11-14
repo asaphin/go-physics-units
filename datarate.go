@@ -15,7 +15,7 @@ type DataRate struct {
 	unit  datarate.Unit
 }
 
-// MultiplyByTime returns the data size r·t (B) in datasize.BaseUnit.
+// MultiplyByTime returns the data size r·t (B) in [datasize.BaseUnit].
 func (r DataRate) MultiplyByTime(t Time) DataSize {
 	return DataSize{value: r.baseValue() * t.baseValue(), unit: datasize.BaseUnit}
 }

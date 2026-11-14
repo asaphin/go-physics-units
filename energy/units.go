@@ -1,5 +1,13 @@
 // Package energy defines the energy units of the units package
 // and their conversion factors to the base unit, the joule.
+//
+// Use the units with units.NewEnergy, from the root package
+// github.com/asaphin/go-physics-units:
+//
+//	e := units.NewEnergy(10, energy.KilowattHour)
+//
+// ParseUnit turns a symbol such as "kWh" into a Unit, and String turns a
+// Unit into its symbol.
 package energy
 
 // Unit is an energy unit: one of the constants below. String returns its

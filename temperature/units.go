@@ -5,6 +5,13 @@
 // packages this one has no factors: Convert converts a temperature, a point on
 // a scale, and DifferenceRate converts a temperature difference, which has no
 // offset. A rise of 10 °C is a rise of 18 °F, while 10 °C is 50 °F.
+//
+// Use the units with units.NewTemperature, a point on a scale, and
+// units.NewTemperatureDifference, a change, from the root package
+// github.com/asaphin/go-physics-units:
+//
+//	room, err := units.NewTemperature(20, temperature.Celsius)
+//	rise := units.NewTemperatureDifference(5, temperature.Kelvin)
 package temperature
 
 import (

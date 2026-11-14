@@ -37,7 +37,7 @@ type Unit[M Measure] struct {
 }
 
 // UnitOf returns the unit of M with the given symbol. It fails with
-// ErrUnknownUnit if M has no such unit, and with ErrInvalidMeasure if M's
+// [ErrUnknownUnit] if M has no such unit, and with [ErrInvalidMeasure] if M's
 // Units method returns the zero UnitSet. Both forms of the micro sign are
 // accepted.
 func UnitOf[M Measure](symbol string) (Unit[M], error) {
@@ -116,8 +116,8 @@ func NewQuantity[M Measure](value float64, unit Unit[M]) Quantity[M] {
 }
 
 // ParseQuantity parses a quantity of M from a string such as "10 USD". It
-// fails with ErrInvalidFormat unless the string has the form
-// "<value> <symbol>" with a finite value, and with ErrUnknownUnit if the
+// fails with [ErrInvalidFormat] unless the string has the form
+// "<value> <symbol>" with a finite value, and with [ErrUnknownUnit] if the
 // symbol isn't a unit of M.
 func ParseQuantity[M Measure](s string) (Quantity[M], error) {
 	value, symbol, err := parseValueAndUnit(s)
@@ -133,8 +133,8 @@ func ParseQuantity[M Measure](s string) (Quantity[M], error) {
 	return Quantity[M]{value: value, unit: u}, nil
 }
 
-// ToQuantity returns m as a Quantity[M]. It fails with ErrIncompatibleMeasures
-// if m isn't one, and with ErrInvalidMeasure if M's Units method returns the
+// ToQuantity returns m as a Quantity[M]. It fails with [ErrIncompatibleMeasures]
+// if m isn't one, and with [ErrInvalidMeasure] if M's Units method returns the
 // zero UnitSet.
 func ToQuantity[M Measure](m Measurement) (Quantity[M], error) {
 	q, ok := m.(Quantity[M])
@@ -183,7 +183,7 @@ func (q Quantity[M]) Format(f fmt.State, verb rune) {
 }
 
 // AppendText implements encoding.TextAppender: it appends the String form,
-// such as "10 USD". It fails with ErrOutOfRange if the value isn't finite.
+// such as "10 USD". It fails with [ErrOutOfRange] if the value isn't finite.
 func (q Quantity[M]) AppendText(b []byte) ([]byte, error) {
 	return appendText(b, q.value, q.unit.String())
 }
@@ -196,7 +196,8 @@ func (q Quantity[M]) MarshalText() ([]byte, error) {
 
 // UnmarshalText implements encoding.TextUnmarshaler: it parses text as
 // ParseQuantity does and stores the result in q. Unmarshalling needs a pointer
-// receiver; it changes only the value it is called on.
+// receiver; it changes only the value it is called on. It fails like
+// [ParseQuantity], and leaves q unchanged when it does.
 func (q *Quantity[M]) UnmarshalText(text []byte) error {
 	value, err := ParseQuantity[M](string(text))
 	if err != nil {
@@ -234,7 +235,7 @@ func (q Quantity[M]) Mul(multiplier float64) Quantity[M] {
 	return Quantity[M]{value: q.value * multiplier, unit: q.unit}
 }
 
-// Div returns the quantity divided by divisor. It fails with ErrZeroDivision
+// Div returns the quantity divided by divisor. It fails with [ErrZeroDivision]
 // if divisor is zero.
 func (q Quantity[M]) Div(divisor float64) (Quantity[M], error) {
 	if divisor == 0 {
@@ -263,9 +264,9 @@ func (q Quantity[M]) EqualWithinRel(other Quantity[M], tol float64) bool {
 	return equalWithinRel(x, y, tol)
 }
 
-// Ratio returns q/other, the ratio of the quantities, in ratio.BaseUnit:
+// Ratio returns q/other, the ratio of the quantities, in [ratio.BaseUnit]:
 // convert it with ConvertTo(ratio.Percent) for a percentage. It fails with
-// ErrZeroDivision if other is zero.
+// [ErrZeroDivision] if other is zero.
 func (q Quantity[M]) Ratio(other Quantity[M]) (Ratio, error) {
 	x, y := q.common(other)
 	if y == 0 {
@@ -289,7 +290,7 @@ func (q Quantity[M]) common(other Quantity[M]) (float64, float64) {
 }
 
 // ConvertToMeasurement is ConvertTo for generic code: it takes a unit symbol.
-// It fails with ErrUnknownUnit if symbol isn't a unit of M.
+// It fails with [ErrUnknownUnit] if symbol isn't a unit of M.
 func (q Quantity[M]) ConvertToMeasurement(symbol string) (Measurement, error) {
 	i, err := set[M]().unitOf(symbol)
 	if err != nil {
@@ -300,7 +301,7 @@ func (q Quantity[M]) ConvertToMeasurement(symbol string) (Measurement, error) {
 }
 
 // AddMeasurement is Add for generic code. It fails with
-// ErrIncompatibleMeasures if m isn't a Quantity[M].
+// [ErrIncompatibleMeasures] if m isn't a Quantity[M].
 func (q Quantity[M]) AddMeasurement(m Measurement) (Measurement, error) {
 	v, err := set[M]().valueIn(m, q.unit.i)
 	if err != nil {
@@ -311,7 +312,7 @@ func (q Quantity[M]) AddMeasurement(m Measurement) (Measurement, error) {
 }
 
 // SubMeasurement is Sub for generic code. It fails with
-// ErrIncompatibleMeasures if m isn't a Quantity[M].
+// [ErrIncompatibleMeasures] if m isn't a Quantity[M].
 func (q Quantity[M]) SubMeasurement(m Measurement) (Measurement, error) {
 	v, err := set[M]().valueIn(m, q.unit.i)
 	if err != nil {
@@ -326,7 +327,8 @@ func (q Quantity[M]) MulMeasurement(multiplier float64) Measurement {
 	return q.Mul(multiplier)
 }
 
-// DivMeasurement is Div for generic code.
+// DivMeasurement is Div for generic code. It fails with [ErrZeroDivision] if
+// divisor is zero.
 func (q Quantity[M]) DivMeasurement(divisor float64) (Measurement, error) {
 	if divisor == 0 {
 		return nil, ErrZeroDivision
@@ -336,7 +338,7 @@ func (q Quantity[M]) DivMeasurement(divisor float64) (Measurement, error) {
 }
 
 // CompareMeasurement is Compare for generic code. It fails with
-// ErrIncompatibleMeasures if m isn't a Quantity[M].
+// [ErrIncompatibleMeasures] if m isn't a Quantity[M].
 func (q Quantity[M]) CompareMeasurement(m Measurement) (int, error) {
 	return set[M]().compare(q.value, q.unit.i, m)
 }

@@ -1,5 +1,13 @@
 // Package pace defines the pace (time per distance) units of the units package
 // and their conversion factors to the base unit, the second per metre.
+//
+// Use the units with units.NewPace, from the root package
+// github.com/asaphin/go-physics-units:
+//
+//	p := units.NewPace(5, pace.MinutePerKilometer)
+//
+// ParseUnit turns a symbol such as "min/km" into a Unit, and String turns a
+// Unit into its symbol.
 package pace
 
 // Unit is a pace unit: one of the constants below. String returns its symbol

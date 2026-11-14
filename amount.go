@@ -18,13 +18,13 @@ type Amount struct {
 	unit  amount.Unit
 }
 
-// MultiplyByMolarMass returns the mass n·mm (kg) in mass.BaseUnit.
+// MultiplyByMolarMass returns the mass n·mm (kg) in [mass.BaseUnit].
 func (n Amount) MultiplyByMolarMass(mm MolarMass) Mass {
 	return Mass{value: n.baseValue() * mm.baseValue(), unit: mass.BaseUnit}
 }
 
-// DivideByVolume returns the molar concentration n/v (mol/m³) in molarity.BaseUnit: the concentration
-// of n dissolved in v. It fails with ErrZeroDivision if v is zero.
+// DivideByVolume returns the molar concentration n/v (mol/m³) in [molarity.BaseUnit]: the concentration
+// of n dissolved in v. It fails with [ErrZeroDivision] if v is zero.
 func (n Amount) DivideByVolume(v Volume) (Molarity, error) {
 	if v.value == 0 {
 		return Molarity{}, ErrZeroDivision
@@ -33,8 +33,8 @@ func (n Amount) DivideByVolume(v Volume) (Molarity, error) {
 	return Molarity{value: n.baseValue() / v.baseValue(), unit: molarity.BaseUnit}, nil
 }
 
-// DivideByMolarity returns the volume n/c (m³) in volume.BaseUnit: the volume of a solution of c
-// holding n. It fails with ErrZeroDivision if c is zero.
+// DivideByMolarity returns the volume n/c (m³) in [volume.BaseUnit]: the volume of a solution of c
+// holding n. It fails with [ErrZeroDivision] if c is zero.
 func (n Amount) DivideByMolarity(c Molarity) (Volume, error) {
 	if c.value == 0 {
 		return Volume{}, ErrZeroDivision

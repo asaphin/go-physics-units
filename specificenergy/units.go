@@ -1,6 +1,14 @@
 // Package specificenergy defines the specific energy (energy per mass) units of
 // the units package and their conversion factors to the base unit, the joule
 // per kilogram.
+//
+// Use the units with units.NewSpecificEnergy, from the root package
+// github.com/asaphin/go-physics-units:
+//
+//	e := units.NewSpecificEnergy(250, specificenergy.WattHourPerKilogram)
+//
+// ParseUnit turns a symbol such as "Wh/kg" into a Unit, and String turns a
+// Unit into its symbol.
 package specificenergy
 
 // Unit is a specific energy unit: one of the constants below. String returns

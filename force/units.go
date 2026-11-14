@@ -1,5 +1,13 @@
 // Package force defines the force units of the units package
 // and their conversion factors to the base unit, the newton.
+//
+// Use the units with units.NewForce, from the root package
+// github.com/asaphin/go-physics-units:
+//
+//	f := units.NewForce(10, force.Newton)
+//
+// ParseUnit turns a symbol such as "N" into a Unit, and String turns a
+// Unit into its symbol.
 package force
 
 // Unit is a force unit: one of the constants below. String returns its

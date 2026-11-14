@@ -1,5 +1,13 @@
 // Package radioactivity defines the radioactivity (activity) units of the units
 // package and their conversion factors to the base unit, the becquerel.
+//
+// Use the units with units.NewRadioactivity, from the root package
+// github.com/asaphin/go-physics-units:
+//
+//	a := units.NewRadioactivity(3.7, radioactivity.Gigabecquerel)
+//
+// ParseUnit turns a symbol such as "GBq" into a Unit, and String turns a
+// Unit into its symbol.
 package radioactivity
 
 // Unit is a radioactivity unit: one of the constants below. String returns its

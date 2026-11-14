@@ -20,8 +20,8 @@ type Force struct {
 	unit  force.Unit
 }
 
-// DivideByMass returns the acceleration f/m (m/s²) in acceleration.BaseUnit. It fails with
-// ErrZeroDivision if m is zero.
+// DivideByMass returns the acceleration f/m (m/s²) in [acceleration.BaseUnit]. It fails with
+// [ErrZeroDivision] if m is zero.
 func (f Force) DivideByMass(m Mass) (Acceleration, error) {
 	if m.value == 0 {
 		return Acceleration{}, ErrZeroDivision
@@ -30,8 +30,8 @@ func (f Force) DivideByMass(m Mass) (Acceleration, error) {
 	return Acceleration{value: f.baseValue() / m.baseValue(), unit: acceleration.BaseUnit}, nil
 }
 
-// DivideByAcceleration returns the mass f/a (kg) in mass.BaseUnit. It fails with
-// ErrZeroDivision if a is zero.
+// DivideByAcceleration returns the mass f/a (kg) in [mass.BaseUnit]. It fails with
+// [ErrZeroDivision] if a is zero.
 func (f Force) DivideByAcceleration(a Acceleration) (Mass, error) {
 	if a.value == 0 {
 		return Mass{}, ErrZeroDivision
@@ -40,8 +40,8 @@ func (f Force) DivideByAcceleration(a Acceleration) (Mass, error) {
 	return Mass{value: f.baseValue() / a.baseValue(), unit: mass.BaseUnit}, nil
 }
 
-// DivideByArea returns the pressure f/a (Pa) in pressure.BaseUnit. It fails with
-// ErrZeroDivision if a is zero.
+// DivideByArea returns the pressure f/a (Pa) in [pressure.BaseUnit]. It fails with
+// [ErrZeroDivision] if a is zero.
 func (f Force) DivideByArea(a Area) (Pressure, error) {
 	if a.value == 0 {
 		return Pressure{}, ErrZeroDivision
@@ -50,18 +50,18 @@ func (f Force) DivideByArea(a Area) (Pressure, error) {
 	return Pressure{value: f.baseValue() / a.baseValue(), unit: pressure.BaseUnit}, nil
 }
 
-// MultiplyByDistance returns the energy (work) f·d (J) in energy.BaseUnit.
+// MultiplyByDistance returns the energy (work) f·d (J) in [energy.BaseUnit].
 func (f Force) MultiplyByDistance(d Distance) Energy {
 	return Energy{value: f.baseValue() * d.baseValue(), unit: energy.BaseUnit}
 }
 
-// MultiplyByTime returns the momentum f·t (kg·m/s) in momentum.BaseUnit: the impulse, the change of
+// MultiplyByTime returns the momentum f·t (kg·m/s) in [momentum.BaseUnit]: the impulse, the change of
 // momentum.
 func (f Force) MultiplyByTime(t Time) Momentum {
 	return Momentum{value: f.baseValue() * t.baseValue(), unit: momentum.BaseUnit}
 }
 
-// TorqueAt returns the torque f·arm (N·m) in torque.BaseUnit: the torque of f at a lever arm,
+// TorqueAt returns the torque f·arm (N·m) in [torque.BaseUnit]: the torque of f at a lever arm,
 // perpendicular to it.
 func (f Force) TorqueAt(arm Distance) Torque {
 	return Torque{value: f.baseValue() * arm.baseValue(), unit: torque.BaseUnit}

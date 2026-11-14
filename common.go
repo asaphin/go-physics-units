@@ -16,7 +16,7 @@ type Arithmetics[T any] interface {
 	// Mul returns the receiver multiplied by multiplier.
 	Mul(multiplier float64) T
 	// Div returns the receiver divided by divisor. It fails with
-	// ErrZeroDivision if divisor is zero.
+	// [ErrZeroDivision] if divisor is zero.
 	Div(divisor float64) (T, error)
 }
 

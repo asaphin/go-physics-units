@@ -1,5 +1,13 @@
 // Package capacitance defines the capacitance units of the units package and
 // their conversion factors to the base unit, the farad.
+//
+// Use the units with units.NewCapacitance, from the root package
+// github.com/asaphin/go-physics-units:
+//
+//	c := units.NewCapacitance(100, capacitance.Microfarad)
+//
+// ParseUnit turns a symbol such as "μF" into a Unit, and String turns a
+// Unit into its symbol.
 package capacitance
 
 // Unit is a capacitance unit: one of the constants below. String returns its

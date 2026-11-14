@@ -1,5 +1,13 @@
 // Package absorbeddose defines the absorbed dose of ionising radiation units of
 // the units package and their conversion factors to the base unit, the gray.
+//
+// Use the units with units.NewAbsorbedDose, from the root package
+// github.com/asaphin/go-physics-units:
+//
+//	d := units.NewAbsorbedDose(2, absorbeddose.Gray)
+//
+// ParseUnit turns a symbol such as "Gy" into a Unit, and String turns a
+// Unit into its symbol.
 package absorbeddose
 
 // Unit is an absorbed dose unit: one of the constants below. String returns its
