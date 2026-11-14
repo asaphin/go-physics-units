@@ -1,5 +1,13 @@
 // Package current defines the electric current units of the units package and their
 // conversion factors to the base unit, the ampere.
+//
+// Use the units with units.NewCurrent, from the root package
+// github.com/asaphin/go-physics-units:
+//
+//	i := units.NewCurrent(2.5, current.Milliampere)
+//
+// ParseUnit turns a symbol such as "mA" into a Unit, and String turns a
+// Unit into its symbol.
 package current
 
 // Unit is an electric current unit: one of the constants below. String returns its

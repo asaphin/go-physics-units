@@ -1,5 +1,13 @@
 // Package doserate defines the equivalent dose rate units of the units package
 // and their conversion factors to the base unit, the sievert per second.
+//
+// Use the units with units.NewDoseRate, from the root package
+// github.com/asaphin/go-physics-units:
+//
+//	r := units.NewDoseRate(0.12, doserate.MicrosievertPerHour)
+//
+// ParseUnit turns a symbol such as "μSv/h" into a Unit, and String turns a
+// Unit into its symbol.
 package doserate
 
 // Unit is a dose rate unit: one of the constants below. String returns its

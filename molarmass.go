@@ -15,7 +15,7 @@ type MolarMass struct {
 	unit  molarmass.Unit
 }
 
-// MultiplyByAmount returns the mass mm·n (kg) in mass.BaseUnit.
+// MultiplyByAmount returns the mass mm·n (kg) in [mass.BaseUnit].
 func (mm MolarMass) MultiplyByAmount(n Amount) Mass {
 	return Mass{value: mm.baseValue() * n.baseValue(), unit: mass.BaseUnit}
 }

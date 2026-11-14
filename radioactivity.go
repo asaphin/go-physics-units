@@ -19,7 +19,7 @@ type Radioactivity struct {
 // DecayAfter returns the activity of a after elapsed, for a single radionuclide
 // with the given half-life: a·2^(−elapsed/halfLife), in the receiver's unit. A
 // negative elapsed time gives the activity before. It fails with
-// ErrZeroDivision if halfLife is zero.
+// [ErrZeroDivision] if halfLife is zero.
 func (a Radioactivity) DecayAfter(elapsed, halfLife Time) (Radioactivity, error) {
 	if halfLife.value == 0 {
 		return Radioactivity{}, ErrZeroDivision

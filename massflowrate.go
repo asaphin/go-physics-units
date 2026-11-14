@@ -16,8 +16,8 @@ type MassFlowRate struct {
 	unit  massflowrate.Unit
 }
 
-// DivideByDensity returns the flow rate mr/d (m³/s) in flowrate.BaseUnit. It fails with
-// ErrZeroDivision if d is zero.
+// DivideByDensity returns the flow rate mr/d (m³/s) in [flowrate.BaseUnit]. It fails with
+// [ErrZeroDivision] if d is zero.
 func (mr MassFlowRate) DivideByDensity(d Density) (FlowRate, error) {
 	if d.value == 0 {
 		return FlowRate{}, ErrZeroDivision
@@ -26,7 +26,7 @@ func (mr MassFlowRate) DivideByDensity(d Density) (FlowRate, error) {
 	return FlowRate{value: mr.baseValue() / d.baseValue(), unit: flowrate.BaseUnit}, nil
 }
 
-// MultiplyByTime returns the mass mr·t (kg) in mass.BaseUnit.
+// MultiplyByTime returns the mass mr·t (kg) in [mass.BaseUnit].
 func (mr MassFlowRate) MultiplyByTime(t Time) Mass {
 	return Mass{value: mr.baseValue() * t.baseValue(), unit: mass.BaseUnit}
 }

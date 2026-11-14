@@ -1,5 +1,13 @@
 // Package density defines the density units of the units package
 // and their conversion factors to the base unit, the kilogram per cubic metre.
+//
+// Use the units with units.NewDensity, from the root package
+// github.com/asaphin/go-physics-units:
+//
+//	d := units.NewDensity(1.2, density.KilogramPerCubicMeter)
+//
+// ParseUnit turns a symbol such as "kg/m³" into a Unit, and String turns a
+// Unit into its symbol.
 package density
 
 // Unit is a density unit: one of the constants below. String returns its

@@ -15,7 +15,7 @@ type Molarity struct {
 	unit  molarity.Unit
 }
 
-// MultiplyByVolume returns the amount of substance c·v (mol) in amount.BaseUnit.
+// MultiplyByVolume returns the amount of substance c·v (mol) in [amount.BaseUnit].
 func (c Molarity) MultiplyByVolume(v Volume) Amount {
 	return Amount{value: c.baseValue() * v.baseValue(), unit: amount.BaseUnit}
 }

@@ -18,13 +18,13 @@ type FlowRate struct {
 	unit  flowrate.Unit
 }
 
-// MultiplyByTime returns the volume q·t (m³) in volume.BaseUnit.
+// MultiplyByTime returns the volume q·t (m³) in [volume.BaseUnit].
 func (q FlowRate) MultiplyByTime(t Time) Volume {
 	return Volume{value: q.baseValue() * t.baseValue(), unit: volume.BaseUnit}
 }
 
-// DivideByArea returns the velocity q/a (m/s) in velocity.BaseUnit: the mean speed of the flow through
-// a cross-section a. It fails with ErrZeroDivision if a is zero.
+// DivideByArea returns the velocity q/a (m/s) in [velocity.BaseUnit]: the mean speed of the flow through
+// a cross-section a. It fails with [ErrZeroDivision] if a is zero.
 func (q FlowRate) DivideByArea(a Area) (Velocity, error) {
 	if a.value == 0 {
 		return Velocity{}, ErrZeroDivision
@@ -33,12 +33,12 @@ func (q FlowRate) DivideByArea(a Area) (Velocity, error) {
 	return Velocity{value: q.baseValue() / a.baseValue(), unit: velocity.BaseUnit}, nil
 }
 
-// MultiplyByPressure returns the power q·p (W) in power.BaseUnit: the hydraulic power.
+// MultiplyByPressure returns the power q·p (W) in [power.BaseUnit]: the hydraulic power.
 func (q FlowRate) MultiplyByPressure(p Pressure) Power {
 	return Power{value: q.baseValue() * p.baseValue(), unit: power.BaseUnit}
 }
 
-// MultiplyByDensity returns the mass flow rate q·d (kg/s) in massflowrate.BaseUnit.
+// MultiplyByDensity returns the mass flow rate q·d (kg/s) in [massflowrate.BaseUnit].
 func (q FlowRate) MultiplyByDensity(d Density) MassFlowRate {
 	return MassFlowRate{value: q.baseValue() * d.baseValue(), unit: massflowrate.BaseUnit}
 }

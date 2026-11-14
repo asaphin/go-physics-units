@@ -1,5 +1,13 @@
 // Package torque defines the torque units of the units package and their
 // conversion factors to the base unit, the newton metre.
+//
+// Use the units with units.NewTorque, from the root package
+// github.com/asaphin/go-physics-units:
+//
+//	tq := units.NewTorque(40, torque.NewtonMeter)
+//
+// ParseUnit turns a symbol such as "N·m" into a Unit, and String turns a
+// Unit into its symbol.
 package torque
 
 // Unit is a torque unit: one of the constants below. String returns its symbol

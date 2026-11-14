@@ -1,5 +1,13 @@
 // Package velocity defines the velocity (speed) units of the units package and
 // their conversion factors to the base unit, the metre per second.
+//
+// Use the units with units.NewVelocity, from the root package
+// github.com/asaphin/go-physics-units:
+//
+//	v := units.NewVelocity(10, velocity.KilometerPerHour)
+//
+// ParseUnit turns a symbol such as "km/h" into a Unit, and String turns a
+// Unit into its symbol.
 package velocity
 
 // Unit is a velocity unit: one of the constants below. String returns its

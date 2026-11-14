@@ -1,5 +1,13 @@
 // Package luminousflux defines the luminous flux units of the units package and
 // their conversion factors to the base unit, the lumen.
+//
+// Use the units with units.NewLuminousFlux, from the root package
+// github.com/asaphin/go-physics-units:
+//
+//	f := units.NewLuminousFlux(800, luminousflux.Lumen)
+//
+// ParseUnit turns a symbol such as "lm" into a Unit, and String turns a
+// Unit into its symbol.
 package luminousflux
 
 // Unit is a luminous flux unit: one of the constants below. String returns its

@@ -17,8 +17,8 @@ type Torque struct {
 	unit  torque.Unit
 }
 
-// DivideByDistance returns the force tq/d (N) in force.BaseUnit: the force at a lever arm d. It fails
-// with ErrZeroDivision if d is zero.
+// DivideByDistance returns the force tq/d (N) in [force.BaseUnit]: the force at a lever arm d. It fails
+// with [ErrZeroDivision] if d is zero.
 func (tq Torque) DivideByDistance(d Distance) (Force, error) {
 	if d.value == 0 {
 		return Force{}, ErrZeroDivision
@@ -27,13 +27,13 @@ func (tq Torque) DivideByDistance(d Distance) (Force, error) {
 	return Force{value: tq.baseValue() / d.baseValue(), unit: force.BaseUnit}, nil
 }
 
-// MultiplyByAngularVelocity returns the power tq·w (W) in power.BaseUnit: the power of a shaft turning
+// MultiplyByAngularVelocity returns the power tq·w (W) in [power.BaseUnit]: the power of a shaft turning
 // at w.
 func (tq Torque) MultiplyByAngularVelocity(w AngularVelocity) Power {
 	return Power{value: tq.baseValue() * w.baseValue(), unit: power.BaseUnit}
 }
 
-// MultiplyByAngle returns the energy tq·a (J) in energy.BaseUnit: the work done turning through a.
+// MultiplyByAngle returns the energy tq·a (J) in [energy.BaseUnit]: the work done turning through a.
 func (tq Torque) MultiplyByAngle(a Angle) Energy {
 	return Energy{value: tq.baseValue() * a.baseValue(), unit: energy.BaseUnit}
 }

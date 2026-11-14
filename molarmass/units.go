@@ -1,5 +1,13 @@
 // Package molarmass defines the molar mass units of the units package and their
 // conversion factors to the base unit, the kilogram per mole.
+//
+// Use the units with units.NewMolarMass, from the root package
+// github.com/asaphin/go-physics-units:
+//
+//	mm := units.NewMolarMass(18.015, molarmass.GramPerMole)
+//
+// ParseUnit turns a symbol such as "g/mol" into a Unit, and String turns a
+// Unit into its symbol.
 package molarmass
 
 // Unit is a molar mass unit: one of the constants below. String returns its

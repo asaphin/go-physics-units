@@ -15,8 +15,8 @@ type LuminousFlux struct {
 	unit  luminousflux.Unit
 }
 
-// DivideByArea returns the illuminance f/a (lx) in illuminance.BaseUnit: the illuminance of f spread
-// evenly over a. It fails with ErrZeroDivision if a is zero.
+// DivideByArea returns the illuminance f/a (lx) in [illuminance.BaseUnit]: the illuminance of f spread
+// evenly over a. It fails with [ErrZeroDivision] if a is zero.
 func (f LuminousFlux) DivideByArea(a Area) (Illuminance, error) {
 	if a.value == 0 {
 		return Illuminance{}, ErrZeroDivision

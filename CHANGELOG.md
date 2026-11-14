@@ -11,6 +11,7 @@
 - **`Ratio(other)`** on every measure and on `Quantity`: the ratio of two values, exact when they share a unit.
 - **Package `physics`:** formulas that combine measures: falling bodies, projectiles, pendulums and hydrostatic pressure; gravitation, orbits and black holes; light, sound, Mach numbers and time dilation; ideal gases and black-body radiation; capacitor and inductor energy and LC resonance.
 - **Package `constant`:** the SI defining constants, exact derived constants (ħ, R, F, σ), the CODATA 2022 values of G, mₑ, mₚ, u, α, ε₀ and μ₀, and IAU astronomical constants.
+- **Documentation:** every doc comment says how its function fails, with links to the sentinels and base units; the package documentation is a task guide (which function for which job, and the common mistakes); every unit package shows how its units are used.
 - **USECASES.md:** four more scenarios: a car's power and a road trip, a lab solution, the radiation of a long-haul flight, and orbits.
 
 ### Changed

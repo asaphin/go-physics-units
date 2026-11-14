@@ -1,5 +1,13 @@
 // Package ratio defines the dimensionless ratio units of the units package and
 // their conversion factors to the base unit, the one, written 1.
+//
+// Use the units with units.NewRatio, from the root package
+// github.com/asaphin/go-physics-units:
+//
+//	r := units.NewRatio(12.5, ratio.Percent)
+//
+// ParseUnit turns a symbol such as "%" into a Unit, and String turns a
+// Unit into its symbol.
 package ratio
 
 // Unit is a ratio unit: one of the constants below. String returns its symbol

@@ -63,7 +63,7 @@ func WithAliases(aliases map[string]string) ParserOption {
 
 // CaseInsensitive makes symbols and aliases match regardless of case where
 // that is unambiguous: "10 KM" parses as 10 km. An exact match always wins, so
-// "1 kn" is still a knot, but "1 KN" fails with ErrAmbiguousUnit, because kN
+// "1 kn" is still a knot, but "1 KN" fails with [ErrAmbiguousUnit], because kN
 // (kilonewton) and kn (knot) differ only in case.
 func CaseInsensitive() ParserOption {
 	return func(c *parserConfig) {
@@ -104,7 +104,7 @@ func WithMeasure[M Measure]() ParserOption {
 	}
 }
 
-// NewParser builds a Parser from the options. It fails with ErrInvalidOption if
+// NewParser builds a Parser from the options. It fails with [ErrInvalidOption] if
 // an alias is invalid or doesn't denote a unit, or if two measures share a
 // symbol.
 func NewParser(options ...ParserOption) (Parser, error) {
@@ -215,6 +215,9 @@ func (p *parser) fold() {
 // finite. Values of predefined measures have their measure's type, such as
 // Distance, and values of a measure M added with WithMeasure the type
 // Quantity[M].
+//
+// It fails like [ParseString], and also with [ErrAmbiguousUnit] when a
+// case-insensitive parser finds several symbols that the unit could be.
 func (p Parser) Parse(s string) (Measurement, error) {
 	if p.p == nil {
 		return ParseString(s)
@@ -239,6 +242,9 @@ func (p Parser) Parse(s string) (Measurement, error) {
 //
 //	symbol, err := p.Unit("metres") // "m"
 //	u, ok := distance.ParseUnit(symbol)
+//
+// It fails with [ErrUnknownUnit] if the parser doesn't know symbol, and with
+// [ErrAmbiguousUnit] if it could be several symbols.
 func (p Parser) Unit(symbol string) (string, error) {
 	if p.p == nil {
 		pu, ok := predefinedUnits[rates.CanonicalUnit(symbol)]
@@ -358,7 +364,7 @@ func splitNumber(field string) (float64, int, error) {
 	return 0, 0, nil
 }
 
-// invalidOption returns an ErrInvalidOption with the given message.
+// invalidOption returns an [ErrInvalidOption] with the given message.
 func invalidOption(msg string) error {
 	return newError(ErrInvalidOption, msg, nil)
 }

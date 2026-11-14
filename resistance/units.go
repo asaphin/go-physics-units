@@ -1,5 +1,13 @@
 // Package resistance defines the electrical resistance units of the units package and their
 // conversion factors to the base unit, the ohm.
+//
+// Use the units with units.NewResistance, from the root package
+// github.com/asaphin/go-physics-units:
+//
+//	r := units.NewResistance(4.7, resistance.Kiloohm)
+//
+// ParseUnit turns a symbol such as "kΩ" into a Unit, and String turns a
+// Unit into its symbol.
 package resistance
 
 // Unit is an electrical resistance unit: one of the constants below. String returns its

@@ -15,7 +15,7 @@ type Illuminance struct {
 	unit  illuminance.Unit
 }
 
-// MultiplyByArea returns the luminous flux e·a (lm) in luminousflux.BaseUnit: the luminous flux that
+// MultiplyByArea returns the luminous flux e·a (lm) in [luminousflux.BaseUnit]: the luminous flux that
 // lights a to e.
 func (e Illuminance) MultiplyByArea(a Area) LuminousFlux {
 	return LuminousFlux{value: e.baseValue() * a.baseValue(), unit: luminousflux.BaseUnit}

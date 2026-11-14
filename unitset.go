@@ -44,7 +44,7 @@ const maxUnits = math.MaxUint16 + 1
 //
 // measure must be non-empty and differ from the predefined MeasureType
 // values, baseUnit must be one of the symbols, and every factor must be
-// positive and finite. It fails with ErrInvalidMeasure or ErrInvalidFactors
+// positive and finite. It fails with [ErrInvalidMeasure] or [ErrInvalidFactors]
 // otherwise.
 //
 // The base unit is the zero Unit of the measure, and the unit of the zero

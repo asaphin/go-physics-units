@@ -15,7 +15,7 @@ type EnergyDensity struct {
 	unit  energydensity.Unit
 }
 
-// MultiplyByVolume returns the energy u·v (J) in energy.BaseUnit.
+// MultiplyByVolume returns the energy u·v (J) in [energy.BaseUnit].
 func (u EnergyDensity) MultiplyByVolume(v Volume) Energy {
 	return Energy{value: u.baseValue() * v.baseValue(), unit: energy.BaseUnit}
 }

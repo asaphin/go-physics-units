@@ -24,13 +24,13 @@ type Mass struct {
 	unit  mass.Unit
 }
 
-// MultiplyByAcceleration returns the force m·a (N) in force.BaseUnit.
+// MultiplyByAcceleration returns the force m·a (N) in [force.BaseUnit].
 func (m Mass) MultiplyByAcceleration(a Acceleration) Force {
 	return Force{value: m.baseValue() * a.baseValue(), unit: force.BaseUnit}
 }
 
-// DivideByVolume returns the density m/v (kg/m³) in density.BaseUnit. It fails with
-// ErrZeroDivision if v is zero.
+// DivideByVolume returns the density m/v (kg/m³) in [density.BaseUnit]. It fails with
+// [ErrZeroDivision] if v is zero.
 func (m Mass) DivideByVolume(v Volume) (Density, error) {
 	if v.value == 0 {
 		return Density{}, ErrZeroDivision
@@ -39,8 +39,8 @@ func (m Mass) DivideByVolume(v Volume) (Density, error) {
 	return Density{value: m.baseValue() / v.baseValue(), unit: density.BaseUnit}, nil
 }
 
-// DivideByDensity returns the volume m/d (m³) in volume.BaseUnit. It fails with
-// ErrZeroDivision if d is zero.
+// DivideByDensity returns the volume m/d (m³) in [volume.BaseUnit]. It fails with
+// [ErrZeroDivision] if d is zero.
 func (m Mass) DivideByDensity(d Density) (Volume, error) {
 	if d.value == 0 {
 		return Volume{}, ErrZeroDivision
@@ -49,13 +49,13 @@ func (m Mass) DivideByDensity(d Density) (Volume, error) {
 	return Volume{value: m.baseValue() / d.baseValue(), unit: volume.BaseUnit}, nil
 }
 
-// MultiplyByVelocity returns the momentum m·v (kg·m/s) in momentum.BaseUnit.
+// MultiplyByVelocity returns the momentum m·v (kg·m/s) in [momentum.BaseUnit].
 func (m Mass) MultiplyByVelocity(v Velocity) Momentum {
 	return Momentum{value: m.baseValue() * v.baseValue(), unit: momentum.BaseUnit}
 }
 
-// DivideByTime returns the mass flow rate m/t (kg/s) in massflowrate.BaseUnit. It fails with
-// ErrZeroDivision if t is zero.
+// DivideByTime returns the mass flow rate m/t (kg/s) in [massflowrate.BaseUnit]. It fails with
+// [ErrZeroDivision] if t is zero.
 func (m Mass) DivideByTime(t Time) (MassFlowRate, error) {
 	if t.value == 0 {
 		return MassFlowRate{}, ErrZeroDivision
@@ -64,8 +64,8 @@ func (m Mass) DivideByTime(t Time) (MassFlowRate, error) {
 	return MassFlowRate{value: m.baseValue() / t.baseValue(), unit: massflowrate.BaseUnit}, nil
 }
 
-// DivideByMassFlowRate returns the time m/mr (s) in time.BaseUnit: how long m lasts at mr. It fails
-// with ErrZeroDivision if mr is zero.
+// DivideByMassFlowRate returns the time m/mr (s) in [time.BaseUnit]: how long m lasts at mr. It fails
+// with [ErrZeroDivision] if mr is zero.
 func (m Mass) DivideByMassFlowRate(mr MassFlowRate) (Time, error) {
 	if mr.value == 0 {
 		return Time{}, ErrZeroDivision
@@ -74,8 +74,8 @@ func (m Mass) DivideByMassFlowRate(mr MassFlowRate) (Time, error) {
 	return Time{value: m.baseValue() / mr.baseValue(), unit: time.BaseUnit}, nil
 }
 
-// DivideByMolarMass returns the amount of substance m/mm (mol) in amount.BaseUnit. It fails with
-// ErrZeroDivision if mm is zero.
+// DivideByMolarMass returns the amount of substance m/mm (mol) in [amount.BaseUnit]. It fails with
+// [ErrZeroDivision] if mm is zero.
 func (m Mass) DivideByMolarMass(mm MolarMass) (Amount, error) {
 	if mm.value == 0 {
 		return Amount{}, ErrZeroDivision
@@ -84,8 +84,8 @@ func (m Mass) DivideByMolarMass(mm MolarMass) (Amount, error) {
 	return Amount{value: m.baseValue() / mm.baseValue(), unit: amount.BaseUnit}, nil
 }
 
-// DivideByAmount returns the molar mass m/n (kg/mol) in molarmass.BaseUnit. It fails with
-// ErrZeroDivision if n is zero.
+// DivideByAmount returns the molar mass m/n (kg/mol) in [molarmass.BaseUnit]. It fails with
+// [ErrZeroDivision] if n is zero.
 func (m Mass) DivideByAmount(n Amount) (MolarMass, error) {
 	if n.value == 0 {
 		return MolarMass{}, ErrZeroDivision
@@ -94,12 +94,12 @@ func (m Mass) DivideByAmount(n Amount) (MolarMass, error) {
 	return MolarMass{value: m.baseValue() / n.baseValue(), unit: molarmass.BaseUnit}, nil
 }
 
-// MultiplyBySpecificEnergy returns the energy m·e (J) in energy.BaseUnit.
+// MultiplyBySpecificEnergy returns the energy m·e (J) in [energy.BaseUnit].
 func (m Mass) MultiplyBySpecificEnergy(e SpecificEnergy) Energy {
 	return Energy{value: m.baseValue() * e.baseValue(), unit: energy.BaseUnit}
 }
 
-// KineticEnergy returns the kinetic energy m·v²/2 (J) in energy.BaseUnit of the
+// KineticEnergy returns the kinetic energy m·v²/2 (J) in [energy.BaseUnit] of the
 // mass m moving at v. It is the classical formula: use it far below the speed
 // of light.
 func (m Mass) KineticEnergy(v Velocity) Energy {
@@ -108,13 +108,13 @@ func (m Mass) KineticEnergy(v Velocity) Energy {
 	return Energy{value: m.baseValue() * s * s / 2, unit: energy.BaseUnit}
 }
 
-// Weight returns the force m·gₙ (N) in force.BaseUnit that gravity exerts on m
+// Weight returns the force m·gₙ (N) in [force.BaseUnit] that gravity exerts on m
 // at standard gravity, 9.80665 m/s²: the weight of 1 kg is 1 kgf.
 func (m Mass) Weight() Force {
 	return Force{value: m.baseValue() * constant.StandardGravity, unit: force.BaseUnit}
 }
 
-// RestEnergy returns the energy m·c² (J) in energy.BaseUnit equivalent to the
+// RestEnergy returns the energy m·c² (J) in [energy.BaseUnit] equivalent to the
 // mass m.
 func (m Mass) RestEnergy() Energy {
 	return Energy{value: m.baseValue() * (constant.SpeedOfLight * constant.SpeedOfLight), unit: energy.BaseUnit}

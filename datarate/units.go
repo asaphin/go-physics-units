@@ -1,5 +1,13 @@
 // Package datarate defines the data rate units of the units package
 // and their conversion factors to the base unit, the byte per second.
+//
+// Use the units with units.NewDataRate, from the root package
+// github.com/asaphin/go-physics-units:
+//
+//	r := units.NewDataRate(100, datarate.MegabitPerSecond)
+//
+// ParseUnit turns a symbol such as "Mbit/s" into a Unit, and String turns a
+// Unit into its symbol.
 package datarate
 
 // Unit is a data rate unit: one of the constants below. String returns its

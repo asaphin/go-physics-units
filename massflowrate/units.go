@@ -1,5 +1,13 @@
 // Package massflowrate defines the mass flow rate units of the units package
 // and their conversion factors to the base unit, the kilogram per second.
+//
+// Use the units with units.NewMassFlowRate, from the root package
+// github.com/asaphin/go-physics-units:
+//
+//	mr := units.NewMassFlowRate(250, massflowrate.KilogramPerHour)
+//
+// ParseUnit turns a symbol such as "kg/h" into a Unit, and String turns a
+// Unit into its symbol.
 package massflowrate
 
 // Unit is a mass flow rate unit: one of the constants below. String returns its

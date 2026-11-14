@@ -16,14 +16,14 @@ type FuelEconomy struct {
 	unit  fueleconomy.Unit
 }
 
-// MultiplyByVolume returns the distance fe·v (m) in distance.BaseUnit: the range on v.
+// MultiplyByVolume returns the distance fe·v (m) in [distance.BaseUnit]: the range on v.
 func (fe FuelEconomy) MultiplyByVolume(v Volume) Distance {
 	return Distance{value: fe.baseValue() * v.baseValue(), unit: distance.BaseUnit}
 }
 
-// Consumption returns the fuel consumption 1/fe (m³/m) in fuelconsumption.BaseUnit:
+// Consumption returns the fuel consumption 1/fe (m³/m) in [fuelconsumption.BaseUnit]:
 // convert it to fuelconsumption.LiterPer100Kilometers. It fails with
-// ErrZeroDivision if fe is zero.
+// [ErrZeroDivision] if fe is zero.
 func (fe FuelEconomy) Consumption() (FuelConsumption, error) {
 	if fe.value == 0 {
 		return FuelConsumption{}, ErrZeroDivision

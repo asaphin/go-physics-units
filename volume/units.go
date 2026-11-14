@@ -1,5 +1,13 @@
 // Package volume defines the volume units of the units package
 // and their conversion factors to the base unit, the cubic metre.
+//
+// Use the units with units.NewVolume, from the root package
+// github.com/asaphin/go-physics-units:
+//
+//	v := units.NewVolume(10, volume.Liter)
+//
+// ParseUnit turns a symbol such as "L" into a Unit, and String turns a
+// Unit into its symbol.
 package volume
 
 // Unit is a volume unit: one of the constants below. String returns its

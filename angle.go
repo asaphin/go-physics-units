@@ -15,8 +15,8 @@ type Angle struct {
 	unit  angle.Unit
 }
 
-// DivideByTime returns the angular velocity a/t (rad/s) in angularvelocity.BaseUnit. It fails with
-// ErrZeroDivision if t is zero.
+// DivideByTime returns the angular velocity a/t (rad/s) in [angularvelocity.BaseUnit]. It fails with
+// [ErrZeroDivision] if t is zero.
 func (a Angle) DivideByTime(t Time) (AngularVelocity, error) {
 	if t.value == 0 {
 		return AngularVelocity{}, ErrZeroDivision

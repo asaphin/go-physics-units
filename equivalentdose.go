@@ -16,7 +16,7 @@ type EquivalentDose struct {
 	unit  equivalentdose.Unit
 }
 
-// DivideByTime returns the dose rate h/t (Sv/s) in doserate.BaseUnit. It fails with ErrZeroDivision if
+// DivideByTime returns the dose rate h/t (Sv/s) in [doserate.BaseUnit]. It fails with [ErrZeroDivision] if
 // t is zero.
 func (h EquivalentDose) DivideByTime(t Time) (DoseRate, error) {
 	if t.value == 0 {
@@ -26,8 +26,8 @@ func (h EquivalentDose) DivideByTime(t Time) (DoseRate, error) {
 	return DoseRate{value: h.baseValue() / t.baseValue(), unit: doserate.BaseUnit}, nil
 }
 
-// DivideByDoseRate returns the time h/r (s) in time.BaseUnit: how long it takes to receive h at r. It
-// fails with ErrZeroDivision if r is zero.
+// DivideByDoseRate returns the time h/r (s) in [time.BaseUnit]: how long it takes to receive h at r. It
+// fails with [ErrZeroDivision] if r is zero.
 func (h EquivalentDose) DivideByDoseRate(r DoseRate) (Time, error) {
 	if r.value == 0 {
 		return Time{}, ErrZeroDivision

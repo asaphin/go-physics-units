@@ -16,12 +16,12 @@ type AngularVelocity struct {
 	unit  angularvelocity.Unit
 }
 
-// MultiplyByTime returns the angle ω·t (rad) in angle.BaseUnit.
+// MultiplyByTime returns the angle ω·t (rad) in [angle.BaseUnit].
 func (w AngularVelocity) MultiplyByTime(t Time) Angle {
 	return Angle{value: w.baseValue() * t.baseValue(), unit: angle.BaseUnit}
 }
 
-// MultiplyByTorque returns the power w·tq (W) in power.BaseUnit.
+// MultiplyByTorque returns the power w·tq (W) in [power.BaseUnit].
 func (w AngularVelocity) MultiplyByTorque(tq Torque) Power {
 	return Power{value: w.baseValue() * tq.baseValue(), unit: power.BaseUnit}
 }

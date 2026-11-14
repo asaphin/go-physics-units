@@ -16,12 +16,12 @@ type Density struct {
 	unit  density.Unit
 }
 
-// MultiplyByVolume returns the mass d·v (kg) in mass.BaseUnit.
+// MultiplyByVolume returns the mass d·v (kg) in [mass.BaseUnit].
 func (d Density) MultiplyByVolume(v Volume) Mass {
 	return Mass{value: d.baseValue() * v.baseValue(), unit: mass.BaseUnit}
 }
 
-// MultiplyByFlowRate returns the mass flow rate d·q (kg/s) in massflowrate.BaseUnit.
+// MultiplyByFlowRate returns the mass flow rate d·q (kg/s) in [massflowrate.BaseUnit].
 func (d Density) MultiplyByFlowRate(q FlowRate) MassFlowRate {
 	return MassFlowRate{value: d.baseValue() * q.baseValue(), unit: massflowrate.BaseUnit}
 }

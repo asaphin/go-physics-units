@@ -1,5 +1,13 @@
 // Package area defines the area units of the units package and
 // their conversion factors to the base unit, the square metre.
+//
+// Use the units with units.NewArea, from the root package
+// github.com/asaphin/go-physics-units:
+//
+//	a := units.NewArea(10, area.SquareMeter)
+//
+// ParseUnit turns a symbol such as "m²" into a Unit, and String turns a
+// Unit into its symbol.
 package area
 
 // Unit is an area unit: one of the constants below. String returns its

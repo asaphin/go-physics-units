@@ -15,7 +15,7 @@ type DoseRate struct {
 	unit  doserate.Unit
 }
 
-// MultiplyByTime returns the equivalent dose r·t (Sv) in equivalentdose.BaseUnit.
+// MultiplyByTime returns the equivalent dose r·t (Sv) in [equivalentdose.BaseUnit].
 func (r DoseRate) MultiplyByTime(t Time) EquivalentDose {
 	return EquivalentDose{value: r.baseValue() * t.baseValue(), unit: equivalentdose.BaseUnit}
 }
