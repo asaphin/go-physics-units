@@ -22,7 +22,7 @@ fmt.Println(vel.ConvertTo(velocity.KilometerPerHour)) // 60 km/h
 - **Type-safe.** `units.NewDistance(5, mass.Kilogram)` doesn't compile. The typed operations can't fail, except division by zero.
 - **Immutable and safe for concurrent use.** Values never change, and the library's tables are fixed once the package is initialised. No importer can alter them, and no locks are needed.
 - **Extensible.** Your own measures, such as currencies, get the same typed API as the built-in ones, and can extend them.
-- **Broad.** 22 measures with 184 units, more than 40 operations between measures (force is mass × acceleration, power is voltage × current, …), `fmt` verbs, JSON and text encoding, a configurable parser, and temperatures with their offsets.
+- **Broad.** 22 measures with 185 units, more than 40 operations between measures (force is mass × acceleration, power is voltage × current, …), `fmt` verbs, JSON and text encoding, a configurable parser, and temperatures with their offsets.
 - **Dependency-free and well tested.** Only the standard library, 100% test coverage, fuzzed parsers, and allocation counts checked in CI.
 
 > [!NOTE]
@@ -408,7 +408,7 @@ The sentinels are constants of type `units.Error`, so no other package can reass
 | Mass             | `mass`            | kg        | Da, μg, mg, g, kg, oz, lb, q, t, M⊕, M☉                                   |
 | Density          | `density`         | kg/m³     | kg/m³, g/L, lb/ft³, lb/gal, kg/L, g/mL, g/cm³                             |
 | Force            | `force`           | N         | dyn, mN, N, lbf, kgf, kN, MN                                              |
-| Pressure         | `pressure`        | Pa        | Pa, hPa, mbar, kPa, Torr, mmHg, inHg, psi, bar, atm, MPa, GPa             |
+| Pressure         | `pressure`        | Pa        | Pa, hPa, mbar, kPa, Torr, mmHg, inHg, psi, kgf/cm², bar, atm, MPa, GPa    |
 | Energy           | `energy`          | J         | eV, erg, J, ft·lbf, cal, kJ, Btu, kcal, Wh, MJ, kWh, GJ, MWh              |
 | Power            | `power`           | W         | mW, W, Btu/h, PS, hp, kW, MW, GW                                          |
 | Temperature      | `temperature`     | K         | K, °C, °F, °R                                                             |
@@ -427,6 +427,7 @@ The sentinels are constants of type `units.Error`, so no other package can reass
 - `yr` is the Julian year of 365.25 days.
 - `pt`, `qt` and `gal` are US liquid measures, `bbl` the 42-gallon oil barrel, `cal` the thermochemical calorie, `Btu` the International Table one, `hp` mechanical horsepower and `PS` metric horsepower. `mmHg` and `inHg` are the conventional values, and `gₙ` (with U+2099) is standard gravity, 9.80665 m/s².
 - Mind the case: `kN` is a kilonewton and `kn` a knot.
+- `kgf/cm²` is the kilogram-force per square centimetre, also called the technical atmosphere and often written kg/cm². A `Parser` accepts that spelling with `WithAliases(map[string]string{"kg/cm²": "kgf/cm²"})`.
 - `℃` (U+2103) and `℉` (U+2109) are accepted for `°C` and `°F`, `Ω` (U+2126 OHM SIGN) for `Ω` (U+03A9), `Å` (U+212B ANGSTROM SIGN) for `Å` (U+00C5), and `K` (U+212A KELVIN SIGN) for `K`.
 - Angular velocity's `rev/min` counts radians; frequency's `rpm` counts cycles. Convert between them through `Angle.DivideByTime` or the factor 2π.
 - Data sizes have both decimal (`kB` = 1000 B) and binary (`KiB` = 1024 B) prefixes, and bits (`bit`, `Mbit`, …).

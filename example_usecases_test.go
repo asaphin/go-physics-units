@@ -310,12 +310,18 @@ func Example_pressure() {
 		panic(err)
 	}
 
-	fmt.Printf("heel:     %6.2f = %4.0f\n", heel.ConvertTo(pressure.Bar), heel.ConvertTo(pressure.PoundPerSquareInch))
-	fmt.Printf("elephant: %6.2f = %4.0f\n", elephant.ConvertTo(pressure.Bar),
-		elephant.ConvertTo(pressure.PoundPerSquareInch))
+	show := func(name string, p units.Pressure) {
+		fmt.Printf("%-9s %5.2f = %4.2f = %3.0f\n", name, p.ConvertTo(pressure.KilogramForcePerSquareCentimeter),
+			p.ConvertTo(pressure.Megapascal), p.ConvertTo(pressure.PoundPerSquareInch))
+	}
+
+	// 60 kg on 1 cm² is 60 kgf/cm²: a kilogram-force per square centimetre is
+	// the weight of 1 kg on 1 cm².
+	show("heel:", heel)
+	show("elephant:", elephant)
 	// Output:
-	// heel:      58.84 bar =  853 psi
-	// elephant:   1.23 bar =   18 psi
+	// heel:     60.00 kgf/cm² = 5.88 MPa = 853 psi
+	// elephant:  1.25 kgf/cm² = 0.12 MPa =  18 psi
 }
 
 // kitchen extends the predefined volume units with US customary cooking
@@ -336,12 +342,16 @@ var kitchenUnits = func() units.UnitSet {
 func (kitchen) Units() units.UnitSet { return kitchenUnits }
 
 func Example_recipeScaling() {
-	// A recipe for 4 servings, scaled to 6.
-	recipe := []struct{ ingredient, amount string }{
-		{"flour", "2 cup"},
-		{"milk", "250 mL"},
-		{"sugar", "3 tbsp"},
-		{"vanilla", "1.5 tsp"},
+	// A recipe for 4 servings, scaled to 6, with the weights for kitchen scales.
+	// The densities are typical values: flour's, for one, depends on how it's packed.
+	recipe := []struct {
+		ingredient, amount string
+		density            units.Density
+	}{
+		{"flour", "2 cup", units.NewDensity(0.53, density.GramPerMilliliter)},
+		{"milk", "250 mL", units.NewDensity(1.03, density.GramPerMilliliter)},
+		{"sugar", "3 tbsp", units.NewDensity(0.85, density.GramPerMilliliter)},
+		{"butter", "4 tbsp", units.NewDensity(0.96, density.GramPerMilliliter)},
 	}
 
 	ml := units.MustUnitOf[kitchen]("mL")
@@ -354,11 +364,17 @@ func Example_recipeScaling() {
 
 		scaled := q.Mul(6.0 / 4)
 
-		fmt.Printf("%-8s %-9v (%.0f)\n", line.ingredient, scaled, scaled.ConvertTo(ml))
+		// The kitchen measure has volume's base unit, the cubic metre, so the
+		// amount converts to a units.Volume, and density × volume is its mass.
+		vol := units.NewVolume(scaled.ConvertToBaseUnits().Value(), volume.BaseUnit)
+		weight := line.density.MultiplyByVolume(vol)
+
+		fmt.Printf("%-7s %-9v %4.0f  %4.0f\n", line.ingredient, scaled, scaled.ConvertTo(ml),
+			weight.ConvertTo(mass.Gram))
 	}
 	// Output:
-	// flour    3 cup     (710 mL)
-	// milk     375 mL    (375 mL)
-	// sugar    4.5 tbsp  (67 mL)
-	// vanilla  2.25 tsp  (11 mL)
+	// flour   3 cup      710 mL   376 g
+	// milk    375 mL     375 mL   386 g
+	// sugar   4.5 tbsp    67 mL    57 g
+	// butter  6 tbsp      89 mL    85 g
 }

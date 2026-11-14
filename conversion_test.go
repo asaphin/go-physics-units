@@ -182,6 +182,8 @@ func TestConversion_ReferenceValues(t *testing.T) {
 		{pressure.InchOfMercury, pressure.MillimeterOfMercury, 25.4},
 		{pressure.Megapascal, pressure.Bar, 10},
 		{pressure.Gigapascal, pressure.Megapascal, 1000},
+		{pressure.KilogramForcePerSquareCentimeter, pressure.Pascal, 98066.5}, // NIST SP 811: 9.80665 E+04 Pa
+		{pressure.KilogramForcePerSquareCentimeter, pressure.Bar, 0.980665},
 		{frequency.Kilohertz, frequency.Hertz, 1000},
 		{frequency.Hertz, frequency.RevolutionPerMinute, 60},
 		{frequency.Gigahertz, frequency.Megahertz, 1000},
