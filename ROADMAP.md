@@ -12,9 +12,11 @@ This is the ordered plan for improving go-physics-units. Take the steps from top
 Two rules keep the steps small:
 
 - **Added methods break no one.** The measure interfaces are sealed by an unexported method, so no code outside the package implements them. Adding a method is therefore not a breaking change.
-- **Breaking changes are batched.** Users have to migrate when the API breaks, so breaks go into as few releases as possible. These are v0.1.0, which already breaks the API, and v0.2.0, the redesign.
+- **Breaking changes are batched.** Users have to migrate when the API breaks, so breaks go into as few releases as possible. The plan had two batches, v0.1.0 and v0.2.0, the redesign. Neither was tagged before the redesign was finished, so both shipped together as v0.1.0. The next batch is v1.0.0 (step 5.1).
 
 ## Overview
+
+> **Released (2026-11-14):** v0.1.0 contains every step of Phases 0–4 below. The Release column names the release each step was planned for; all of them shipped in v0.1.0.
 
 Size is relative effort: S < M < L.
 
@@ -23,7 +25,7 @@ Size is relative effort: S < M < L.
 | ☑ | [0.1](#01-commit-the-current-work-and-get-ci-green) | Commit the current work, first CI run | — | — | S | — |
 | ☑ | [0.2](#02-decision-replace-conversionrates-with-rate) | Replace `ConversionRates()` with `Rate()` | P2 | yes, **Decision** | S | v0.1.0 |
 | ☑ | [0.3](#03-decision-zero-division-returns-an-error-everywhere) | Zero division returns an error everywhere | correctness | yes, **Decision** | S | v0.1.0 |
-| ☐ | [0.4](#04-release-v010) | Release v0.1.0 | — | — | S | v0.1.0 |
+| ☑ | [0.4](#04-release-v010) | Release v0.1.0 | — | — | S | v0.1.0 |
 | ☑ | [1.1](#11-allocation-guards-and-wider-benchmarks) | Allocation guards and wider benchmarks | P1 | no | S | — |
 | ☑ | [1.2](#12-api-change-report-in-ci) | API-change report in CI | all | no | S | — |
 | ☑ | [1.3](#13-formatting-with-fmt-verbs) | `fmt.Formatter` (`%.2f` → `5.00 km`) | P1, P2 | no | S | v0.1.x |
@@ -36,7 +38,7 @@ Size is relative effort: S < M < L.
 | ☑ | [3.2A](#32a-value-type-measures) | Value-type measures (Path A) | P1, P2 | yes | L | v0.2.0 |
 | ☑ | [3.3A](#33a-typed-custom-measures) | Typed custom measures (Path A) | P3 | yes | M | v0.2.0 |
 | — | [3.2B](#32b-typed-results-from-generic-operations) | Typed results from generic operations (Path B, not taken) | P3 | no | M | — |
-| ◐ | [3.4](#34-migration-guide-and-release-v020) | Migration guide (done), release v0.2.0 | — | — | S | v0.2.0 |
+| ☑ | [3.4](#34-migration-guide-and-release-v020) | Migration guide, release (shipped as v0.1.0) | — | — | S | v0.2.0 |
 | ☑ | [4.1](#41-text-and-json-encoding) | Text and JSON encoding | P3 | no | M | v0.2.x |
 | ☑ | [4.2](#42-configurable-parser) | Configurable parser with aliases | P3, P2 | no | M | v0.2.x |
 | ☑ | [4.3](#43-new-measures-one-per-step) | New measures, one per step | P3 | no | S each | v0.2.x |
@@ -84,6 +86,7 @@ The work since v0.0.4 already breaks the API: it changes the `mass.Quintal` symb
   - tag `v0.1.0` on `main` and push the tag;
   - create a GitHub release from the CHANGELOG section.
 - **pkg.go.dev:** request the version from the proxy so the docs update: `GOPROXY=https://proxy.golang.org go list -m github.com/asaphin/go-physics-units@v0.1.0`.
+- **Status:** released on 2026-11-14, together with step 3.4: v0.1.0 contains Phases 0–4. The "Changed (breaking)" section of the CHANGELOG and the checklist in `MIGRATION.md` list every break since v0.0.4.
 
 ## Phase 1: non-breaking improvements (v0.1.x)
 
@@ -231,6 +234,7 @@ Serves **P3**. This change doesn't break the API: static types stay `Measurement
 - Write `MIGRATION.md` with before-and-after code for every break.
 - Remove anything deprecated during v0.1.x.
 - Add the CHANGELOG section and release as in step 0.4.
+- **Status:** done. `MIGRATION.md` covers the upgrade from v0.0.4, and the release shipped as v0.1.0 (step 0.4). The deprecated names stay for now, to ease the upgrade: `MustConvertTo`, whose `//go:fix inline` lets `go fix` rewrite calls to `ConvertTo`, and the misspelled aliases `PlankLength` and `PlankTime`. Step 5.1 removes them (the author's decision, 2026-11-14).
 
 ## Phase 4: features (v0.2.x)
 
@@ -284,9 +288,9 @@ Serves **P3**.
 
 ### 5.1 Stabilise and release v1.0.0
 
-- **Clean up.** Remove the deprecated names: `PlankLength`, `PlankTime` and anything deprecated since.
+- **Clean up.** Remove the deprecated names: `MustConvertTo` on every measure, the misspelled aliases `PlankLength` and `PlankTime` (the correctly spelled `PlanckLength` and `PlanckTime` stay), and anything deprecated since.
 - **Review the API.** Read the whole exported API with `go doc -all`, and make the step 1.2 `gorelease` check fail the build.
-- **Then release.** After v1.0.0, a breaking change needs a new `/v2` module path. Complete Phase 3 before this step.
+- **Then release.** After v1.0.0, a breaking change needs a new `/v2` module path.
 
 ## Ongoing
 

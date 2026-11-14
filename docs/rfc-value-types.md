@@ -133,7 +133,7 @@ total := units.New(10, usd).Add(units.New(5, usd)) // a Money; Add, ConvertTo an
 
 ### 5. Migration
 
-| Before (v0.1) | After (v0.2) | How |
+| Before (v0.0.4) | After (v0.1.0) | How |
 |---|---|---|
 | `d, err := units.NewDistance(5, distance.Kilometer)` | `d := units.NewDistance(5, distance.Kilometer)` | drop the error; the compiler finds every case |
 | `units.NewDistance(5, "km")` | `units.NewDistance(5, distance.Kilometer)` | use the constant |

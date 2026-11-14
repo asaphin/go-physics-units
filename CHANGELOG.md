@@ -2,9 +2,11 @@
 
 ## Unreleased
 
+## v0.1.0 - 2026-11-14
+
 This release redesigns the API around value types and typed units, as decided in [docs/rfc-value-types.md](docs/rfc-value-types.md). Every program that uses the library needs changes; [MIGRATION.md](MIGRATION.md) lists them with before-and-after code. Most are mechanical, and the compiler reports each one.
 
-The entries below describe the changes since v0.0.4, the latest release.
+The entries below describe the changes since v0.0.4.
 
 ### Changed (breaking)
 
