@@ -5,6 +5,7 @@ import (
 
 	"github.com/asaphin/go-physics-units/area"
 	"github.com/asaphin/go-physics-units/distance"
+	"github.com/asaphin/go-physics-units/volume"
 )
 
 // Area is an area measurement. Its unit symbols are defined in the area package.
@@ -17,6 +18,8 @@ type Area interface {
 	// DivideByDistance returns the distance a/d in distance.BaseUnit (m).
 	// It fails if d is zero.
 	DivideByDistance(d Distance) (Distance, error)
+	// MultiplyByDistance returns the volume a·d in volume.BaseUnit (m³).
+	MultiplyByDistance(d Distance) Volume
 }
 
 // areaImplementation is the concrete implementation of Area.
@@ -90,6 +93,11 @@ func (a *areaImplementation) DivideByDistance(d Distance) (Distance, error) {
 	return newDistance(a.valueInBaseUnits()/d.valueInBaseUnits(), distance.BaseUnit), nil
 }
 
+// MultiplyByDistance returns the volume a·d in m³.
+func (a *areaImplementation) MultiplyByDistance(d Distance) Volume {
+	return newVolume(a.valueInBaseUnits()*d.valueInBaseUnits(), volume.BaseUnit)
+}
+
 // Compare compares the areas; see Comparer.
 func (a *areaImplementation) Compare(other Area) int {
 	return cmp.Compare(a.commonValues(other.base()))
@@ -138,7 +146,7 @@ func ToArea(m Measurement) (Area, error) {
 }
 
 // StringToArea parses an area from a string such as "10 m²".
-// It fails if the unit isn't a area unit.
+// It fails if the unit isn't an area unit.
 func StringToArea(s string) (Area, error) {
 	// Parse and construct directly: one allocation, where ParseString
 	// followed by ToArea would allocate twice.

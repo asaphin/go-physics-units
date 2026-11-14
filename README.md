@@ -3,7 +3,7 @@
 [![Go Reference](https://pkg.go.dev/badge/github.com/asaphin/go-physics-units.svg)](https://pkg.go.dev/github.com/asaphin/go-physics-units)
 [![CI](https://github.com/asaphin/go-physics-units/actions/workflows/ci.yml/badge.svg)](https://github.com/asaphin/go-physics-units/actions/workflows/ci.yml)
 
-go-physics-units is a Go library for working with physical measurements such as distance, area, mass, time and velocity.
+go-physics-units is a Go library for working with physical measurements: distance, area, volume, mass, time, velocity, acceleration, force, energy, power, pressure, frequency, angle, data size, density and data rate.
 You can create, parse, convert and combine measurements, and define measures of your own, such as currencies.
 It has no dependencies.
 
@@ -104,14 +104,57 @@ fmt.Println(ds) // [12 in 1 ft 1 mi]
 
 Operations that combine measures return their result in SI base units:
 
-| Operation                  | Result                    |
-|----------------------------|---------------------------|
-| `Distance.DivideByTime`    | `Velocity` in m/s         |
-| `Distance.Square`          | `Area` in m²              |
-| `Area.DivideByDistance`    | `Distance` in m           |
-| `Velocity.MultiplyByTime`  | `Distance` in m           |
-| `ParseDuration`            | `Time` in s, from a `time.Duration` |
-| `Time.ToDuration`          | `time.Duration`, rounded to the nearest nanosecond |
+| Operation                     | Result                                             |
+|-------------------------------|----------------------------------------------------|
+| `Distance.DivideByTime`       | `Velocity` in m/s                                  |
+| `Distance.Square`             | `Area` in m²                                       |
+| `Area.DivideByDistance`       | `Distance` in m                                    |
+| `Velocity.MultiplyByTime`     | `Distance` in m                                    |
+| `Velocity.DivideByTime`       | `Acceleration` in m/s²                             |
+| `Distance.Cube`               | `Volume` in m³                                     |
+| `Area.MultiplyByDistance`     | `Volume` in m³                                     |
+| `Volume.DivideByArea`         | `Distance` in m                                    |
+| `Volume.DivideByDistance`     | `Area` in m²                                       |
+| `Acceleration.MultiplyByTime` | `Velocity` in m/s                                  |
+| `Mass.MultiplyByAcceleration` | `Force` in N                                       |
+| `Acceleration.MultiplyByMass` | `Force` in N                                       |
+| `Force.DivideByMass`          | `Acceleration` in m/s²                             |
+| `Force.DivideByAcceleration`  | `Mass` in kg                                       |
+| `Force.DivideByArea`          | `Pressure` in Pa                                   |
+| `Force.MultiplyByDistance`    | `Energy` in J                                      |
+| `Energy.DivideByTime`         | `Power` in W                                       |
+| `Energy.DivideByDistance`     | `Force` in N                                       |
+| `Power.MultiplyByTime`        | `Energy` in J                                      |
+| `Pressure.MultiplyByArea`     | `Force` in N                                       |
+| `Frequency.Period`            | `Time` in s                                        |
+| `Mass.DivideByVolume`         | `Density` in kg/m³                                 |
+| `Mass.DivideByDensity`        | `Volume` in m³                                     |
+| `Density.MultiplyByVolume`    | `Mass` in kg                                       |
+| `DataSize.DivideByTime`       | `DataRate` in B/s                                  |
+| `DataSize.DivideByDataRate`   | `Time` in s                                        |
+| `DataRate.MultiplyByTime`     | `DataSize` in B                                    |
+| `ParseDuration`               | `Time` in s, from a `time.Duration`                |
+| `Time.ToDuration`             | `time.Duration`, rounded to the nearest nanosecond |
+
+## Parsing with options
+
+`ParseString` is strict: exactly `"<value> <unit>"` with a predefined, case-sensitive symbol.
+A `Parser` accepts more, with the options you choose. It is immutable once built and safe for concurrent use:
+
+```go
+p, err := units.NewParser(
+	units.WithAliases(map[string]string{"metres": distance.Meter, "kph": velocity.KilometerPerHour}),
+	units.CaseInsensitive(), // "10 KM" is 10 km, but "1 KN" is ambiguous: kN or kn
+	units.AllowNoSpace(),    // "100kph"
+)
+if err != nil {
+	panic(err)
+}
+
+m, err := p.Parse("5 metres") // 5 m, a distance
+```
+
+`WithCreator(mc)` adds the units of a custom measure, and `p.Unit("metres")` resolves an alias to its symbol for the typed constructors.
 
 ## Errors
 
@@ -125,6 +168,8 @@ Every error matches exactly one sentinel, which you can test for with `errors.Is
 | `ErrInvalidFormat`        | the string isn't `"<value> <unit>"` with a finite value                                  |
 | `ErrInvalidFactors`       | custom conversion factors are invalid or lack the base unit                              |
 | `ErrInvalidMeasure`       | `NewMeasurementCreator` gets an empty or predefined measure name, or an unsupported type |
+| `ErrAmbiguousUnit`        | a case-insensitive `Parser` gets a unit that matches several symbols, such as `KN`       |
+| `ErrInvalidOption`        | `NewParser` gets an invalid alias, or two measures that share a symbol                   |
 | `ErrOutOfRange`           | `Time.ToDuration` gets NaN or more than about 292 years                                  |
 
 ```go
@@ -220,19 +265,33 @@ fmt.Println(err) // unknown distance unit fur
 
 ## Supported units
 
-| Measure  | Package    | Base unit | Symbols |
-|----------|------------|-----------|---------|
-| Distance | `distance` | m         | lp, fm, pm, Å, nm, μm, mm, cm, dm, m, km, in, ft, yd, mi, nmi, AU, ly, pc |
-| Area     | `area`     | m²        | mm², cm², in², ft², m², km², mi² |
-| Mass     | `mass`     | kg        | Da, μg, mg, g, kg, oz, lb, q, t, M⊕, M☉ |
-| Time     | `time`     | s         | tp, ns, μs, ms, s, min, h, d, wk, yr |
-| Velocity | `velocity` | m/s       | km/h, ft/s, mph, kn, m/s, c |
+| Measure      | Package        | Base unit | Symbols                                                                   |
+|--------------|----------------|-----------|---------------------------------------------------------------------------|
+| Distance     | `distance`     | m         | lp, fm, pm, Å, nm, μm, mm, cm, dm, m, km, in, ft, yd, mi, nmi, AU, ly, pc |
+| Area         | `area`         | m²        | mm², cm², in², ft², m², km², mi²                                          |
+| Mass         | `mass`         | kg        | Da, μg, mg, g, kg, oz, lb, q, t, M⊕, M☉                                   |
+| Time         | `time`         | s         | tp, ns, μs, ms, s, min, h, d, wk, yr                                      |
+| Velocity     | `velocity`     | m/s       | km/h, ft/s, mph, kn, m/s, c                                               |
+| Volume       | `volume`       | m³        | mm³, μL, cm³, mL, in³, L, pt, qt, gal, ft³, bbl, yd³, m³, km³             |
+| Acceleration | `acceleration` | m/s²      | cm/s², ft/s², m/s², gₙ                                                    |
+| Force        | `force`        | N         | dyn, mN, N, lbf, kgf, kN, MN                                              |
+| Energy       | `energy`       | J         | eV, erg, J, ft·lbf, cal, kJ, Btu, kcal, Wh, MJ, kWh, GJ, MWh              |
+| Power        | `power`        | W         | mW, W, Btu/h, PS, hp, kW, MW, GW                                          |
+| Pressure     | `pressure`     | Pa        | Pa, hPa, mbar, kPa, Torr, mmHg, inHg, psi, bar, atm, MPa, GPa             |
+| Frequency    | `frequency`    | Hz        | rpm, Hz, kHz, MHz, GHz, THz                                               |
+| Angle        | `angle`        | rad       | arcsec, arcmin, mrad, gon, °, rad, rev                                    |
+| Data size    | `datasize`     | B         | bit, B, kbit, kB, KiB, Mbit, MB, MiB, Gbit, GB, GiB, TB, TiB, PB, PiB     |
+| Density      | `density`      | kg/m³     | g/L, lb/ft³, kg/m³, lb/gal, kg/L, g/mL, g/cm³                             |
+| Data rate    | `datarate`     | B/s       | bit/s, B/s, kbit/s, kB/s, KiB/s, Mbit/s, MB/s, MiB/s, Gbit/s, GB/s, GiB/s |
 
 - Every symbol has a named constant in its package, for example `distance.LightYear` or `mass.Pound`.
 - Each unit package also provides `ConversionFactors()`, a copy of its factors, and `Rate(from, to)`, the multiplier between two units. For example, `distance.Rate(distance.Mile, distance.Kilometer)` returns 1.609344.
 - Symbols are case-sensitive.
 - The micro prefix can be written as `μ` (U+03BC GREEK SMALL LETTER MU) or `µ` (U+00B5 MICRO SIGN). Values always carry the `μ` form.
 - `yr` is the Julian year of 365.25 days.
+- `pt`, `qt` and `gal` are US liquid measures, `bbl` the 42-gallon oil barrel, `cal` the thermochemical calorie, `Btu` the International Table one, `hp` mechanical horsepower and `PS` metric horsepower. `mmHg` and `inHg` are the conventional values, and `gₙ` (with U+2099) is standard gravity, 9.80665 m/s².
+- Mind the case: `kN` is a kilonewton and `kn` a knot.
+- Data sizes have both decimal (`kB` = 1000 B) and binary (`KiB` = 1024 B) prefixes, and bits (`bit`, `Mbit`, …).
 - Strings are parsed in the form `"<value> <unit>"`, with whitespace between the value and the unit. NaN and infinite values are rejected.
 
 ## Documentation
@@ -242,13 +301,14 @@ The full API reference is on [pkg.go.dev](https://pkg.go.dev/github.com/asaphin/
 ## Development
 
 ```shell
+make tools   # once: installs the pinned golangci-lint into ./bin
 make check   # formatting, go vet, golangci-lint and tests with the race detector
 make cover   # coverage summary, plus an HTML report in coverage/
 make bench   # benchmarks
 make fuzz    # fuzz the string parser (FUZZTIME=30s by default)
 ```
 
-`make check` needs golangci-lint v2.15.0, the version CI uses. With any other version it stops and prints the install command.
+`make check` needs golangci-lint v2.15.0, the version CI uses; `make tools` installs it into `./bin`, which `make` prefers over the one on your `PATH`. `make help` lists all targets.
 
 Guidelines for contributors and AI coding agents are in [AGENTS.md](AGENTS.md).
 

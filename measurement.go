@@ -275,15 +275,12 @@ func (b *baseMeasurement) withValue(value float64) baseMeasurement {
 // detected from unit. Use the measure-specific constructors (NewDistance, …)
 // when the measure is known in advance.
 func NewMeasurement(value float64, unit string) (Measurement, error) {
-	mt := DetectMeasureType(unit)
-	if mt == MeasureCustom {
+	pu, ok := predefinedUnits[rates.CanonicalUnit(unit)]
+	if !ok {
 		return nil, unknownUnitError("", unit)
 	}
 
-	bm, err := newBaseMeasurement(value, unit, measureToConversionRatesMapping[mt])
-	if err != nil {
-		return nil, err
-	}
+	bm := baseMeasurement{value: value, unit: pu.unit, conversionRates: pu.table}
 
 	return &bm, nil
 }

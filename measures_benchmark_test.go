@@ -16,6 +16,17 @@ func BenchmarkMeasures(b *testing.B) {
 	b.Run("mass", func(b *testing.B) { benchTypedMeasure(b, massCase) })
 	b.Run("time", func(b *testing.B) { benchTypedMeasure(b, timeCase) })
 	b.Run("velocity", func(b *testing.B) { benchTypedMeasure(b, velocityCase) })
+	b.Run("volume", func(b *testing.B) { benchTypedMeasure(b, volumeCase) })
+	b.Run("acceleration", func(b *testing.B) { benchTypedMeasure(b, accelerationCase) })
+	b.Run("force", func(b *testing.B) { benchTypedMeasure(b, forceCase) })
+	b.Run("energy", func(b *testing.B) { benchTypedMeasure(b, energyCase) })
+	b.Run("power", func(b *testing.B) { benchTypedMeasure(b, powerCase) })
+	b.Run("pressure", func(b *testing.B) { benchTypedMeasure(b, pressureCase) })
+	b.Run("frequency", func(b *testing.B) { benchTypedMeasure(b, frequencyCase) })
+	b.Run("angle", func(b *testing.B) { benchTypedMeasure(b, angleCase) })
+	b.Run("data size", func(b *testing.B) { benchTypedMeasure(b, dataSizeCase) })
+	b.Run("density", func(b *testing.B) { benchTypedMeasure(b, densityCase) })
+	b.Run("data rate", func(b *testing.B) { benchTypedMeasure(b, dataRateCase) })
 }
 
 func benchTypedMeasure[T typedMeasure[T]](b *testing.B, c typedCase[T]) {
@@ -138,6 +149,34 @@ func BenchmarkErrors(b *testing.B) {
 	b.Run("invalid format", func(b *testing.B) {
 		for b.Loop() {
 			_, _ = units.ParseString("10km")
+		}
+	})
+}
+
+// BenchmarkParser covers the configurable parser, against ParseString.
+func BenchmarkParser(b *testing.B) {
+	strict, _ := units.NewParser()
+	all, _ := units.NewParser(units.CaseInsensitive(), units.AllowNoSpace(),
+		units.WithAliases(map[string]string{"metres": distance.Meter}))
+
+	b.Run("ParseString", func(b *testing.B) {
+		for b.Loop() {
+			_, _ = units.ParseString("10 km")
+		}
+	})
+	b.Run("default options", func(b *testing.B) {
+		for b.Loop() {
+			_, _ = strict.Parse("10 km")
+		}
+	})
+	b.Run("alias", func(b *testing.B) {
+		for b.Loop() {
+			_, _ = all.Parse("10 metres")
+		}
+	})
+	b.Run("no space, other case", func(b *testing.B) {
+		for b.Loop() {
+			_, _ = all.Parse("10KM")
 		}
 	})
 }

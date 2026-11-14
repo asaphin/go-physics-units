@@ -2,6 +2,7 @@ package rates_test
 
 import (
 	"math"
+	"slices"
 	"testing"
 
 	"github.com/asaphin/go-physics-units/conversion"
@@ -108,6 +109,10 @@ func TestTable_Factor(t *testing.T) {
 		}
 	}
 
+	if got := slices.Sorted(table.Units()); !slices.Equal(got, []string{"km", "m", "\u03bcm"}) {
+		t.Errorf("Units() = %q, want km, m and \u03bcm", got)
+	}
+
 	// Factor, like Rate, takes canonical symbols only.
 	for _, unit := range []string{"ft", "\u00b5m", ""} {
 		if got, ok := table.Factor(unit); ok || got != 0 {
@@ -155,6 +160,10 @@ func TestTable_Zero(t *testing.T) {
 
 	if f, ok := zero.Factor("a"); ok || f != 0 {
 		t.Errorf("zero Table: Factor(a) = %v, %v; want 0, false", f, ok)
+	}
+
+	for u := range zero.Units() {
+		t.Errorf("zero Table: Units() yields %q", u)
 	}
 }
 

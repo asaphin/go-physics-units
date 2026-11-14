@@ -6,6 +6,7 @@ import (
 	"github.com/asaphin/go-physics-units/area"
 	"github.com/asaphin/go-physics-units/distance"
 	"github.com/asaphin/go-physics-units/velocity"
+	"github.com/asaphin/go-physics-units/volume"
 )
 
 // Distance is a length measurement. Its unit symbols are defined in the
@@ -21,6 +22,8 @@ type Distance interface {
 	DivideByTime(t Time) (Velocity, error)
 	// Square returns the area d² in area.BaseUnit (m²).
 	Square() Area
+	// Cube returns the volume d³ in volume.BaseUnit (m³).
+	Cube() Volume
 }
 
 // distanceImplementation is the concrete implementation of Distance.
@@ -117,6 +120,13 @@ func (d *distanceImplementation) EqualWithinRel(other Distance, tol float64) boo
 	x, y := d.commonValues(other.base())
 
 	return equalWithinRel(x, y, tol)
+}
+
+// Cube returns the volume d³ in m³.
+func (d *distanceImplementation) Cube() Volume {
+	baseD := d.valueInBaseUnits()
+
+	return newVolume(baseD*baseD*baseD, volume.BaseUnit)
 }
 
 // NewDistance creates a distance of value in unit, one of the symbols defined in

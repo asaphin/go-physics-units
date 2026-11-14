@@ -4,12 +4,23 @@ import (
 	"fmt"
 
 	units "github.com/asaphin/go-physics-units"
+	"github.com/asaphin/go-physics-units/acceleration"
+	"github.com/asaphin/go-physics-units/angle"
 	"github.com/asaphin/go-physics-units/area"
 	"github.com/asaphin/go-physics-units/conversion"
+	"github.com/asaphin/go-physics-units/datarate"
+	"github.com/asaphin/go-physics-units/datasize"
+	"github.com/asaphin/go-physics-units/density"
 	"github.com/asaphin/go-physics-units/distance"
+	"github.com/asaphin/go-physics-units/energy"
+	"github.com/asaphin/go-physics-units/force"
+	"github.com/asaphin/go-physics-units/frequency"
 	"github.com/asaphin/go-physics-units/mass"
+	"github.com/asaphin/go-physics-units/power"
+	"github.com/asaphin/go-physics-units/pressure"
 	"github.com/asaphin/go-physics-units/time"
 	"github.com/asaphin/go-physics-units/velocity"
+	"github.com/asaphin/go-physics-units/volume"
 )
 
 // Examples of each measure, the cross-measure operations and custom measures,
@@ -146,4 +157,171 @@ func ExampleNewBaseMeasurement() {
 
 	fmt.Println(kib, kib.Type())
 	// Output: 3584 KiB custom
+}
+
+func ExampleNewVolume() {
+	bottle, err := units.NewVolume(2, volume.Liter)
+	if err != nil {
+		panic(err)
+	}
+
+	fmt.Printf("%.4f\n", bottle.MustConvertTo(volume.Gallon))
+	// Output: 0.5283 gal
+}
+
+func ExampleNewAcceleration() {
+	g, err := units.NewAcceleration(1, acceleration.StandardGravity)
+	if err != nil {
+		panic(err)
+	}
+
+	fmt.Printf("%.3f\n", g.MustConvertTo(acceleration.FootPerSecondSquared))
+	// Output: 32.174 ft/s²
+}
+
+func ExampleNewForce() {
+	f, err := units.NewForce(1, force.Kilonewton)
+	if err != nil {
+		panic(err)
+	}
+
+	fmt.Printf("%.1f\n", f.MustConvertTo(force.PoundForce))
+	// Output: 224.8 lbf
+}
+
+func ExampleNewEnergy() {
+	diet, err := units.NewEnergy(2000, energy.Kilocalorie)
+	if err != nil {
+		panic(err)
+	}
+
+	fmt.Printf("%.3f\n", diet.MustConvertTo(energy.KilowattHour))
+	// Output: 2.324 kWh
+}
+
+func ExampleNewPower() {
+	engine, err := units.NewPower(100, power.Horsepower)
+	if err != nil {
+		panic(err)
+	}
+
+	fmt.Printf("%.2f\n", engine.MustConvertTo(power.Kilowatt))
+	// Output: 74.57 kW
+}
+
+func ExampleNewPressure() {
+	tyre, err := units.NewPressure(32, pressure.PoundPerSquareInch)
+	if err != nil {
+		panic(err)
+	}
+
+	fmt.Printf("%.3f\n", tyre.MustConvertTo(pressure.Bar))
+	// Output: 2.206 bar
+}
+
+func ExampleNewFrequency() {
+	motor, err := units.NewFrequency(3000, frequency.RevolutionPerMinute)
+	if err != nil {
+		panic(err)
+	}
+
+	fmt.Println(motor.MustConvertTo(frequency.Hertz))
+	// Output: 50 Hz
+}
+
+func ExampleFrequency_Period() {
+	mains, _ := units.NewFrequency(50, frequency.Hertz)
+
+	period, err := mains.Period()
+	if err != nil {
+		panic(err) // the frequency is zero
+	}
+
+	d, _ := period.ToDuration()
+	fmt.Println(period, d)
+	// Output: 0.02 s 20ms
+}
+
+func ExampleVolume_DivideByArea() {
+	rain, _ := units.NewVolume(1, volume.Liter)
+	gauge, _ := units.NewArea(1, area.SquareMeter)
+
+	depth, err := rain.DivideByArea(gauge)
+	if err != nil {
+		panic(err) // the area is zero
+	}
+
+	fmt.Printf("%.1f\n", depth.MustConvertTo(distance.Millimeter))
+	// Output: 1.0 mm
+}
+
+// Climbing 3 m of stairs in 4 s: the work against gravity and the power it
+// takes, through Mass, Force, Energy and Power.
+func Example_work() {
+	climber, _ := units.NewMass(75, mass.Kilogram)
+	g, _ := units.NewAcceleration(1, acceleration.StandardGravity)
+	height, _ := units.NewDistance(3, distance.Meter)
+	climb, _ := units.NewTime(4, time.Second)
+
+	weight := climber.MultiplyByAcceleration(g)
+	work := weight.MultiplyByDistance(height)
+
+	p, err := work.DivideByTime(climb)
+	if err != nil {
+		panic(err) // the time is zero
+	}
+
+	fmt.Printf("%.1f, %.1f, %.1f = %.2f\n", weight, work, p, p.MustConvertTo(power.Horsepower))
+	// Output: 735.5 N, 2206.5 J, 551.6 W = 0.74 hp
+}
+
+func ExampleNewAngle() {
+	right, err := units.NewAngle(90, angle.Degree)
+	if err != nil {
+		panic(err)
+	}
+
+	fmt.Printf("%.4f\n", right.ConvertToBaseUnits())
+	fmt.Printf("%.2f\n", right.MustConvertTo(angle.Gradian)) // π/180 and π/200 both round
+	// Output:
+	// 1.5708 rad
+	// 100.00 gon
+}
+
+func ExampleNewDataSize() {
+	disk, err := units.NewDataSize(1, datasize.Terabyte)
+	if err != nil {
+		panic(err)
+	}
+
+	// What a "1 TB" disk shows in binary units.
+	fmt.Printf("%.1f\n", disk.MustConvertTo(datasize.Gibibyte))
+	// Output: 931.3 GiB
+}
+
+func ExampleNewDensity() {
+	steel, err := units.NewDensity(7.85, density.GramPerCubicCentimeter)
+	if err != nil {
+		panic(err)
+	}
+
+	beam, _ := units.NewVolume(0.02, volume.CubicMeter)
+
+	fmt.Println(steel.MultiplyByVolume(beam))
+	// Output: 157 kg
+}
+
+// How long a download takes: a data size divided by a data rate.
+func ExampleDataSize_DivideByDataRate() {
+	file, _ := units.NewDataSize(4.7, datasize.Gigabyte)
+	link, _ := units.NewDataRate(100, datarate.MegabitPerSecond)
+
+	t, err := file.DivideByDataRate(link)
+	if err != nil {
+		panic(err) // the rate is zero
+	}
+
+	d, _ := t.ToDuration()
+	fmt.Println(t, d)
+	// Output: 376 s 6m16s
 }

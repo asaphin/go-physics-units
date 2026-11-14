@@ -2,6 +2,26 @@
 
 ## Unreleased
 
+This release breaks the API in a few places; the next section lists what to change. Everything else is fixes and additions.
+
+### Upgrading from v0.0.4
+
+Compile-time breaks:
+
+- **Go 1.27** is the minimum version.
+- **`ConversionRates()`** is gone from the unit packages. For the multiplier between two units use `Rate(from, to)`, for example `distance.Rate(distance.Mile, distance.Kilometer)`; for the whole table use `ConversionFactors()`.
+- **`Distance.DivideByTime`** returns `(Velocity, error)`. Handle the error, which is `ErrZeroDivision` when the time is zero; the method used to panic.
+
+Changes in behaviour that compile unchanged:
+
+- **`mass.Quintal`** is `"q"`, not `"Qts"`. Stored strings such as `"3 Qts"` no longer parse; replace the symbol.
+- **`mass.Microgram`** is `"μg"` with U+03BC GREEK SMALL LETTER MU, not U+00B5 MICRO SIGN. Both forms are still accepted as input, but values report `"μg"`, so compare units with the constant rather than a literal.
+- **Custom measures:** `Type()` of a value from `NewMeasurementCreator` returns the measure name you gave, not `custom`. Code that checked for `MeasureCustom` should check for that name. `NewBaseMeasurement` values are still `custom`.
+- **Stricter input.** `NewMeasurementCreator` and `NewBaseMeasurement` reject empty, zero, negative, NaN and infinite factors, empty unit symbols, and, for the creator, empty or predefined measure names. `ParseString` rejects NaN and infinite values.
+- **`AddMeasurement` and `SubMeasurement`** return an error when the units can't be converted into each other. They used to count the other operand as zero.
+- **New measures** reserve their names: a custom measure named `volume`, `force`, `energy`, `power`, `pressure`, `frequency`, `angle`, `acceleration`, `data size`, `density` or `data rate` is now rejected by `NewMeasurementCreator`; rename it. Symbols such as `L`, `N`, `J`, `W`, `Pa` and `Hz` now parse as those measures.
+- **Error messages** changed, for example to `unknown distance unit kg`. Instead of matching messages, test for the new sentinel errors with `errors.Is`, such as `errors.Is(err, units.ErrUnknownUnit)`.
+
 ### Fixed
 
 - Converting between metres and millimetres no longer gives a wrong result. The internal rate table keyed pairs by concatenating the two symbols, and `"m"+"mm"` equals `"mm"+"m"`, so one of the two directions was wrong in every process.
@@ -24,9 +44,10 @@
   - empty unit symbols;
   - measure types that are empty or the same as a predefined one.
 - `NewBaseMeasurement` always returns a measurement of type `custom`.
+- The names of the new measures (`volume`, `acceleration`, `force`, `energy`, `power`, `pressure`, `frequency`, `angle`, `data size`, `density` and `data rate`) are now reserved, so `NewMeasurementCreator` rejects them for custom measures. Their predefined symbols, such as `L` and `N`, now belong to those measures in `ParseString` and `DetectMeasureType`.
 - Error messages name the measure, for example `unknown distance unit kg`.
 - Faster, with fewer allocations:
-  - `ParseString` is about twice as fast and allocates once instead of three times. `DetectMeasureType` uses an index instead of a linear scan, and the parser no longer builds a slice of fields.
+  - `ParseString` and `NewMeasurement` are three to four times as fast and allocate once instead of three times. One index takes a symbol straight to its unit and table, and the parser no longer builds a slice of fields.
   - `String()` is about twice as fast and allocates once.
   - Errors are cheaper. Creating a value with an unknown unit is about three times as fast and allocates once instead of four times. Parsing a malformed string is about twice as fast and allocates twice instead of four times.
   - `NewBaseMeasurement` is two to four times as fast, depending on the number of units.
@@ -41,6 +62,8 @@
 
 ### Added
 
+- `Parser`, a configurable parser built with `NewParser` and options: `WithAliases` (alternative unit names such as `metres`), `CaseInsensitive` (exact matches win, and an ambiguous match such as `KN` fails with the new `ErrAmbiguousUnit`), `AllowNoSpace` (`10km`) and `WithCreator` (the units of a custom measure). A `Parser` is immutable and safe for concurrent use, and the zero `Parser` behaves like `ParseString`. `Parser.Unit` resolves an alias to its symbol. Invalid options fail with the new `ErrInvalidOption`.
+- Eleven measures: volume, acceleration, force, energy, power, pressure, frequency, angle, data size, density and data rate, each with its unit package (`volume`, `acceleration`, …, `datasize`, `density`, `datarate`), `NewX`, `ToX`, `StringToX` and `MeasureX`. The factors are exact definitions from NIST SP 811 and the SI Brochure. They come with cross-measure operations that link them to each other and to the existing measures: `Distance.Cube`, `Area.MultiplyByDistance`, `Volume.DivideByArea` and `DivideByDistance`, `Velocity.DivideByTime`, `Acceleration.MultiplyByTime` and `MultiplyByMass`, `Mass.MultiplyByAcceleration`, `Force.DivideByMass`, `DivideByAcceleration`, `DivideByArea` and `MultiplyByDistance`, `Energy.DivideByTime` and `DivideByDistance`, `Power.MultiplyByTime`, `Pressure.MultiplyByArea`, `Frequency.Period`, `Mass.DivideByVolume` and `DivideByDensity`, `Density.MultiplyByVolume`, `DataSize.DivideByTime` and `DivideByDataRate` (how long a transfer takes), and `DataRate.MultiplyByTime`.
 - Runnable examples on pkg.go.dev for every measure, the cross-measure operations, extending a predefined measure, `NewBaseMeasurement`, formatting and `distance.Rate`.
 - `Time.ToDuration`, the reverse of `ParseDuration`: it converts a `Time` into a `time.Duration`, rounded to the nearest nanosecond, and fails with `ErrOutOfRange` for NaN or beyond about ±292 years.
 - `Compare`, `Equal` and `EqualWithinRel` on every measure, from the new `Comparer[T]` interface, and `CompareMeasurement` on every measurement, including custom ones. `Compare` follows `cmp.Compare`, so `slices.SortFunc(ds, units.Distance.Compare)` sorts distances in any mix of units. Values in different units are compared in the base unit, so the result doesn't depend on the order of the operands. `EqualWithinRel` allows a relative tolerance, because conversions round: 12 in and 1 ft differ in the last bit.

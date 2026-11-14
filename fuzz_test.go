@@ -49,3 +49,49 @@ func FuzzParseString(f *testing.F) {
 		}
 	})
 }
+
+// FuzzParser checks a parser with every option: it never panics, returns nil
+// on error, accepts whatever ParseString accepts with the same result, and
+// what it parses round-trips through String.
+func FuzzParser(f *testing.F) {
+	for _, seed := range []string{
+		"10 km", "10km", "10KM", "1.5e3eV", "10eV", "-2.5m", "1 KN", "5 metres", "10", "km", "1e999km", "1 2 3",
+	} {
+		f.Add(seed)
+	}
+
+	p, err := units.NewParser(units.CaseInsensitive(), units.AllowNoSpace(),
+		units.WithAliases(map[string]string{"metres": "m"}))
+	if err != nil {
+		f.Fatal(err)
+	}
+
+	f.Fuzz(func(t *testing.T, s string) {
+		m, err := p.Parse(s)
+		if err != nil {
+			if m != nil {
+				t.Fatalf("Parse(%q) returned %v together with error %v", s, m, err)
+			}
+
+			if strict, strictErr := units.ParseString(s); strictErr == nil {
+				t.Fatalf("Parse(%q) failed with %v, but ParseString accepts it as %v", s, err, strict)
+			}
+
+			return
+		}
+
+		if math.IsNaN(m.Value()) || math.IsInf(m.Value(), 0) {
+			t.Fatalf("Parse(%q) returned a non-finite value %v", s, m.Value())
+		}
+
+		if strict, strictErr := units.ParseString(s); strictErr == nil &&
+			(strict.Value() != m.Value() || strict.Unit() != m.Unit()) {
+			t.Fatalf("Parse(%q) = %v, but ParseString gives %v", s, m, strict)
+		}
+
+		again, err := p.Parse(m.String())
+		if err != nil || again.Value() != m.Value() || again.Unit() != m.Unit() {
+			t.Fatalf("String() doesn't round-trip: %q -> %v -> %v, %v", s, m, again, err)
+		}
+	})
+}

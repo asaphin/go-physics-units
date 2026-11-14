@@ -4,7 +4,7 @@ Guidance for AI coding agents (and humans) working in this repository. `CLAUDE.m
 
 ## What this is
 
-`go-physics-units` (module `github.com/asaphin/go-physics-units`, package name `units`) is a small Go library for creating, converting, parsing and doing arithmetic on physical measurements (distance, area, mass, time, velocity) and user-defined measures (e.g. currency).
+`go-physics-units` (module `github.com/asaphin/go-physics-units`, package name `units`) is a small Go library for creating, converting, parsing and doing arithmetic on physical measurements (distance, area, volume, mass, time, velocity, acceleration, force, energy, power, pressure, frequency, angle, data size, density, data rate) and user-defined measures (e.g. currency).
 
 - **Published and pre-1.0** (tags `v0.0.0`–`v0.0.4`). Exported API changes affect real users: make them deliberately, call them out, and record them in `CHANGELOG.md`. `make api`, and the CI job "API changes", list every exported change since the latest tag; check that each one is in the CHANGELOG.
 - **Go version:** `go.mod` declares `go 1.27.0`. CI tests that exact version and the latest stable release. Use modern Go freely: iterators and the `maps`/`slices` helpers, `strings.FieldsSeq`, `testing.B.Loop`, `sync.WaitGroup.Go`, and generic methods (Go 1.27). The `modernize` linter points out older forms. Raising the minimum again is its own deliberate change, with a CHANGELOG entry.
@@ -63,13 +63,16 @@ User-defined measures are first-class: they convert, combine and parse like the 
 | `measures.go` | `MeasureType` constants, the predefined rate tables (`distanceRates`, …), the registries `measureToConversionFactorsMapping` and `measureToConversionRatesMapping`, the `unitToMeasureType` index, `DetectMeasureType` |
 | `common.go` | Generic `Arithmetics[T]` and `UnitConverter[T]` interfaces |
 | `errors.go` | The sentinel errors (constants of type `Error`), `UnitError`, and the unexported error types and constructors the package uses |
-| `distance.go`, `area.go`, `mass.go`, `time.go`, `velocity.go` | One file per measure: the public interface, the `xxxImplementation` struct embedding `baseMeasurement`, constructors and cross-measure operations. All five follow the same pattern |
-| `distance/`, `area/`, `mass/`, `time/`, `velocity/` | One `units.go` per measure: unit symbol constants, `BaseUnit`, the `conversionFactors` table, `ConversionFactors()` (returns a copy) and `Rate(from, to)` |
+| `distance.go`, `area.go`, `volume.go`, `mass.go`, `time.go`, `velocity.go`, `acceleration.go`, `force.go`, `energy.go`, `power.go`, `pressure.go`, `frequency.go`, `angle.go`, `datasize.go`, `density.go`, `datarate.go` | One file per measure: the public interface, the `xxxImplementation` struct embedding `baseMeasurement`, constructors and cross-measure operations. All follow the same pattern |
+| `distance/`, `area/`, `volume/`, … (one per measure) | One `units.go` per measure: unit symbol constants, `BaseUnit`, the `conversionFactors` table, `ConversionFactors()` (returns a copy) and `Rate(from, to)` |
 | `conversion/` | Public `Factors` type alias (`map[string]float64`) and `CopyConversionFactors` |
 | `measurement_creator.go` | Generic `NewMeasurementCreator[T]` for user-defined measures |
+| `parser.go` | `Parser`, `NewParser` and its options |
 | `internal/rates` | `Table`: the immutable, validated N×N rate table of one measure, plus each unit's factor, a read-only handle passed by value. Also `CanonicalUnit` |
 | `Makefile` | Task runner (see Commands) |
-| `.github/workflows/ci.yml` | CI: `go mod tidy` check, vet, race tests and coverage (the `go.mod` Go version and stable), a short fuzz run, golangci-lint (pinned version), govulncheck |
+| `.github/workflows/ci.yml` | CI: `go mod tidy` check, vet, race tests and coverage (the `go.mod` Go version and stable), allocation guards, a short fuzz run, the RFC prototype, golangci-lint (pinned version), the exported-API report, govulncheck |
+| `.github/dependabot.yml`, `.github/pull_request_template.md` | Weekly bumps of the CI actions (into `dev`); the PR checklist |
+| `docs/` | Design documents awaiting the author's decision: `docs/rfc-value-types.md` (ROADMAP 2.1) with its prototype, a separate module in `docs/rfc-value-types/` that CI tests but that isn't part of the library, and `docs/rfc-temperature.md` (ROADMAP 4.4) |
 | `CHANGELOG.md` | User-visible changes, under `## Unreleased` until the next tag |
 | `ROADMAP.md` | Ordered plan of upcoming work. Take steps in order and tick them off when done |
 
@@ -82,14 +85,16 @@ User-defined measures are first-class: they convert, combine and parse like the 
    - Predefined tables are named after their `MeasureType` constant, and `TestMeasureRegistriesAreConsistent` enforces this.
    - `NewMeasurementCreator` names the table after the measure type you pass; predefined names are rejected.
    - `NewBaseMeasurement` names it `custom`.
-   - `DetectMeasureType(unit)` maps a predefined symbol to its measure through an index. It is only used where no table is known yet (`NewMeasurement`, `ParseString`). Because of it, **predefined symbols must be unique across all measures**; `TestMeasuresSelfCheck` enforces this.
+   - `predefinedUnits` (`measures.go`) indexes every predefined symbol by its unit and table. `NewMeasurement`, `ParseString` and `DetectMeasureType` use it where no table is known yet, and every `Parser` starts from a copy of it. Because of it, **predefined symbols must be unique across all measures**; `TestMeasuresSelfCheck` enforces this.
 5. **Micro sign.** `rates.CanonicalUnit` maps U+00B5 MICRO SIGN to U+03BC GREEK SMALL LETTER MU. Every entry point that receives a unit string canonicalises it (`newBaseMeasurement`, `convertTo`, `DetectMeasureType`), and tables store canonical keys. Internal paths that only handle units already stored in a value skip this step.
 6. **Combining values.**
    - `AddMeasurement` and `SubMeasurement` check that the types match *and* that a rate between the two units exists.
    - Typed `Add`/`Sub` need neither check: two values of one Go type share the same table.
-   - Cross-measure operations (`Distance.DivideByTime`, `Distance.Square`, `Area.DivideByDistance`, `Velocity.MultiplyByTime`) convert to base units and return results in the target measure's base unit. Dividing by a zero measurement returns an error, as `Div` does for a zero divisor.
+   - Cross-measure operations (`Distance.DivideByTime`, `Force.DivideByArea`, `Frequency.Period` and the others in the README's operations table) convert to base units and return results in the target measure's base unit. Dividing by a zero measurement returns an error, as `Div` does for a zero divisor.
    - **Comparisons** (`Compare`, `Equal`, `EqualWithinRel`, `CompareMeasurement`) compare two values in the same unit exactly. Otherwise they multiply each value by its unit's factor (`Table.Factor`), which gives the value in the base unit. The result doesn't depend on the order of the operands, so `a.Equal(b) == b.Equal(a)`; converting one value into the other's unit would break that at the last bit. `TestCompare_Symmetric` enforces it. `CompareMeasurement` falls back to the receiver's unit only for two tables that share a measure name.
 7. **Parsing.** `ParseString` accepts exactly `"<float> <unit>"`, two whitespace-separated fields. It rejects NaN and ±Inf.
+   - `Parser` (`parser.go`) is the configurable variant, a value handle like `rates.Table`: `NewParser` builds an immutable index of symbols and aliases (plus a lower-case index for `CaseInsensitive`), and `Parse` is one or two map lookups. Aliases and creator units live in the parser, never in the global tables (P2).
+   - **Its contract:** anything `ParseString` accepts, every `Parser` accepts with the same result; `FuzzParser` checks this, and the String round trip.
 
 Constructor conventions per measure:
 
@@ -103,7 +108,9 @@ On error, always return a nil interface (`return nil, err`, or `var zero T` in g
 ## Commands
 
 ```sh
+make tools      # once per clone: the pinned golangci-lint into ./bin (gitignored), built with the go.mod Go
 make check      # what CI runs: go mod tidy check, format check, go vet, golangci-lint, go test -race, allocation guards
+make help       # every documented target
 make test       # quick tests without the race detector
 make cover      # coverage summary; HTML report in coverage/ (gitignored)
 make bench      # benchmarks (root package only)
@@ -111,10 +118,11 @@ make bench-compare  # benchstat: BENCH_BASE (default the latest tag) vs the work
 make api        # gorelease: exported API changes since the latest tag, and the suggested version
 make fuzz       # FuzzParseString; FUZZTIME=30s by default
 make fmt        # golangci-lint fmt: gofumpt, goimports, golines (120 columns)
+make rfc-bench  # benchmarks of the value-type prototype (docs/rfc-value-types) against the library
 ```
 
 - **golangci-lint:** `.golangci.yaml` (v2 format) lists every enabled linter explicitly, grouped by purpose, and gives a reason for each linter it leaves out. It is adapted from the golden config by Marat Reimers. golangci-lint also runs staticcheck with all checks, so there is no separate staticcheck step.
-- **Pinned version:** golangci-lint `v2.15.0`, set in the Makefile (`GOLANGCI_LINT_VERSION`) and in CI. `make lint` refuses to run any other version and prints the install command.
+- **Pinned version:** golangci-lint `v2.15.0`, set in the Makefile (`GOLANGCI_LINT_VERSION`) and in CI. `make lint` refuses to run any other version and points to `make tools`, which builds that version into `./bin` with `GOTOOLCHAIN` set to the `go.mod` Go (golangci-lint's own `go.mod` would otherwise select an older Go, too old for this module).
 - **Lint Go version:** CI runs golangci-lint with the `go.mod` Go version. A golangci-lint binary can't read the export data of Go releases newer than it supports: v2.13.2 fails on Go 1.27.4, for example. Linting with the latest Go would therefore break whenever Go is released.
 - **Upgrading golangci-lint:** upgrade on purpose, in its own PR. Bump both pins, read the changelog for renamed options, then fix the new findings or disable a check with a reason. Enabling a new linter is a separate, reviewed change.
 - **`nolint`:** add a `//nolint:<linter> // reason` directive only with a reason. `nolintlint` flags unused directives.
