@@ -20,10 +20,10 @@ GO_VERSION := $(shell go env GOVERSION)
 # api: a pinned gorelease, run with go run. Keep in sync with .github/workflows/ci.yml.
 GORELEASE := golang.org/x/exp/cmd/gorelease@v0.0.0-20261014143641-f0251eb4aa3e
 
-.PHONY: help check tools api build vet test race allocs bench bench-compare generate profile cover fuzz lint fmt fmt-check tidy-check golangci-lint-version
+.PHONY: help check tools api build vet test race allocs bench bench-compare generate profile cover fuzz lint fix fix-check fmt fmt-check tidy-check golangci-lint-version
 
-## check: everything CI runs (go.mod tidiness, formatting, vet, lint, race-enabled tests, allocation guards)
-check: tidy-check fmt-check vet lint race allocs
+## check: everything CI runs (go.mod tidiness, formatting, vet, go fix, lint, race-enabled tests, allocation guards)
+check: tidy-check fmt-check vet fix-check lint race allocs
 
 ## help: lists the documented targets
 help:
@@ -86,6 +86,15 @@ fuzz:
 
 lint: golangci-lint-version
 	$(GOLANGCI_LINT) run ./...
+
+## fix: applies every automatic fix: go fix (the toolchain's modernizers and //go:fix inline), then golangci-lint --fix and fmt
+fix: golangci-lint-version
+	go fix ./...
+	$(GOLANGCI_LINT) run --fix ./...
+	$(GOLANGCI_LINT) fmt ./...
+
+fix-check:
+	@go fix -diff ./... || { echo "go fix has changes to apply: run make fix"; exit 1; }
 
 ## fmt: format with the formatters in .golangci.yaml (gofumpt, goimports, golines)
 fmt: golangci-lint-version

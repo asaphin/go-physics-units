@@ -6,7 +6,7 @@ Guidance for AI coding agents (and humans) working in this repository. `CLAUDE.m
 
 `go-physics-units` (module `github.com/asaphin/go-physics-units`, package name `units`) is a small Go library for creating, converting, comparing, parsing, encoding and doing arithmetic on physical measurements (distance, area, volume, mass, time, velocity, acceleration, force, energy, power, pressure, frequency, angle, angular velocity, data size, density, data rate, temperature, electric current, voltage, electric charge, resistance) and user-defined measures (e.g. currency).
 
-- **Published and pre-1.0** (tags `v0.0.0`–`v0.0.4`). The work since v0.0.4 redesigns the API (value types and typed units, ROADMAP Phase 3); `MIGRATION.md` is the upgrade guide. Exported API changes affect real users: make them deliberately, call them out, and record them in `CHANGELOG.md` and, if they break code, `MIGRATION.md`. `make api`, and the CI job "API changes", list every exported change since the latest tag; check that each one is in the CHANGELOG.
+- **Published and pre-1.0** (tags `v0.0.0`–`v0.1.0`). v0.1.0 redesigned the API (value types and typed units, ROADMAP Phase 3); `MIGRATION.md` is the upgrade guide from v0.0.4. Until v1.0.0 (ROADMAP 5.1), a breaking change bumps the minor version. Exported API changes affect real users: make them deliberately, call them out, and record them in `CHANGELOG.md` and, if they break code, `MIGRATION.md`. `make api`, and the CI job "API changes", list every exported change since the latest tag; check that each one is in the CHANGELOG.
 - **Go version:** `go.mod` declares `go 1.27.0`. CI tests that exact version and the latest stable release. Use modern Go freely: iterators and the `maps`/`slices` helpers, `strings.FieldsSeq`, `testing.B.Loop`, `sync.WaitGroup.Go`, `encoding.TextAppender`, and generic methods (Go 1.27). The `modernize` linter points out older forms. Raising the minimum again is its own deliberate change, with a CHANGELOG entry.
 - **No third-party dependencies**, including in tests (stdlib `testing` only, no testify). Keep it that way unless asked.
 - **Branches:** `dev` is the working branch, and it only accepts pull requests. Work on a short-lived branch and open a PR into `dev`. Releases are merged from `dev` into `main`.
@@ -78,10 +78,11 @@ User-defined measures are first-class: they convert, combine, compare, parse and
 | `internal/rates` | `Validate` (unit definitions), `Matrix` (the rates between every pair of units), `CanonicalUnit` |
 | `internal/gen` | The code generator, and `TestGenerated`, which fails when a generated file is stale |
 | `Makefile` | Task runner (see Commands) |
-| `.github/workflows/ci.yml` | CI: `go mod tidy` check, vet, race tests and coverage (the `go.mod` Go version and stable), allocation guards, short fuzz runs, golangci-lint (pinned version), the exported-API report, govulncheck |
+| `.github/workflows/ci.yml` | CI: `go mod tidy` check, vet, race tests and coverage (the `go.mod` Go version and stable), allocation guards, short fuzz runs, golangci-lint (pinned version) and `go fix -diff`, the exported-API report, govulncheck |
 | `.github/dependabot.yml`, `.github/pull_request_template.md` | Weekly bumps of the CI actions (into `dev`); the PR checklist |
 | `docs/` | Design documents: `docs/rfc-value-types.md` (ROADMAP 2.1, accepted) and `docs/rfc-temperature.md` (ROADMAP 4.4, accepted) |
 | `CHANGELOG.md`, `MIGRATION.md` | User-visible changes, under `## Unreleased` until the next tag; the upgrade guide from v0.0.4 |
+| `USECASES.md`, `example_usecases_test.go` | Real-world scenarios, each a verified example. `TestUseCasesDoc` (`usecases_test.go`) checks that the document shows the examples' declarations, code and output verbatim |
 | `ROADMAP.md` | Ordered plan of upcoming work. Take steps in order and tick them off when done |
 
 ## How it works
@@ -115,7 +116,7 @@ On error, return the zero value of a concrete type (`return Distance{}, err`) or
 
 ```sh
 make tools      # once per clone: the pinned golangci-lint into ./bin (gitignored), built with the go.mod Go
-make check      # what CI runs: go mod tidy check, format check, go vet, golangci-lint, go test -race, allocation guards
+make check      # what CI runs: go mod tidy check, format check, go vet, go fix check, golangci-lint, go test -race, allocation guards
 make help       # every documented target
 make generate   # regenerate measures_gen.go and the unit packages' unit_gen.go (go generate ./...)
 make test       # quick tests without the race detector
@@ -125,11 +126,13 @@ make bench-compare  # benchstat: BENCH_BASE (default the latest tag) vs the work
 make api        # gorelease: exported API changes since the latest tag, and the suggested version
 make fuzz       # FuzzParseString; FUZZTIME=30s by default
 make fmt        # golangci-lint fmt: gofumpt, goimports, golines (120 columns)
+make fix       # every automatic fix: go fix, then golangci-lint run --fix, then make fmt
 ```
 
 - **golangci-lint:** `.golangci.yaml` (v2 format) lists every enabled linter explicitly, grouped by purpose, and gives a reason for each linter it leaves out. It is adapted from the golden config by Marat Reimers. golangci-lint also runs staticcheck with all checks, so there is no separate staticcheck step.
 - **Pinned version:** golangci-lint `v2.15.0`, set in the Makefile (`GOLANGCI_LINT_VERSION`) and in CI. `make lint` refuses to run any other version and points to `make tools`, which builds that version into `./bin` with `GOTOOLCHAIN` set to the `go.mod` Go (golangci-lint's own `go.mod` would otherwise select an older Go, too old for this module).
 - **Lint Go version:** CI runs golangci-lint with the `go.mod` Go version. A golangci-lint binary can't read the export data of Go releases newer than it supports: v2.13.2 fails on Go 1.27.4, for example. Linting with the latest Go would therefore break whenever Go is released.
+- **go fix and the linter:** `go fix` applies the modernizers of the Go toolchain and the `//go:fix inline` directives; the `modernize` linter reports most of the same findings, from the `golang.org/x/tools` version that golangci-lint pins. `make fix` applies both, `go fix` first, and `make check` and CI fail while `go fix -diff` isn't empty. CI runs `go fix` with the `go.mod` Go version, like the linter. If the two ever disagree, so that one rewrites what the other reports, the toolchain's `go fix` wins: disable that analyzer in the `modernize` settings of `.golangci.yaml`, with a reason.
 - **Upgrading golangci-lint:** upgrade on purpose, in its own PR. Bump both pins, read the changelog for renamed options, then fix the new findings or disable a check with a reason. Enabling a new linter is a separate, reviewed change.
 - **`nolint`:** add a `//nolint:<linter> // reason` directive only with a reason. `nolintlint` flags unused directives.
 - **Generated code:** after changing `internal/gen` or the measures list in it, run `make generate` and commit the result. `TestGenerated` fails when a generated file differs from what the generator produces.
@@ -170,7 +173,7 @@ The factor model is multiplicative only. Temperature, with its offsets, has its 
 - Exported identifiers need doc comments that start with the identifier's name, as do package clauses (`revive` enforces both).
 - **Look-alike characters:** U+00B5 and U+03BC look identical, as do ℃ (U+2103) and °C. Wherever the difference matters in code (comparisons, tests), write them as Go escape sequences, as `internal/rates.CanonicalUnit` and the tests do. Comments and the `definitions` arrays keep the readable characters; `TestMeasuresSelfCheck` checks that definitions are canonical. Some editing tools turn escapes into the literal characters when they write a file; check with `grep` afterwards.
 - **Shadowed `time` package:** the `time` subpackage shadows the stdlib one. Import the stdlib package as `builtintime "time"`, as `time.go` and `time_test.go` do.
-- **Renaming exported names** breaks users. Add the new name and keep the old one as an alias with a `// Deprecated: Use X.` paragraph, as `distance.PlankLength` does. Unexported names can change freely.
+- **Renaming exported names** breaks users. Add the new name and keep the old one as an alias with a `// Deprecated: Use X.` paragraph and a `//go:fix inline` directive, as `distance.PlankLength` does: `go fix` then rewrites the callers' code. The directive works on constants and on functions whose body is a single call, such as `MustConvertTo`. Unexported names can change freely.
 - **Generated files** (`*_gen.go`) start with `// Code generated … DO NOT EDIT.`; change the generator instead.
 
 ## Testing conventions
@@ -182,6 +185,7 @@ The factor model is multiplicative only. Temperature, with its offsets, has its 
 - `measure_types_test.go` runs the whole shared API against every measure and against `Quantity` (`testTypedMeasure`, `testGenericMethods`, `testText`, `testUnitPackage`). A new shared method needs a check there.
 - `Example*` functions in `example_test.go` mirror `README.md` and have verified `// Output:` blocks. Keep the README snippets in sync with them.
 - `example_measures_test.go` has an example for each measure, each cross-measure operation, custom measures, temperature and formatting, and the unit packages have their own (`distance/example_test.go`). They are what pkg.go.dev shows; a new measure or cross-measure operation needs one.
+- `example_usecases_test.go` holds the scenarios of `USECASES.md`. Change a scenario there, run it, and copy its code and output into the document: `TestUseCasesDoc` fails until the two match.
 - If a test fails because of a library bug, fix the library or skip the test with `t.Skip("known defect: …")`. Never change expected values to match wrong output.
 - Benchmarks are in `measures_benchmark_test.go` (every measure, custom measures, a sum of mixed distances, error paths, the parser, `Rate`) and `distance_benchmark_test.go` (random data). Keep benchmark names stable, because `make bench-compare` matches them across versions. They loop with `b.Loop()` (`for i := 0; b.Loop(); i++` when an index is needed), which keeps the compiler from optimizing the loop body away, and use the `generateRandom*` helpers, which draw from `math/rand/v2`.
 - Package-level sinks for benchmarks and allocation tests are in `helpers_test.go`, not in `alloc_test.go`, which `-race` builds exclude.

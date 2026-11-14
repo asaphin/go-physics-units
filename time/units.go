@@ -34,6 +34,8 @@ const (
 // PlankTime is a misspelled alias of PlanckTime.
 //
 // Deprecated: Use PlanckTime.
+//
+//go:fix inline
 const PlankTime = PlanckTime
 
 // definitions holds the symbol of each unit and its factor: how many base
