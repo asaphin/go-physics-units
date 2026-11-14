@@ -11,6 +11,8 @@ import (
 	"iter"
 	"math/big"
 	"strconv"
+
+	"github.com/asaphin/go-physics-units/internal/rates"
 )
 
 // Unit is a temperature unit: one of the constants below. String returns its
@@ -109,8 +111,10 @@ func (u Unit) AbsoluteZero() float64 {
 
 // ParseUnit returns the unit with the given symbol, and whether there is one.
 // U+2103 DEGREE CELSIUS and U+2109 DEGREE FAHRENHEIT are accepted for °C and
-// °F.
+// °F, and U+212A KELVIN SIGN for K.
 func ParseUnit(symbol string) (Unit, bool) {
+	symbol = rates.CanonicalUnit(symbol)
+
 	switch symbol {
 	case "\u2103":
 		return Celsius, true

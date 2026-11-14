@@ -6,10 +6,10 @@ import (
 	"github.com/asaphin/go-physics-units/velocity"
 )
 
-// Acceleration is an acceleration: a value in a acceleration.Unit, such as 9.8 m/s². Create one with
+// Acceleration is an acceleration: a value in an acceleration.Unit, such as 9.8 m/s². Create one with
 // NewAcceleration or StringToAcceleration.
 //
-// A Acceleration is a small immutable value: every method returns a new value, so
+// An Acceleration is a small immutable value: every method returns a new value, so
 // copy and share it freely. The zero Acceleration is 0 m/s².
 type Acceleration struct {
 	value float64

@@ -8,8 +8,11 @@ import (
 	units "github.com/asaphin/go-physics-units"
 	"github.com/asaphin/go-physics-units/acceleration"
 	"github.com/asaphin/go-physics-units/angle"
+	"github.com/asaphin/go-physics-units/angularvelocity"
 	"github.com/asaphin/go-physics-units/area"
+	"github.com/asaphin/go-physics-units/charge"
 	"github.com/asaphin/go-physics-units/conversion"
+	"github.com/asaphin/go-physics-units/current"
 	"github.com/asaphin/go-physics-units/datarate"
 	"github.com/asaphin/go-physics-units/datasize"
 	"github.com/asaphin/go-physics-units/density"
@@ -20,28 +23,35 @@ import (
 	"github.com/asaphin/go-physics-units/mass"
 	"github.com/asaphin/go-physics-units/power"
 	"github.com/asaphin/go-physics-units/pressure"
+	"github.com/asaphin/go-physics-units/resistance"
 	"github.com/asaphin/go-physics-units/time"
 	"github.com/asaphin/go-physics-units/velocity"
+	"github.com/asaphin/go-physics-units/voltage"
 	"github.com/asaphin/go-physics-units/volume"
 )
 
 var predefinedFactors = map[units.MeasureType]conversion.Factors{
-	units.MeasureDistance:     distance.ConversionFactors(),
-	units.MeasureArea:         area.ConversionFactors(),
-	units.MeasureMass:         mass.ConversionFactors(),
-	units.MeasureTime:         time.ConversionFactors(),
-	units.MeasureVelocity:     velocity.ConversionFactors(),
-	units.MeasureVolume:       volume.ConversionFactors(),
-	units.MeasureAcceleration: acceleration.ConversionFactors(),
-	units.MeasureForce:        force.ConversionFactors(),
-	units.MeasureEnergy:       energy.ConversionFactors(),
-	units.MeasurePower:        power.ConversionFactors(),
-	units.MeasurePressure:     pressure.ConversionFactors(),
-	units.MeasureFrequency:    frequency.ConversionFactors(),
-	units.MeasureAngle:        angle.ConversionFactors(),
-	units.MeasureDataSize:     datasize.ConversionFactors(),
-	units.MeasureDensity:      density.ConversionFactors(),
-	units.MeasureDataRate:     datarate.ConversionFactors(),
+	units.MeasureDistance:        distance.ConversionFactors(),
+	units.MeasureArea:            area.ConversionFactors(),
+	units.MeasureMass:            mass.ConversionFactors(),
+	units.MeasureTime:            time.ConversionFactors(),
+	units.MeasureVelocity:        velocity.ConversionFactors(),
+	units.MeasureVolume:          volume.ConversionFactors(),
+	units.MeasureAcceleration:    acceleration.ConversionFactors(),
+	units.MeasureForce:           force.ConversionFactors(),
+	units.MeasureEnergy:          energy.ConversionFactors(),
+	units.MeasurePower:           power.ConversionFactors(),
+	units.MeasurePressure:        pressure.ConversionFactors(),
+	units.MeasureFrequency:       frequency.ConversionFactors(),
+	units.MeasureAngle:           angle.ConversionFactors(),
+	units.MeasureDataSize:        datasize.ConversionFactors(),
+	units.MeasureDensity:         density.ConversionFactors(),
+	units.MeasureDataRate:        datarate.ConversionFactors(),
+	units.MeasureCurrent:         current.ConversionFactors(),
+	units.MeasureVoltage:         voltage.ConversionFactors(),
+	units.MeasureCharge:          charge.ConversionFactors(),
+	units.MeasureResistance:      resistance.ConversionFactors(),
+	units.MeasureAngularVelocity: angularvelocity.ConversionFactors(),
 }
 
 // TestConversion_AllUnitPairs converts between every ordered pair of units of
@@ -206,6 +216,22 @@ func TestConversion_ReferenceValues(t *testing.T) {
 		{datarate.GigabitPerSecond, datarate.MegabytePerSecond, 125},
 		{datarate.KibibytePerSecond, datarate.BytePerSecond, 1024},
 		{datarate.GigabytePerSecond, datarate.MegabytePerSecond, 1000},
+		{current.Ampere, current.Milliampere, 1000},
+		{current.Milliampere, current.Microampere, 1000},
+		{current.Kiloampere, current.Ampere, 1000},
+		{voltage.Kilovolt, voltage.Volt, 1000},
+		{voltage.Megavolt, voltage.Kilovolt, 1000},
+		{voltage.Millivolt, voltage.Microvolt, 1000},
+		{charge.AmpereHour, charge.Coulomb, 3600},
+		{charge.MilliampereHour, charge.Coulomb, 3.6},
+		{charge.Coulomb, charge.Millicoulomb, 1000},
+		{charge.Millicoulomb, charge.Microcoulomb, 1000},
+		{resistance.Kiloohm, resistance.Ohm, 1000},
+		{resistance.Gigaohm, resistance.Megaohm, 1000},
+		{resistance.Ohm, resistance.Milliohm, 1000},
+		{angularvelocity.RevolutionPerSecond, angularvelocity.RevolutionPerMinute, 60},
+		{angularvelocity.RevolutionPerSecond, angularvelocity.DegreePerSecond, 360},
+		{angularvelocity.RevolutionPerMinute, angularvelocity.RadianPerSecond, 0.10471975511965977},
 	}
 
 	for _, c := range cases {
@@ -292,6 +318,15 @@ func TestRate(t *testing.T) {
 		{"data size", datasize.Rate(datasize.Kibibyte, datasize.Byte), 1024},
 		{"density", density.Rate(density.KilogramPerLiter, density.KilogramPerCubicMeter), 1000},
 		{"data rate", datarate.Rate(datarate.MegabytePerSecond, datarate.MegabitPerSecond), 8},
+		{"current", current.Rate(current.Ampere, current.Milliampere), 1000},
+		{"voltage", voltage.Rate(voltage.Kilovolt, voltage.Volt), 1000},
+		{"charge", charge.Rate(charge.AmpereHour, charge.MilliampereHour), 1000},
+		{"resistance", resistance.Rate(resistance.Megaohm, resistance.Kiloohm), 1000},
+		{
+			"angular velocity",
+			angularvelocity.Rate(angularvelocity.RevolutionPerSecond, angularvelocity.RevolutionPerMinute),
+			60,
+		},
 	}
 
 	for _, e := range examples {
@@ -303,22 +338,27 @@ func TestRate(t *testing.T) {
 
 func TestConversionFactors_ReturnsCopy(t *testing.T) {
 	for mt, factorsFn := range map[units.MeasureType]func() conversion.Factors{
-		units.MeasureDistance:     distance.ConversionFactors,
-		units.MeasureArea:         area.ConversionFactors,
-		units.MeasureMass:         mass.ConversionFactors,
-		units.MeasureTime:         time.ConversionFactors,
-		units.MeasureVelocity:     velocity.ConversionFactors,
-		units.MeasureVolume:       volume.ConversionFactors,
-		units.MeasureAcceleration: acceleration.ConversionFactors,
-		units.MeasureForce:        force.ConversionFactors,
-		units.MeasureEnergy:       energy.ConversionFactors,
-		units.MeasurePower:        power.ConversionFactors,
-		units.MeasurePressure:     pressure.ConversionFactors,
-		units.MeasureFrequency:    frequency.ConversionFactors,
-		units.MeasureAngle:        angle.ConversionFactors,
-		units.MeasureDataSize:     datasize.ConversionFactors,
-		units.MeasureDensity:      density.ConversionFactors,
-		units.MeasureDataRate:     datarate.ConversionFactors,
+		units.MeasureDistance:        distance.ConversionFactors,
+		units.MeasureArea:            area.ConversionFactors,
+		units.MeasureMass:            mass.ConversionFactors,
+		units.MeasureTime:            time.ConversionFactors,
+		units.MeasureVelocity:        velocity.ConversionFactors,
+		units.MeasureVolume:          volume.ConversionFactors,
+		units.MeasureAcceleration:    acceleration.ConversionFactors,
+		units.MeasureForce:           force.ConversionFactors,
+		units.MeasureEnergy:          energy.ConversionFactors,
+		units.MeasurePower:           power.ConversionFactors,
+		units.MeasurePressure:        pressure.ConversionFactors,
+		units.MeasureFrequency:       frequency.ConversionFactors,
+		units.MeasureAngle:           angle.ConversionFactors,
+		units.MeasureDataSize:        datasize.ConversionFactors,
+		units.MeasureDensity:         density.ConversionFactors,
+		units.MeasureDataRate:        datarate.ConversionFactors,
+		units.MeasureCurrent:         current.ConversionFactors,
+		units.MeasureVoltage:         voltage.ConversionFactors,
+		units.MeasureCharge:          charge.ConversionFactors,
+		units.MeasureResistance:      resistance.ConversionFactors,
+		units.MeasureAngularVelocity: angularvelocity.ConversionFactors,
 	} {
 		f := factorsFn()
 		for unit := range f {

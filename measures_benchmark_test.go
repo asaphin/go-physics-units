@@ -27,6 +27,11 @@ func BenchmarkMeasures(b *testing.B) {
 	b.Run("data size", func(b *testing.B) { benchTypedMeasure(b, dataSizeCase) })
 	b.Run("density", func(b *testing.B) { benchTypedMeasure(b, densityCase) })
 	b.Run("data rate", func(b *testing.B) { benchTypedMeasure(b, dataRateCase) })
+	b.Run("electric current", func(b *testing.B) { benchTypedMeasure(b, currentCase) })
+	b.Run("voltage", func(b *testing.B) { benchTypedMeasure(b, voltageCase) })
+	b.Run("electric charge", func(b *testing.B) { benchTypedMeasure(b, chargeCase) })
+	b.Run("resistance", func(b *testing.B) { benchTypedMeasure(b, resistanceCase) })
+	b.Run("angular velocity", func(b *testing.B) { benchTypedMeasure(b, angularVelocityCase) })
 }
 
 func benchTypedMeasure[T typedMeasure[T, U], U unitType](b *testing.B, c typedCase[T, U]) {

@@ -4,12 +4,13 @@ import (
 	"github.com/asaphin/go-physics-units/energy"
 	"github.com/asaphin/go-physics-units/force"
 	"github.com/asaphin/go-physics-units/power"
+	"github.com/asaphin/go-physics-units/voltage"
 )
 
-// Energy is an amount of energy: a value in a energy.Unit, such as 10 kWh. Create one with
+// Energy is an amount of energy: a value in an energy.Unit, such as 10 kWh. Create one with
 // NewEnergy or StringToEnergy.
 //
-// A Energy is a small immutable value: every method returns a new value, so
+// An Energy is a small immutable value: every method returns a new value, so
 // copy and share it freely. The zero Energy is 0 J.
 type Energy struct {
 	value float64
@@ -34,4 +35,14 @@ func (e Energy) DivideByDistance(d Distance) (Force, error) {
 	}
 
 	return Force{value: e.baseValue() / d.baseValue(), unit: force.BaseUnit}, nil
+}
+
+// DivideByCharge returns the voltage e/q (V) in voltage.BaseUnit. It fails with
+// ErrZeroDivision if q is zero.
+func (e Energy) DivideByCharge(q Charge) (Voltage, error) {
+	if q.value == 0 {
+		return Voltage{}, ErrZeroDivision
+	}
+
+	return Voltage{value: e.baseValue() / q.baseValue(), unit: voltage.BaseUnit}, nil
 }

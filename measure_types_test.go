@@ -13,7 +13,10 @@ import (
 	units "github.com/asaphin/go-physics-units"
 	"github.com/asaphin/go-physics-units/acceleration"
 	"github.com/asaphin/go-physics-units/angle"
+	"github.com/asaphin/go-physics-units/angularvelocity"
 	"github.com/asaphin/go-physics-units/area"
+	"github.com/asaphin/go-physics-units/charge"
+	"github.com/asaphin/go-physics-units/current"
 	"github.com/asaphin/go-physics-units/datarate"
 	"github.com/asaphin/go-physics-units/datasize"
 	"github.com/asaphin/go-physics-units/density"
@@ -24,8 +27,10 @@ import (
 	"github.com/asaphin/go-physics-units/mass"
 	"github.com/asaphin/go-physics-units/power"
 	"github.com/asaphin/go-physics-units/pressure"
+	"github.com/asaphin/go-physics-units/resistance"
 	"github.com/asaphin/go-physics-units/time"
 	"github.com/asaphin/go-physics-units/velocity"
+	"github.com/asaphin/go-physics-units/voltage"
 	"github.com/asaphin/go-physics-units/volume"
 )
 
@@ -190,6 +195,41 @@ var (
 		unitA: datarate.GigabitPerSecond, unitB: datarate.MegabytePerSecond, ratio: 125,
 		baseUnit: datarate.BaseUnit, baseRatio: 1.25e8, foreignSymbol: datasize.Byte.String(),
 	}
+	currentCase = typedCase[units.Current, current.Unit]{
+		measureType: units.MeasureCurrent,
+		newFn:       units.NewCurrent, toFn: units.ToCurrent, parseFn: units.StringToCurrent,
+		parseUnit: current.ParseUnit, allUnits: current.Units, rate: current.Rate,
+		unitA: current.Kiloampere, unitB: current.Milliampere, ratio: 1e6,
+		baseUnit: current.BaseUnit, baseRatio: 1000, foreignSymbol: voltage.Volt.String(),
+	}
+	voltageCase = typedCase[units.Voltage, voltage.Unit]{
+		measureType: units.MeasureVoltage,
+		newFn:       units.NewVoltage, toFn: units.ToVoltage, parseFn: units.StringToVoltage,
+		parseUnit: voltage.ParseUnit, allUnits: voltage.Units, rate: voltage.Rate,
+		unitA: voltage.Kilovolt, unitB: voltage.Millivolt, ratio: 1e6,
+		baseUnit: voltage.BaseUnit, baseRatio: 1000, foreignSymbol: current.Ampere.String(),
+	}
+	chargeCase = typedCase[units.Charge, charge.Unit]{
+		measureType: units.MeasureCharge,
+		newFn:       units.NewCharge, toFn: units.ToCharge, parseFn: units.StringToCharge,
+		parseUnit: charge.ParseUnit, allUnits: charge.Units, rate: charge.Rate,
+		unitA: charge.AmpereHour, unitB: charge.MilliampereHour, ratio: 1000,
+		baseUnit: charge.BaseUnit, baseRatio: 3600, foreignSymbol: current.Ampere.String(),
+	}
+	resistanceCase = typedCase[units.Resistance, resistance.Unit]{
+		measureType: units.MeasureResistance,
+		newFn:       units.NewResistance, toFn: units.ToResistance, parseFn: units.StringToResistance,
+		parseUnit: resistance.ParseUnit, allUnits: resistance.Units, rate: resistance.Rate,
+		unitA: resistance.Megaohm, unitB: resistance.Kiloohm, ratio: 1000,
+		baseUnit: resistance.BaseUnit, baseRatio: 1e6, foreignSymbol: voltage.Volt.String(),
+	}
+	angularVelocityCase = typedCase[units.AngularVelocity, angularvelocity.Unit]{
+		measureType: units.MeasureAngularVelocity,
+		newFn:       units.NewAngularVelocity, toFn: units.ToAngularVelocity, parseFn: units.StringToAngularVelocity,
+		parseUnit: angularvelocity.ParseUnit, allUnits: angularvelocity.Units, rate: angularvelocity.Rate,
+		unitA: angularvelocity.RevolutionPerSecond, unitB: angularvelocity.RevolutionPerMinute, ratio: 60,
+		baseUnit: angularvelocity.BaseUnit, baseRatio: 2 * math.Pi, foreignSymbol: frequency.Hertz.String(),
+	}
 )
 
 func TestTypedMeasures(t *testing.T) {
@@ -212,6 +252,14 @@ func TestTypedMeasures(t *testing.T) {
 	t.Run("data size", func(t *testing.T) { testTypedMeasure(t, dataSizeCase); testUnitPackage(t, dataSizeCase) })
 	t.Run("density", func(t *testing.T) { testTypedMeasure(t, densityCase); testUnitPackage(t, densityCase) })
 	t.Run("data rate", func(t *testing.T) { testTypedMeasure(t, dataRateCase); testUnitPackage(t, dataRateCase) })
+	t.Run("electric current", func(t *testing.T) { testTypedMeasure(t, currentCase); testUnitPackage(t, currentCase) })
+	t.Run("voltage", func(t *testing.T) { testTypedMeasure(t, voltageCase); testUnitPackage(t, voltageCase) })
+	t.Run("electric charge", func(t *testing.T) { testTypedMeasure(t, chargeCase); testUnitPackage(t, chargeCase) })
+	t.Run("resistance", func(t *testing.T) { testTypedMeasure(t, resistanceCase); testUnitPackage(t, resistanceCase) })
+	t.Run(
+		"angular velocity",
+		func(t *testing.T) { testTypedMeasure(t, angularVelocityCase); testUnitPackage(t, angularVelocityCase) },
+	)
 }
 
 func testTypedMeasure[T typedMeasure[T, U], U unitType](t *testing.T, c typedCase[T, U]) {
