@@ -589,7 +589,7 @@ The design decisions are recorded in [docs/rfc-value-types.md](docs/rfc-value-ty
 
 The module follows [semantic versioning](https://semver.org).
 Before v1.0.0, a minor release (v0.x.0) may break the API, and a patch release doesn't.
-[CHANGELOG.md](CHANGELOG.md) records every user-visible change, and [MIGRATION.md](MIGRATION.md) covers the upgrade from v0.0.4.
+[CHANGELOG.md](CHANGELOG.md) records every user-visible change, and [MIGRATION.md](MIGRATION.md) covers the upgrade from v0.0.4; v0.2.0 needs no changes after v0.1.0.
 Deprecated names keep working until v1.0.0, and `go fix` rewrites your code to their replacements, such as `MustConvertTo` to `ConvertTo`.
 
 The full API reference, with runnable examples for every measure, is on [pkg.go.dev](https://pkg.go.dev/github.com/asaphin/go-physics-units).

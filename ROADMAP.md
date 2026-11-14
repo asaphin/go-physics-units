@@ -16,7 +16,7 @@ Two rules keep the steps small:
 
 ## Overview
 
-> **Released (2026-11-14):** v0.1.0 contains every step of Phases 0–4 below. The Release column names the release each step was planned for; all of them shipped in v0.1.0.
+> **Released (2026-11-14):** v0.1.0 contains steps 0.1–4.4 below, and v0.2.0 steps 4.5–4.7. The Release column names the release each step was planned for.
 
 Size is relative effort: S < M < L.
 
@@ -45,7 +45,7 @@ Size is relative effort: S < M < L.
 | ☑ | [4.4](#44-decision-temperature) | Temperature (design first) | P3 | **Decision** | M | v0.2.x |
 | ☑ | [4.5](#45-science-and-everyday-measures) | Science and everyday measures, calculators, physics, constants | P3 | no | L | v0.2.0 |
 | ☑ | [4.6](#46-documentation-pass) | Documentation pass: godoc as contracts, for people and AI agents | docs | no | M | v0.2.0 |
-| ☐ | [4.7](#47-release-v020) | Release v0.2.0 | — | no | S | v0.2.0 |
+| ☑ | [4.7](#47-release-v020) | Release v0.2.0 | — | no | S | v0.2.0 |
 | ☐ | [5.1](#51-stabilise-and-release-v100) | Stabilise and release v1.0.0 | — | removals | M | v1.0.0 |
 
 ## Phase 0: finish and ship v0.1.0
@@ -299,6 +299,7 @@ Serves **P3**. The author chose the groups and the API shape on 2026-11-14.
 ### 4.7 Release v0.2.0
 
 - As in step 0.4: CHANGELOG section, a PR from `dev` into `main`, an annotated tag, the GitHub release and the proxy request.
+- **Status:** done. `gorelease` reports only compatible changes since v0.1.0; the author chose a minor release for the size of the additions.
 
 ### Not planned unless there is demand
 
