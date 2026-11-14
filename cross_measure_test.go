@@ -2,11 +2,16 @@ package units_test
 
 import (
 	"errors"
+	"math"
 	"testing"
 
 	units "github.com/asaphin/go-physics-units"
 	"github.com/asaphin/go-physics-units/acceleration"
+	"github.com/asaphin/go-physics-units/angle"
+	"github.com/asaphin/go-physics-units/angularvelocity"
 	"github.com/asaphin/go-physics-units/area"
+	"github.com/asaphin/go-physics-units/charge"
+	"github.com/asaphin/go-physics-units/current"
 	"github.com/asaphin/go-physics-units/datarate"
 	"github.com/asaphin/go-physics-units/datasize"
 	"github.com/asaphin/go-physics-units/density"
@@ -17,8 +22,10 @@ import (
 	"github.com/asaphin/go-physics-units/mass"
 	"github.com/asaphin/go-physics-units/power"
 	"github.com/asaphin/go-physics-units/pressure"
+	"github.com/asaphin/go-physics-units/resistance"
 	"github.com/asaphin/go-physics-units/time"
 	"github.com/asaphin/go-physics-units/velocity"
+	"github.com/asaphin/go-physics-units/voltage"
 	"github.com/asaphin/go-physics-units/volume"
 )
 
@@ -77,6 +84,13 @@ func TestCrossMeasureOperations(t *testing.T) {
 	m500 := units.NewDistance(500, distance.Meter)
 	kmh20 := units.NewVelocity(20, velocity.KilometerPerHour)
 	min30 := units.NewTime(30, time.Minute)
+	ma500 := units.NewCurrent(500, current.Milliampere)
+	v230 := units.NewVoltage(230, voltage.Volt)
+	kohm := units.NewResistance(1, resistance.Kiloohm)
+	mah3000 := units.NewCharge(3000, charge.MilliampereHour)
+	w1150 := units.NewPower(1150, power.Watt)
+	spin60 := units.NewAngularVelocity(60, angularvelocity.RevolutionPerMinute)
+	halfTurn := units.NewAngle(180, angle.Degree)
 
 	cases := []struct {
 		name  string
@@ -102,6 +116,102 @@ func TestCrossMeasureOperations(t *testing.T) {
 			func() (units.Measurement, error) { return ok(kmh20.MultiplyByTime(min30)) },
 			10000,
 			distance.BaseUnit.String(),
+		},
+		{
+			"500 mA × 230 V",
+			func() (units.Measurement, error) { return ok(ma500.MultiplyByVoltage(v230)) },
+			115,
+			power.BaseUnit.String(),
+		},
+		{
+			"230 V × 500 mA",
+			func() (units.Measurement, error) { return ok(v230.MultiplyByCurrent(ma500)) },
+			115,
+			power.BaseUnit.String(),
+		},
+		{
+			"500 mA × 1 kΩ",
+			func() (units.Measurement, error) { return ok(ma500.MultiplyByResistance(kohm)) },
+			500,
+			voltage.BaseUnit.String(),
+		},
+		{
+			"1 kΩ × 500 mA",
+			func() (units.Measurement, error) { return ok(kohm.MultiplyByCurrent(ma500)) },
+			500,
+			voltage.BaseUnit.String(),
+		},
+		{
+			"500 mA × 1 h",
+			func() (units.Measurement, error) { return ok(ma500.MultiplyByTime(hour)) },
+			1800,
+			charge.BaseUnit.String(),
+		},
+		{
+			"230 V / 500 mA",
+			func() (units.Measurement, error) { return fallible(v230.DivideByCurrent(ma500)) },
+			460,
+			resistance.BaseUnit.String(),
+		},
+		{
+			"230 V / 1 kΩ",
+			func() (units.Measurement, error) { return fallible(v230.DivideByResistance(kohm)) },
+			0.23,
+			current.BaseUnit.String(),
+		},
+		{
+			"230 V × 3000 mAh",
+			func() (units.Measurement, error) { return ok(v230.MultiplyByCharge(mah3000)) },
+			230 * 10800,
+			energy.BaseUnit.String(),
+		},
+		{
+			"3000 mAh × 230 V",
+			func() (units.Measurement, error) { return ok(mah3000.MultiplyByVoltage(v230)) },
+			230 * 10800,
+			energy.BaseUnit.String(),
+		},
+		{
+			"3000 mAh / 1 h",
+			func() (units.Measurement, error) { return fallible(mah3000.DivideByTime(hour)) },
+			3,
+			current.BaseUnit.String(),
+		},
+		{
+			"3000 mAh at 500 mA",
+			func() (units.Measurement, error) { return fallible(mah3000.DivideByCurrent(ma500)) },
+			21600,
+			time.BaseUnit.String(),
+		},
+		{
+			"1150 W / 230 V",
+			func() (units.Measurement, error) { return fallible(w1150.DivideByVoltage(v230)) },
+			5,
+			current.BaseUnit.String(),
+		},
+		{
+			"1150 W / 500 mA",
+			func() (units.Measurement, error) { return fallible(w1150.DivideByCurrent(ma500)) },
+			2300,
+			voltage.BaseUnit.String(),
+		},
+		{
+			"1 kWh / 3000 mAh",
+			func() (units.Measurement, error) { return fallible(kwh.DivideByCharge(mah3000)) },
+			3.6e6 / 10800,
+			voltage.BaseUnit.String(),
+		},
+		{
+			"60 rev/min × 2 s",
+			func() (units.Measurement, error) { return ok(spin60.MultiplyByTime(s2)) },
+			4 * math.Pi,
+			angle.BaseUnit.String(),
+		},
+		{
+			"180° / 2 s",
+			func() (units.Measurement, error) { return fallible(halfTurn.DivideByTime(s2)) },
+			math.Pi / 2,
+			angularvelocity.BaseUnit.String(),
 		},
 		{"2 m cubed", func() (units.Measurement, error) { return ok(m2.Cube()) }, 8, volume.BaseUnit.String()},
 		{
@@ -273,7 +383,24 @@ func TestCrossMeasureOperations_ZeroDivision(t *testing.T) {
 	gb := units.NewDataSize(1, datasize.Gigabyte)
 	noRate := units.NewDataRate(0, datarate.BitPerSecond)
 
+	noCurrent := units.NewCurrent(0, current.Ampere)
+	noVoltage := units.NewVoltage(0, voltage.Volt)
+	noResistance := units.NewResistance(0, resistance.Ohm)
+	noCharge := units.NewCharge(0, charge.Coulomb)
+	v := units.NewVoltage(1, voltage.Volt)
+	q := units.NewCharge(1, charge.Coulomb)
+	w := units.NewPower(1, power.Watt)
+	rad := units.NewAngle(1, angle.Radian)
+
 	cases := map[string]func() (units.Measurement, error){
+		"Voltage.DivideByCurrent":    func() (units.Measurement, error) { return fallible(v.DivideByCurrent(noCurrent)) },
+		"Voltage.DivideByResistance": func() (units.Measurement, error) { return fallible(v.DivideByResistance(noResistance)) },
+		"Charge.DivideByTime":        func() (units.Measurement, error) { return fallible(q.DivideByTime(noTime)) },
+		"Charge.DivideByCurrent":     func() (units.Measurement, error) { return fallible(q.DivideByCurrent(noCurrent)) },
+		"Power.DivideByVoltage":      func() (units.Measurement, error) { return fallible(w.DivideByVoltage(noVoltage)) },
+		"Power.DivideByCurrent":      func() (units.Measurement, error) { return fallible(w.DivideByCurrent(noCurrent)) },
+		"Energy.DivideByCharge":      func() (units.Measurement, error) { return fallible(j.DivideByCharge(noCharge)) },
+		"Angle.DivideByTime":         func() (units.Measurement, error) { return fallible(rad.DivideByTime(noTime)) },
 		"Distance.DivideByTime":      func() (units.Measurement, error) { return fallible(noDistance.DivideByTime(noTime)) },
 		"Area.DivideByDistance":      func() (units.Measurement, error) { return fallible(noArea.DivideByDistance(noDistance)) },
 		"Volume.DivideByArea":        func() (units.Measurement, error) { return fallible(cubicM.DivideByArea(noArea)) },

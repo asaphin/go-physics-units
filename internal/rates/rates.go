@@ -74,10 +74,26 @@ func Matrix(factors []float64) []float64 {
 	return m
 }
 
-// CanonicalUnit returns unit with U+00B5 MICRO SIGN replaced by U+03BC GREEK
-// SMALL LETTER MU, the same mapping Unicode NFKC applies. Both characters are
-// in common use for the micro prefix, so "µm" and "μm" denote the same unit.
-// It doesn't allocate unless unit contains a micro sign.
+// canonical maps the look-alike characters of unit symbols to the forms the
+// tables store, as Unicode NFKC does: U+00B5 MICRO SIGN to U+03BC GREEK SMALL
+// LETTER MU, U+2126 OHM SIGN to U+03A9 GREEK CAPITAL LETTER OMEGA, U+212B
+// ANGSTROM SIGN to U+00C5 and U+212A KELVIN SIGN to K. A Replacer is safe for
+// concurrent use, and this one is never changed after init.
+var canonical = strings.NewReplacer(
+	"\u00b5", "\u03bc",
+	"\u2126", "\u03a9",
+	"\u212b", "\u00c5",
+	"\u212a", "K",
+)
+
+// CanonicalUnit returns unit with its look-alike characters replaced by the
+// forms the tables store: "µm" (MICRO SIGN) and "μm" (GREEK SMALL LETTER MU)
+// denote the same unit, as do "Ω" (OHM SIGN) and "Ω" (GREEK CAPITAL LETTER
+// OMEGA). It doesn't allocate unless unit contains one of them.
 func CanonicalUnit(unit string) string {
-	return strings.ReplaceAll(unit, "\u00b5", "\u03bc")
+	if !strings.ContainsAny(unit, "\u00b5\u2126\u212b\u212a") {
+		return unit
+	}
+
+	return canonical.Replace(unit)
 }

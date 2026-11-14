@@ -8,7 +8,10 @@ import (
 
 	"github.com/asaphin/go-physics-units/acceleration"
 	"github.com/asaphin/go-physics-units/angle"
+	"github.com/asaphin/go-physics-units/angularvelocity"
 	"github.com/asaphin/go-physics-units/area"
+	"github.com/asaphin/go-physics-units/charge"
+	"github.com/asaphin/go-physics-units/current"
 	"github.com/asaphin/go-physics-units/datarate"
 	"github.com/asaphin/go-physics-units/datasize"
 	"github.com/asaphin/go-physics-units/density"
@@ -19,8 +22,10 @@ import (
 	"github.com/asaphin/go-physics-units/mass"
 	"github.com/asaphin/go-physics-units/power"
 	"github.com/asaphin/go-physics-units/pressure"
+	"github.com/asaphin/go-physics-units/resistance"
 	"github.com/asaphin/go-physics-units/time"
 	"github.com/asaphin/go-physics-units/velocity"
+	"github.com/asaphin/go-physics-units/voltage"
 	"github.com/asaphin/go-physics-units/volume"
 )
 
@@ -76,6 +81,21 @@ var (
 	datarateSet = newPredefinedSet(MeasureDataRate, datarate.Units(), func(v float64, u datarate.Unit) Measurement {
 		return DataRate{value: v, unit: u}
 	})
+	currentSet = newPredefinedSet(MeasureCurrent, current.Units(), func(v float64, u current.Unit) Measurement {
+		return Current{value: v, unit: u}
+	})
+	voltageSet = newPredefinedSet(MeasureVoltage, voltage.Units(), func(v float64, u voltage.Unit) Measurement {
+		return Voltage{value: v, unit: u}
+	})
+	chargeSet = newPredefinedSet(MeasureCharge, charge.Units(), func(v float64, u charge.Unit) Measurement {
+		return Charge{value: v, unit: u}
+	})
+	resistanceSet = newPredefinedSet(MeasureResistance, resistance.Units(), func(v float64, u resistance.Unit) Measurement {
+		return Resistance{value: v, unit: u}
+	})
+	angularvelocitySet = newPredefinedSet(MeasureAngularVelocity, angularvelocity.Units(), func(v float64, u angularvelocity.Unit) Measurement {
+		return AngularVelocity{value: v, unit: u}
+	})
 )
 
 // predefinedSets lists the unit sets of the predefined measures.
@@ -96,6 +116,11 @@ var predefinedSets = [...]*unitSet{
 	datasizeSet,
 	densitySet,
 	datarateSet,
+	currentSet,
+	voltageSet,
+	chargeSet,
+	resistanceSet,
+	angularvelocitySet,
 }
 
 // NewDistance returns a distance of value in unit, such as
@@ -3870,6 +3895,1186 @@ func (r *DataRate) UnmarshalText(text []byte) error {
 	}
 
 	*r = value
+
+	return nil
+}
+
+// NewCurrent returns an electric current of value in unit, such as
+// NewCurrent(10, current.BaseUnit).
+func NewCurrent(value float64, unit current.Unit) Current {
+	return Current{value: value, unit: unit}
+}
+
+// Value returns the numeric value, expressed in Unit.
+func (i Current) Value() float64 {
+	return i.value
+}
+
+// Unit returns the unit of the value.
+func (i Current) Unit() current.Unit {
+	return i.unit
+}
+
+// Symbol returns the symbol of the unit, as Unit().String() does.
+func (i Current) Symbol() string {
+	return i.unit.String()
+}
+
+// Type returns MeasureCurrent.
+func (Current) Type() MeasureType {
+	return MeasureCurrent
+}
+
+// String formats the electric current as "<value> <symbol>", such as "2.5 mA", the form
+// StringToCurrent and ParseString accept. The value is formatted like fmt's %v,
+// in the shortest form that parses back to the same float64.
+func (i Current) String() string {
+	return formatString(i.value, i.unit.String())
+}
+
+// Format implements fmt.Formatter: %.2f formats the value and appends the
+// symbol. See the package documentation for every verb.
+func (i Current) Format(state fmt.State, verb rune) {
+	formatMeasurement(state, verb, "Current", i.value, i.unit.String())
+}
+
+// ConvertTo returns the electric current expressed in unit.
+func (i Current) ConvertTo(unit current.Unit) Current {
+	return Current{value: i.value * current.Rate(i.unit, unit), unit: unit}
+}
+
+// MustConvertTo is ConvertTo.
+//
+// Deprecated: Use ConvertTo, which no longer fails.
+//
+//go:fix inline
+func (i Current) MustConvertTo(unit current.Unit) Current {
+	return i.ConvertTo(unit)
+}
+
+// ConvertToBaseUnits returns the electric current expressed in amperes.
+func (i Current) ConvertToBaseUnits() Current {
+	return Current{value: i.baseValue(), unit: current.BaseUnit}
+}
+
+// baseValue returns the value in amperes.
+func (i Current) baseValue() float64 {
+	return i.value * i.unit.Factor()
+}
+
+// Add returns the sum of the electric currents, expressed in the receiver's unit.
+func (i Current) Add(other Current) Current {
+	return Current{value: i.value + other.value*current.Rate(other.unit, i.unit), unit: i.unit}
+}
+
+// Sub returns the difference of the electric currents, expressed in the receiver's unit.
+func (i Current) Sub(other Current) Current {
+	return Current{value: i.value - other.value*current.Rate(other.unit, i.unit), unit: i.unit}
+}
+
+// Mul returns the electric current multiplied by multiplier.
+func (i Current) Mul(multiplier float64) Current {
+	return Current{value: i.value * multiplier, unit: i.unit}
+}
+
+// Div returns the electric current divided by divisor. It fails with ErrZeroDivision if
+// divisor is zero.
+func (i Current) Div(divisor float64) (Current, error) {
+	if divisor == 0 {
+		return Current{}, ErrZeroDivision
+	}
+
+	return Current{value: i.value / divisor, unit: i.unit}, nil
+}
+
+// Compare compares the electric currents; see Comparer.
+func (i Current) Compare(other Current) int {
+	return cmp.Compare(i.common(other))
+}
+
+// Equal reports whether the electric currents are equal; see Comparer.
+func (i Current) Equal(other Current) bool {
+	return i.Compare(other) == 0
+}
+
+// EqualWithinRel reports whether the electric currents are equal within the relative
+// tolerance tol; see Comparer.
+func (i Current) EqualWithinRel(other Current, tol float64) bool {
+	x, y := i.common(other)
+
+	return equalWithinRel(x, y, tol)
+}
+
+// common returns the values of the electric currents in a common unit: their own if
+// they share it, otherwise the base unit. Either way the result doesn't depend
+// on the order of the operands, so comparisons are symmetric.
+func (i Current) common(other Current) (float64, float64) {
+	if i.unit == other.unit {
+		return i.value, other.value
+	}
+
+	return i.baseValue(), other.baseValue()
+}
+
+// ConvertToMeasurement is ConvertTo for generic code: it takes a unit symbol.
+// It fails with ErrUnknownUnit if symbol isn't an electric current unit.
+func (i Current) ConvertToMeasurement(symbol string) (Measurement, error) {
+	unit, ok := current.ParseUnit(symbol)
+	if !ok {
+		return nil, unknownUnitError(MeasureCurrent, symbol)
+	}
+
+	return i.ConvertTo(unit), nil
+}
+
+// AddMeasurement is Add for generic code. It fails with
+// ErrIncompatibleMeasures if other isn't an electric current.
+func (i Current) AddMeasurement(other Measurement) (Measurement, error) {
+	value, err := currentSet.valueIn(other, uint16(i.unit))
+	if err != nil {
+		return nil, err
+	}
+
+	return Current{value: i.value + value, unit: i.unit}, nil
+}
+
+// SubMeasurement is Sub for generic code. It fails with
+// ErrIncompatibleMeasures if other isn't an electric current.
+func (i Current) SubMeasurement(other Measurement) (Measurement, error) {
+	value, err := currentSet.valueIn(other, uint16(i.unit))
+	if err != nil {
+		return nil, err
+	}
+
+	return Current{value: i.value - value, unit: i.unit}, nil
+}
+
+// MulMeasurement is Mul for generic code.
+func (i Current) MulMeasurement(multiplier float64) Measurement {
+	return i.Mul(multiplier)
+}
+
+// DivMeasurement is Div for generic code.
+func (i Current) DivMeasurement(divisor float64) (Measurement, error) {
+	if divisor == 0 {
+		return nil, ErrZeroDivision
+	}
+
+	return Current{value: i.value / divisor, unit: i.unit}, nil
+}
+
+// CompareMeasurement is Compare for generic code. It fails with
+// ErrIncompatibleMeasures if other isn't an electric current.
+func (i Current) CompareMeasurement(other Measurement) (int, error) {
+	return currentSet.compare(i.value, uint16(i.unit), other)
+}
+
+func (i Current) generic() genericValue {
+	return genericValue{value: i.value, unit: uint16(i.unit), set: currentSet}
+}
+
+const errCurrentConversion incompatibleError = "not an electric current measure"
+
+// ToCurrent returns m as a Current, for example a result of ParseString. It fails
+// with ErrIncompatibleMeasures if m isn't an electric current.
+func ToCurrent(m Measurement) (Current, error) {
+	value, ok := m.(Current)
+	if !ok {
+		return Current{}, errCurrentConversion
+	}
+
+	return value, nil
+}
+
+// StringToCurrent parses an electric current from a string such as "2.5 mA". It fails with
+// ErrInvalidFormat unless the string has the form "<value> <symbol>" with a
+// finite value, and with ErrUnknownUnit if the symbol isn't an electric current unit.
+func StringToCurrent(s string) (Current, error) {
+	value, symbol, err := parseValueAndUnit(s)
+	if err != nil {
+		return Current{}, err
+	}
+
+	unit, ok := current.ParseUnit(symbol)
+	if !ok {
+		return Current{}, unknownUnitError(MeasureCurrent, symbol)
+	}
+
+	return Current{value: value, unit: unit}, nil
+}
+
+// AppendText implements encoding.TextAppender: it appends the String form,
+// such as "2.5 mA". It fails with ErrOutOfRange if the value isn't finite, and
+// with ErrUnknownUnit if the unit isn't valid, so that the text always parses
+// back.
+func (i Current) AppendText(b []byte) ([]byte, error) {
+	if !i.unit.Valid() {
+		return b, unknownUnitError(MeasureCurrent, i.unit.String())
+	}
+
+	return appendText(b, i.value, i.unit.String())
+}
+
+// MarshalText implements encoding.TextMarshaler, so electric current values encode in
+// JSON as strings such as "2.5 mA". It fails like AppendText.
+func (i Current) MarshalText() ([]byte, error) {
+	return i.AppendText(nil)
+}
+
+// UnmarshalText implements encoding.TextUnmarshaler: it parses text as
+// StringToCurrent does and stores the result in i. Unmarshalling needs a
+// pointer receiver; it changes only the value it is called on.
+func (i *Current) UnmarshalText(text []byte) error {
+	value, err := StringToCurrent(string(text))
+	if err != nil {
+		return err
+	}
+
+	*i = value
+
+	return nil
+}
+
+// NewVoltage returns a voltage of value in unit, such as
+// NewVoltage(10, voltage.BaseUnit).
+func NewVoltage(value float64, unit voltage.Unit) Voltage {
+	return Voltage{value: value, unit: unit}
+}
+
+// Value returns the numeric value, expressed in Unit.
+func (v Voltage) Value() float64 {
+	return v.value
+}
+
+// Unit returns the unit of the value.
+func (v Voltage) Unit() voltage.Unit {
+	return v.unit
+}
+
+// Symbol returns the symbol of the unit, as Unit().String() does.
+func (v Voltage) Symbol() string {
+	return v.unit.String()
+}
+
+// Type returns MeasureVoltage.
+func (Voltage) Type() MeasureType {
+	return MeasureVoltage
+}
+
+// String formats the voltage as "<value> <symbol>", such as "230 V", the form
+// StringToVoltage and ParseString accept. The value is formatted like fmt's %v,
+// in the shortest form that parses back to the same float64.
+func (v Voltage) String() string {
+	return formatString(v.value, v.unit.String())
+}
+
+// Format implements fmt.Formatter: %.2f formats the value and appends the
+// symbol. See the package documentation for every verb.
+func (v Voltage) Format(state fmt.State, verb rune) {
+	formatMeasurement(state, verb, "Voltage", v.value, v.unit.String())
+}
+
+// ConvertTo returns the voltage expressed in unit.
+func (v Voltage) ConvertTo(unit voltage.Unit) Voltage {
+	return Voltage{value: v.value * voltage.Rate(v.unit, unit), unit: unit}
+}
+
+// MustConvertTo is ConvertTo.
+//
+// Deprecated: Use ConvertTo, which no longer fails.
+//
+//go:fix inline
+func (v Voltage) MustConvertTo(unit voltage.Unit) Voltage {
+	return v.ConvertTo(unit)
+}
+
+// ConvertToBaseUnits returns the voltage expressed in volts.
+func (v Voltage) ConvertToBaseUnits() Voltage {
+	return Voltage{value: v.baseValue(), unit: voltage.BaseUnit}
+}
+
+// baseValue returns the value in volts.
+func (v Voltage) baseValue() float64 {
+	return v.value * v.unit.Factor()
+}
+
+// Add returns the sum of the voltages, expressed in the receiver's unit.
+func (v Voltage) Add(other Voltage) Voltage {
+	return Voltage{value: v.value + other.value*voltage.Rate(other.unit, v.unit), unit: v.unit}
+}
+
+// Sub returns the difference of the voltages, expressed in the receiver's unit.
+func (v Voltage) Sub(other Voltage) Voltage {
+	return Voltage{value: v.value - other.value*voltage.Rate(other.unit, v.unit), unit: v.unit}
+}
+
+// Mul returns the voltage multiplied by multiplier.
+func (v Voltage) Mul(multiplier float64) Voltage {
+	return Voltage{value: v.value * multiplier, unit: v.unit}
+}
+
+// Div returns the voltage divided by divisor. It fails with ErrZeroDivision if
+// divisor is zero.
+func (v Voltage) Div(divisor float64) (Voltage, error) {
+	if divisor == 0 {
+		return Voltage{}, ErrZeroDivision
+	}
+
+	return Voltage{value: v.value / divisor, unit: v.unit}, nil
+}
+
+// Compare compares the voltages; see Comparer.
+func (v Voltage) Compare(other Voltage) int {
+	return cmp.Compare(v.common(other))
+}
+
+// Equal reports whether the voltages are equal; see Comparer.
+func (v Voltage) Equal(other Voltage) bool {
+	return v.Compare(other) == 0
+}
+
+// EqualWithinRel reports whether the voltages are equal within the relative
+// tolerance tol; see Comparer.
+func (v Voltage) EqualWithinRel(other Voltage, tol float64) bool {
+	x, y := v.common(other)
+
+	return equalWithinRel(x, y, tol)
+}
+
+// common returns the values of the voltages in a common unit: their own if
+// they share it, otherwise the base unit. Either way the result doesn't depend
+// on the order of the operands, so comparisons are symmetric.
+func (v Voltage) common(other Voltage) (float64, float64) {
+	if v.unit == other.unit {
+		return v.value, other.value
+	}
+
+	return v.baseValue(), other.baseValue()
+}
+
+// ConvertToMeasurement is ConvertTo for generic code: it takes a unit symbol.
+// It fails with ErrUnknownUnit if symbol isn't a voltage unit.
+func (v Voltage) ConvertToMeasurement(symbol string) (Measurement, error) {
+	unit, ok := voltage.ParseUnit(symbol)
+	if !ok {
+		return nil, unknownUnitError(MeasureVoltage, symbol)
+	}
+
+	return v.ConvertTo(unit), nil
+}
+
+// AddMeasurement is Add for generic code. It fails with
+// ErrIncompatibleMeasures if other isn't a voltage.
+func (v Voltage) AddMeasurement(other Measurement) (Measurement, error) {
+	value, err := voltageSet.valueIn(other, uint16(v.unit))
+	if err != nil {
+		return nil, err
+	}
+
+	return Voltage{value: v.value + value, unit: v.unit}, nil
+}
+
+// SubMeasurement is Sub for generic code. It fails with
+// ErrIncompatibleMeasures if other isn't a voltage.
+func (v Voltage) SubMeasurement(other Measurement) (Measurement, error) {
+	value, err := voltageSet.valueIn(other, uint16(v.unit))
+	if err != nil {
+		return nil, err
+	}
+
+	return Voltage{value: v.value - value, unit: v.unit}, nil
+}
+
+// MulMeasurement is Mul for generic code.
+func (v Voltage) MulMeasurement(multiplier float64) Measurement {
+	return v.Mul(multiplier)
+}
+
+// DivMeasurement is Div for generic code.
+func (v Voltage) DivMeasurement(divisor float64) (Measurement, error) {
+	if divisor == 0 {
+		return nil, ErrZeroDivision
+	}
+
+	return Voltage{value: v.value / divisor, unit: v.unit}, nil
+}
+
+// CompareMeasurement is Compare for generic code. It fails with
+// ErrIncompatibleMeasures if other isn't a voltage.
+func (v Voltage) CompareMeasurement(other Measurement) (int, error) {
+	return voltageSet.compare(v.value, uint16(v.unit), other)
+}
+
+func (v Voltage) generic() genericValue {
+	return genericValue{value: v.value, unit: uint16(v.unit), set: voltageSet}
+}
+
+const errVoltageConversion incompatibleError = "not a voltage measure"
+
+// ToVoltage returns m as a Voltage, for example a result of ParseString. It fails
+// with ErrIncompatibleMeasures if m isn't a voltage.
+func ToVoltage(m Measurement) (Voltage, error) {
+	value, ok := m.(Voltage)
+	if !ok {
+		return Voltage{}, errVoltageConversion
+	}
+
+	return value, nil
+}
+
+// StringToVoltage parses a voltage from a string such as "230 V". It fails with
+// ErrInvalidFormat unless the string has the form "<value> <symbol>" with a
+// finite value, and with ErrUnknownUnit if the symbol isn't a voltage unit.
+func StringToVoltage(s string) (Voltage, error) {
+	value, symbol, err := parseValueAndUnit(s)
+	if err != nil {
+		return Voltage{}, err
+	}
+
+	unit, ok := voltage.ParseUnit(symbol)
+	if !ok {
+		return Voltage{}, unknownUnitError(MeasureVoltage, symbol)
+	}
+
+	return Voltage{value: value, unit: unit}, nil
+}
+
+// AppendText implements encoding.TextAppender: it appends the String form,
+// such as "230 V". It fails with ErrOutOfRange if the value isn't finite, and
+// with ErrUnknownUnit if the unit isn't valid, so that the text always parses
+// back.
+func (v Voltage) AppendText(b []byte) ([]byte, error) {
+	if !v.unit.Valid() {
+		return b, unknownUnitError(MeasureVoltage, v.unit.String())
+	}
+
+	return appendText(b, v.value, v.unit.String())
+}
+
+// MarshalText implements encoding.TextMarshaler, so voltage values encode in
+// JSON as strings such as "230 V". It fails like AppendText.
+func (v Voltage) MarshalText() ([]byte, error) {
+	return v.AppendText(nil)
+}
+
+// UnmarshalText implements encoding.TextUnmarshaler: it parses text as
+// StringToVoltage does and stores the result in v. Unmarshalling needs a
+// pointer receiver; it changes only the value it is called on.
+func (v *Voltage) UnmarshalText(text []byte) error {
+	value, err := StringToVoltage(string(text))
+	if err != nil {
+		return err
+	}
+
+	*v = value
+
+	return nil
+}
+
+// NewCharge returns an electric charge of value in unit, such as
+// NewCharge(10, charge.BaseUnit).
+func NewCharge(value float64, unit charge.Unit) Charge {
+	return Charge{value: value, unit: unit}
+}
+
+// Value returns the numeric value, expressed in Unit.
+func (q Charge) Value() float64 {
+	return q.value
+}
+
+// Unit returns the unit of the value.
+func (q Charge) Unit() charge.Unit {
+	return q.unit
+}
+
+// Symbol returns the symbol of the unit, as Unit().String() does.
+func (q Charge) Symbol() string {
+	return q.unit.String()
+}
+
+// Type returns MeasureCharge.
+func (Charge) Type() MeasureType {
+	return MeasureCharge
+}
+
+// String formats the electric charge as "<value> <symbol>", such as "3000 mAh", the form
+// StringToCharge and ParseString accept. The value is formatted like fmt's %v,
+// in the shortest form that parses back to the same float64.
+func (q Charge) String() string {
+	return formatString(q.value, q.unit.String())
+}
+
+// Format implements fmt.Formatter: %.2f formats the value and appends the
+// symbol. See the package documentation for every verb.
+func (q Charge) Format(state fmt.State, verb rune) {
+	formatMeasurement(state, verb, "Charge", q.value, q.unit.String())
+}
+
+// ConvertTo returns the electric charge expressed in unit.
+func (q Charge) ConvertTo(unit charge.Unit) Charge {
+	return Charge{value: q.value * charge.Rate(q.unit, unit), unit: unit}
+}
+
+// MustConvertTo is ConvertTo.
+//
+// Deprecated: Use ConvertTo, which no longer fails.
+//
+//go:fix inline
+func (q Charge) MustConvertTo(unit charge.Unit) Charge {
+	return q.ConvertTo(unit)
+}
+
+// ConvertToBaseUnits returns the electric charge expressed in coulombs.
+func (q Charge) ConvertToBaseUnits() Charge {
+	return Charge{value: q.baseValue(), unit: charge.BaseUnit}
+}
+
+// baseValue returns the value in coulombs.
+func (q Charge) baseValue() float64 {
+	return q.value * q.unit.Factor()
+}
+
+// Add returns the sum of the electric charges, expressed in the receiver's unit.
+func (q Charge) Add(other Charge) Charge {
+	return Charge{value: q.value + other.value*charge.Rate(other.unit, q.unit), unit: q.unit}
+}
+
+// Sub returns the difference of the electric charges, expressed in the receiver's unit.
+func (q Charge) Sub(other Charge) Charge {
+	return Charge{value: q.value - other.value*charge.Rate(other.unit, q.unit), unit: q.unit}
+}
+
+// Mul returns the electric charge multiplied by multiplier.
+func (q Charge) Mul(multiplier float64) Charge {
+	return Charge{value: q.value * multiplier, unit: q.unit}
+}
+
+// Div returns the electric charge divided by divisor. It fails with ErrZeroDivision if
+// divisor is zero.
+func (q Charge) Div(divisor float64) (Charge, error) {
+	if divisor == 0 {
+		return Charge{}, ErrZeroDivision
+	}
+
+	return Charge{value: q.value / divisor, unit: q.unit}, nil
+}
+
+// Compare compares the electric charges; see Comparer.
+func (q Charge) Compare(other Charge) int {
+	return cmp.Compare(q.common(other))
+}
+
+// Equal reports whether the electric charges are equal; see Comparer.
+func (q Charge) Equal(other Charge) bool {
+	return q.Compare(other) == 0
+}
+
+// EqualWithinRel reports whether the electric charges are equal within the relative
+// tolerance tol; see Comparer.
+func (q Charge) EqualWithinRel(other Charge, tol float64) bool {
+	x, y := q.common(other)
+
+	return equalWithinRel(x, y, tol)
+}
+
+// common returns the values of the electric charges in a common unit: their own if
+// they share it, otherwise the base unit. Either way the result doesn't depend
+// on the order of the operands, so comparisons are symmetric.
+func (q Charge) common(other Charge) (float64, float64) {
+	if q.unit == other.unit {
+		return q.value, other.value
+	}
+
+	return q.baseValue(), other.baseValue()
+}
+
+// ConvertToMeasurement is ConvertTo for generic code: it takes a unit symbol.
+// It fails with ErrUnknownUnit if symbol isn't an electric charge unit.
+func (q Charge) ConvertToMeasurement(symbol string) (Measurement, error) {
+	unit, ok := charge.ParseUnit(symbol)
+	if !ok {
+		return nil, unknownUnitError(MeasureCharge, symbol)
+	}
+
+	return q.ConvertTo(unit), nil
+}
+
+// AddMeasurement is Add for generic code. It fails with
+// ErrIncompatibleMeasures if other isn't an electric charge.
+func (q Charge) AddMeasurement(other Measurement) (Measurement, error) {
+	value, err := chargeSet.valueIn(other, uint16(q.unit))
+	if err != nil {
+		return nil, err
+	}
+
+	return Charge{value: q.value + value, unit: q.unit}, nil
+}
+
+// SubMeasurement is Sub for generic code. It fails with
+// ErrIncompatibleMeasures if other isn't an electric charge.
+func (q Charge) SubMeasurement(other Measurement) (Measurement, error) {
+	value, err := chargeSet.valueIn(other, uint16(q.unit))
+	if err != nil {
+		return nil, err
+	}
+
+	return Charge{value: q.value - value, unit: q.unit}, nil
+}
+
+// MulMeasurement is Mul for generic code.
+func (q Charge) MulMeasurement(multiplier float64) Measurement {
+	return q.Mul(multiplier)
+}
+
+// DivMeasurement is Div for generic code.
+func (q Charge) DivMeasurement(divisor float64) (Measurement, error) {
+	if divisor == 0 {
+		return nil, ErrZeroDivision
+	}
+
+	return Charge{value: q.value / divisor, unit: q.unit}, nil
+}
+
+// CompareMeasurement is Compare for generic code. It fails with
+// ErrIncompatibleMeasures if other isn't an electric charge.
+func (q Charge) CompareMeasurement(other Measurement) (int, error) {
+	return chargeSet.compare(q.value, uint16(q.unit), other)
+}
+
+func (q Charge) generic() genericValue {
+	return genericValue{value: q.value, unit: uint16(q.unit), set: chargeSet}
+}
+
+const errChargeConversion incompatibleError = "not an electric charge measure"
+
+// ToCharge returns m as a Charge, for example a result of ParseString. It fails
+// with ErrIncompatibleMeasures if m isn't an electric charge.
+func ToCharge(m Measurement) (Charge, error) {
+	value, ok := m.(Charge)
+	if !ok {
+		return Charge{}, errChargeConversion
+	}
+
+	return value, nil
+}
+
+// StringToCharge parses an electric charge from a string such as "3000 mAh". It fails with
+// ErrInvalidFormat unless the string has the form "<value> <symbol>" with a
+// finite value, and with ErrUnknownUnit if the symbol isn't an electric charge unit.
+func StringToCharge(s string) (Charge, error) {
+	value, symbol, err := parseValueAndUnit(s)
+	if err != nil {
+		return Charge{}, err
+	}
+
+	unit, ok := charge.ParseUnit(symbol)
+	if !ok {
+		return Charge{}, unknownUnitError(MeasureCharge, symbol)
+	}
+
+	return Charge{value: value, unit: unit}, nil
+}
+
+// AppendText implements encoding.TextAppender: it appends the String form,
+// such as "3000 mAh". It fails with ErrOutOfRange if the value isn't finite, and
+// with ErrUnknownUnit if the unit isn't valid, so that the text always parses
+// back.
+func (q Charge) AppendText(b []byte) ([]byte, error) {
+	if !q.unit.Valid() {
+		return b, unknownUnitError(MeasureCharge, q.unit.String())
+	}
+
+	return appendText(b, q.value, q.unit.String())
+}
+
+// MarshalText implements encoding.TextMarshaler, so electric charge values encode in
+// JSON as strings such as "3000 mAh". It fails like AppendText.
+func (q Charge) MarshalText() ([]byte, error) {
+	return q.AppendText(nil)
+}
+
+// UnmarshalText implements encoding.TextUnmarshaler: it parses text as
+// StringToCharge does and stores the result in q. Unmarshalling needs a
+// pointer receiver; it changes only the value it is called on.
+func (q *Charge) UnmarshalText(text []byte) error {
+	value, err := StringToCharge(string(text))
+	if err != nil {
+		return err
+	}
+
+	*q = value
+
+	return nil
+}
+
+// NewResistance returns a resistance of value in unit, such as
+// NewResistance(10, resistance.BaseUnit).
+func NewResistance(value float64, unit resistance.Unit) Resistance {
+	return Resistance{value: value, unit: unit}
+}
+
+// Value returns the numeric value, expressed in Unit.
+func (r Resistance) Value() float64 {
+	return r.value
+}
+
+// Unit returns the unit of the value.
+func (r Resistance) Unit() resistance.Unit {
+	return r.unit
+}
+
+// Symbol returns the symbol of the unit, as Unit().String() does.
+func (r Resistance) Symbol() string {
+	return r.unit.String()
+}
+
+// Type returns MeasureResistance.
+func (Resistance) Type() MeasureType {
+	return MeasureResistance
+}
+
+// String formats the resistance as "<value> <symbol>", such as "4.7 kΩ", the form
+// StringToResistance and ParseString accept. The value is formatted like fmt's %v,
+// in the shortest form that parses back to the same float64.
+func (r Resistance) String() string {
+	return formatString(r.value, r.unit.String())
+}
+
+// Format implements fmt.Formatter: %.2f formats the value and appends the
+// symbol. See the package documentation for every verb.
+func (r Resistance) Format(state fmt.State, verb rune) {
+	formatMeasurement(state, verb, "Resistance", r.value, r.unit.String())
+}
+
+// ConvertTo returns the resistance expressed in unit.
+func (r Resistance) ConvertTo(unit resistance.Unit) Resistance {
+	return Resistance{value: r.value * resistance.Rate(r.unit, unit), unit: unit}
+}
+
+// MustConvertTo is ConvertTo.
+//
+// Deprecated: Use ConvertTo, which no longer fails.
+//
+//go:fix inline
+func (r Resistance) MustConvertTo(unit resistance.Unit) Resistance {
+	return r.ConvertTo(unit)
+}
+
+// ConvertToBaseUnits returns the resistance expressed in ohms.
+func (r Resistance) ConvertToBaseUnits() Resistance {
+	return Resistance{value: r.baseValue(), unit: resistance.BaseUnit}
+}
+
+// baseValue returns the value in ohms.
+func (r Resistance) baseValue() float64 {
+	return r.value * r.unit.Factor()
+}
+
+// Add returns the sum of the resistances, expressed in the receiver's unit.
+func (r Resistance) Add(other Resistance) Resistance {
+	return Resistance{value: r.value + other.value*resistance.Rate(other.unit, r.unit), unit: r.unit}
+}
+
+// Sub returns the difference of the resistances, expressed in the receiver's unit.
+func (r Resistance) Sub(other Resistance) Resistance {
+	return Resistance{value: r.value - other.value*resistance.Rate(other.unit, r.unit), unit: r.unit}
+}
+
+// Mul returns the resistance multiplied by multiplier.
+func (r Resistance) Mul(multiplier float64) Resistance {
+	return Resistance{value: r.value * multiplier, unit: r.unit}
+}
+
+// Div returns the resistance divided by divisor. It fails with ErrZeroDivision if
+// divisor is zero.
+func (r Resistance) Div(divisor float64) (Resistance, error) {
+	if divisor == 0 {
+		return Resistance{}, ErrZeroDivision
+	}
+
+	return Resistance{value: r.value / divisor, unit: r.unit}, nil
+}
+
+// Compare compares the resistances; see Comparer.
+func (r Resistance) Compare(other Resistance) int {
+	return cmp.Compare(r.common(other))
+}
+
+// Equal reports whether the resistances are equal; see Comparer.
+func (r Resistance) Equal(other Resistance) bool {
+	return r.Compare(other) == 0
+}
+
+// EqualWithinRel reports whether the resistances are equal within the relative
+// tolerance tol; see Comparer.
+func (r Resistance) EqualWithinRel(other Resistance, tol float64) bool {
+	x, y := r.common(other)
+
+	return equalWithinRel(x, y, tol)
+}
+
+// common returns the values of the resistances in a common unit: their own if
+// they share it, otherwise the base unit. Either way the result doesn't depend
+// on the order of the operands, so comparisons are symmetric.
+func (r Resistance) common(other Resistance) (float64, float64) {
+	if r.unit == other.unit {
+		return r.value, other.value
+	}
+
+	return r.baseValue(), other.baseValue()
+}
+
+// ConvertToMeasurement is ConvertTo for generic code: it takes a unit symbol.
+// It fails with ErrUnknownUnit if symbol isn't a resistance unit.
+func (r Resistance) ConvertToMeasurement(symbol string) (Measurement, error) {
+	unit, ok := resistance.ParseUnit(symbol)
+	if !ok {
+		return nil, unknownUnitError(MeasureResistance, symbol)
+	}
+
+	return r.ConvertTo(unit), nil
+}
+
+// AddMeasurement is Add for generic code. It fails with
+// ErrIncompatibleMeasures if other isn't a resistance.
+func (r Resistance) AddMeasurement(other Measurement) (Measurement, error) {
+	value, err := resistanceSet.valueIn(other, uint16(r.unit))
+	if err != nil {
+		return nil, err
+	}
+
+	return Resistance{value: r.value + value, unit: r.unit}, nil
+}
+
+// SubMeasurement is Sub for generic code. It fails with
+// ErrIncompatibleMeasures if other isn't a resistance.
+func (r Resistance) SubMeasurement(other Measurement) (Measurement, error) {
+	value, err := resistanceSet.valueIn(other, uint16(r.unit))
+	if err != nil {
+		return nil, err
+	}
+
+	return Resistance{value: r.value - value, unit: r.unit}, nil
+}
+
+// MulMeasurement is Mul for generic code.
+func (r Resistance) MulMeasurement(multiplier float64) Measurement {
+	return r.Mul(multiplier)
+}
+
+// DivMeasurement is Div for generic code.
+func (r Resistance) DivMeasurement(divisor float64) (Measurement, error) {
+	if divisor == 0 {
+		return nil, ErrZeroDivision
+	}
+
+	return Resistance{value: r.value / divisor, unit: r.unit}, nil
+}
+
+// CompareMeasurement is Compare for generic code. It fails with
+// ErrIncompatibleMeasures if other isn't a resistance.
+func (r Resistance) CompareMeasurement(other Measurement) (int, error) {
+	return resistanceSet.compare(r.value, uint16(r.unit), other)
+}
+
+func (r Resistance) generic() genericValue {
+	return genericValue{value: r.value, unit: uint16(r.unit), set: resistanceSet}
+}
+
+const errResistanceConversion incompatibleError = "not a resistance measure"
+
+// ToResistance returns m as a Resistance, for example a result of ParseString. It fails
+// with ErrIncompatibleMeasures if m isn't a resistance.
+func ToResistance(m Measurement) (Resistance, error) {
+	value, ok := m.(Resistance)
+	if !ok {
+		return Resistance{}, errResistanceConversion
+	}
+
+	return value, nil
+}
+
+// StringToResistance parses a resistance from a string such as "4.7 kΩ". It fails with
+// ErrInvalidFormat unless the string has the form "<value> <symbol>" with a
+// finite value, and with ErrUnknownUnit if the symbol isn't a resistance unit.
+func StringToResistance(s string) (Resistance, error) {
+	value, symbol, err := parseValueAndUnit(s)
+	if err != nil {
+		return Resistance{}, err
+	}
+
+	unit, ok := resistance.ParseUnit(symbol)
+	if !ok {
+		return Resistance{}, unknownUnitError(MeasureResistance, symbol)
+	}
+
+	return Resistance{value: value, unit: unit}, nil
+}
+
+// AppendText implements encoding.TextAppender: it appends the String form,
+// such as "4.7 kΩ". It fails with ErrOutOfRange if the value isn't finite, and
+// with ErrUnknownUnit if the unit isn't valid, so that the text always parses
+// back.
+func (r Resistance) AppendText(b []byte) ([]byte, error) {
+	if !r.unit.Valid() {
+		return b, unknownUnitError(MeasureResistance, r.unit.String())
+	}
+
+	return appendText(b, r.value, r.unit.String())
+}
+
+// MarshalText implements encoding.TextMarshaler, so resistance values encode in
+// JSON as strings such as "4.7 kΩ". It fails like AppendText.
+func (r Resistance) MarshalText() ([]byte, error) {
+	return r.AppendText(nil)
+}
+
+// UnmarshalText implements encoding.TextUnmarshaler: it parses text as
+// StringToResistance does and stores the result in r. Unmarshalling needs a
+// pointer receiver; it changes only the value it is called on.
+func (r *Resistance) UnmarshalText(text []byte) error {
+	value, err := StringToResistance(string(text))
+	if err != nil {
+		return err
+	}
+
+	*r = value
+
+	return nil
+}
+
+// NewAngularVelocity returns an angular velocity of value in unit, such as
+// NewAngularVelocity(10, angularvelocity.BaseUnit).
+func NewAngularVelocity(value float64, unit angularvelocity.Unit) AngularVelocity {
+	return AngularVelocity{value: value, unit: unit}
+}
+
+// Value returns the numeric value, expressed in Unit.
+func (w AngularVelocity) Value() float64 {
+	return w.value
+}
+
+// Unit returns the unit of the value.
+func (w AngularVelocity) Unit() angularvelocity.Unit {
+	return w.unit
+}
+
+// Symbol returns the symbol of the unit, as Unit().String() does.
+func (w AngularVelocity) Symbol() string {
+	return w.unit.String()
+}
+
+// Type returns MeasureAngularVelocity.
+func (AngularVelocity) Type() MeasureType {
+	return MeasureAngularVelocity
+}
+
+// String formats the angular velocity as "<value> <symbol>", such as "33.3 rev/min", the form
+// StringToAngularVelocity and ParseString accept. The value is formatted like fmt's %v,
+// in the shortest form that parses back to the same float64.
+func (w AngularVelocity) String() string {
+	return formatString(w.value, w.unit.String())
+}
+
+// Format implements fmt.Formatter: %.2f formats the value and appends the
+// symbol. See the package documentation for every verb.
+func (w AngularVelocity) Format(state fmt.State, verb rune) {
+	formatMeasurement(state, verb, "AngularVelocity", w.value, w.unit.String())
+}
+
+// ConvertTo returns the angular velocity expressed in unit.
+func (w AngularVelocity) ConvertTo(unit angularvelocity.Unit) AngularVelocity {
+	return AngularVelocity{value: w.value * angularvelocity.Rate(w.unit, unit), unit: unit}
+}
+
+// MustConvertTo is ConvertTo.
+//
+// Deprecated: Use ConvertTo, which no longer fails.
+//
+//go:fix inline
+func (w AngularVelocity) MustConvertTo(unit angularvelocity.Unit) AngularVelocity {
+	return w.ConvertTo(unit)
+}
+
+// ConvertToBaseUnits returns the angular velocity expressed in radians per second.
+func (w AngularVelocity) ConvertToBaseUnits() AngularVelocity {
+	return AngularVelocity{value: w.baseValue(), unit: angularvelocity.BaseUnit}
+}
+
+// baseValue returns the value in radians per second.
+func (w AngularVelocity) baseValue() float64 {
+	return w.value * w.unit.Factor()
+}
+
+// Add returns the sum of the angular velocities, expressed in the receiver's unit.
+func (w AngularVelocity) Add(other AngularVelocity) AngularVelocity {
+	return AngularVelocity{value: w.value + other.value*angularvelocity.Rate(other.unit, w.unit), unit: w.unit}
+}
+
+// Sub returns the difference of the angular velocities, expressed in the receiver's unit.
+func (w AngularVelocity) Sub(other AngularVelocity) AngularVelocity {
+	return AngularVelocity{value: w.value - other.value*angularvelocity.Rate(other.unit, w.unit), unit: w.unit}
+}
+
+// Mul returns the angular velocity multiplied by multiplier.
+func (w AngularVelocity) Mul(multiplier float64) AngularVelocity {
+	return AngularVelocity{value: w.value * multiplier, unit: w.unit}
+}
+
+// Div returns the angular velocity divided by divisor. It fails with ErrZeroDivision if
+// divisor is zero.
+func (w AngularVelocity) Div(divisor float64) (AngularVelocity, error) {
+	if divisor == 0 {
+		return AngularVelocity{}, ErrZeroDivision
+	}
+
+	return AngularVelocity{value: w.value / divisor, unit: w.unit}, nil
+}
+
+// Compare compares the angular velocities; see Comparer.
+func (w AngularVelocity) Compare(other AngularVelocity) int {
+	return cmp.Compare(w.common(other))
+}
+
+// Equal reports whether the angular velocities are equal; see Comparer.
+func (w AngularVelocity) Equal(other AngularVelocity) bool {
+	return w.Compare(other) == 0
+}
+
+// EqualWithinRel reports whether the angular velocities are equal within the relative
+// tolerance tol; see Comparer.
+func (w AngularVelocity) EqualWithinRel(other AngularVelocity, tol float64) bool {
+	x, y := w.common(other)
+
+	return equalWithinRel(x, y, tol)
+}
+
+// common returns the values of the angular velocities in a common unit: their own if
+// they share it, otherwise the base unit. Either way the result doesn't depend
+// on the order of the operands, so comparisons are symmetric.
+func (w AngularVelocity) common(other AngularVelocity) (float64, float64) {
+	if w.unit == other.unit {
+		return w.value, other.value
+	}
+
+	return w.baseValue(), other.baseValue()
+}
+
+// ConvertToMeasurement is ConvertTo for generic code: it takes a unit symbol.
+// It fails with ErrUnknownUnit if symbol isn't an angular velocity unit.
+func (w AngularVelocity) ConvertToMeasurement(symbol string) (Measurement, error) {
+	unit, ok := angularvelocity.ParseUnit(symbol)
+	if !ok {
+		return nil, unknownUnitError(MeasureAngularVelocity, symbol)
+	}
+
+	return w.ConvertTo(unit), nil
+}
+
+// AddMeasurement is Add for generic code. It fails with
+// ErrIncompatibleMeasures if other isn't an angular velocity.
+func (w AngularVelocity) AddMeasurement(other Measurement) (Measurement, error) {
+	value, err := angularvelocitySet.valueIn(other, uint16(w.unit))
+	if err != nil {
+		return nil, err
+	}
+
+	return AngularVelocity{value: w.value + value, unit: w.unit}, nil
+}
+
+// SubMeasurement is Sub for generic code. It fails with
+// ErrIncompatibleMeasures if other isn't an angular velocity.
+func (w AngularVelocity) SubMeasurement(other Measurement) (Measurement, error) {
+	value, err := angularvelocitySet.valueIn(other, uint16(w.unit))
+	if err != nil {
+		return nil, err
+	}
+
+	return AngularVelocity{value: w.value - value, unit: w.unit}, nil
+}
+
+// MulMeasurement is Mul for generic code.
+func (w AngularVelocity) MulMeasurement(multiplier float64) Measurement {
+	return w.Mul(multiplier)
+}
+
+// DivMeasurement is Div for generic code.
+func (w AngularVelocity) DivMeasurement(divisor float64) (Measurement, error) {
+	if divisor == 0 {
+		return nil, ErrZeroDivision
+	}
+
+	return AngularVelocity{value: w.value / divisor, unit: w.unit}, nil
+}
+
+// CompareMeasurement is Compare for generic code. It fails with
+// ErrIncompatibleMeasures if other isn't an angular velocity.
+func (w AngularVelocity) CompareMeasurement(other Measurement) (int, error) {
+	return angularvelocitySet.compare(w.value, uint16(w.unit), other)
+}
+
+func (w AngularVelocity) generic() genericValue {
+	return genericValue{value: w.value, unit: uint16(w.unit), set: angularvelocitySet}
+}
+
+const errAngularVelocityConversion incompatibleError = "not an angular velocity measure"
+
+// ToAngularVelocity returns m as a AngularVelocity, for example a result of ParseString. It fails
+// with ErrIncompatibleMeasures if m isn't an angular velocity.
+func ToAngularVelocity(m Measurement) (AngularVelocity, error) {
+	value, ok := m.(AngularVelocity)
+	if !ok {
+		return AngularVelocity{}, errAngularVelocityConversion
+	}
+
+	return value, nil
+}
+
+// StringToAngularVelocity parses an angular velocity from a string such as "33.3 rev/min". It fails with
+// ErrInvalidFormat unless the string has the form "<value> <symbol>" with a
+// finite value, and with ErrUnknownUnit if the symbol isn't an angular velocity unit.
+func StringToAngularVelocity(s string) (AngularVelocity, error) {
+	value, symbol, err := parseValueAndUnit(s)
+	if err != nil {
+		return AngularVelocity{}, err
+	}
+
+	unit, ok := angularvelocity.ParseUnit(symbol)
+	if !ok {
+		return AngularVelocity{}, unknownUnitError(MeasureAngularVelocity, symbol)
+	}
+
+	return AngularVelocity{value: value, unit: unit}, nil
+}
+
+// AppendText implements encoding.TextAppender: it appends the String form,
+// such as "33.3 rev/min". It fails with ErrOutOfRange if the value isn't finite, and
+// with ErrUnknownUnit if the unit isn't valid, so that the text always parses
+// back.
+func (w AngularVelocity) AppendText(b []byte) ([]byte, error) {
+	if !w.unit.Valid() {
+		return b, unknownUnitError(MeasureAngularVelocity, w.unit.String())
+	}
+
+	return appendText(b, w.value, w.unit.String())
+}
+
+// MarshalText implements encoding.TextMarshaler, so angular velocity values encode in
+// JSON as strings such as "33.3 rev/min". It fails like AppendText.
+func (w AngularVelocity) MarshalText() ([]byte, error) {
+	return w.AppendText(nil)
+}
+
+// UnmarshalText implements encoding.TextUnmarshaler: it parses text as
+// StringToAngularVelocity does and stores the result in w. Unmarshalling needs a
+// pointer receiver; it changes only the value it is called on.
+func (w *AngularVelocity) UnmarshalText(text []byte) error {
+	value, err := StringToAngularVelocity(string(text))
+	if err != nil {
+		return err
+	}
+
+	*w = value
 
 	return nil
 }

@@ -1,8 +1,9 @@
 // Package units provides physical measurements (distance, area, volume, mass,
 // time, velocity, acceleration, force, energy, power, pressure, frequency,
-// angle, data size, density and data rate) with unit conversion, arithmetic,
-// comparison, parsing and text encoding, plus user-defined measures such as
-// currencies.
+// angle, angular velocity, data size, density, data rate, temperature,
+// electric current, voltage, electric charge and resistance) with unit
+// conversion, arithmetic, comparison, parsing and text encoding, plus
+// user-defined measures such as currencies.
 //
 // # Values and units
 //

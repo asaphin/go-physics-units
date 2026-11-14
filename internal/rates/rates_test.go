@@ -79,10 +79,14 @@ func TestMatrix(t *testing.T) {
 
 func TestCanonicalUnit(t *testing.T) {
 	cases := map[string]string{
-		"\u00b5m": "\u03bcm",
-		"\u03bcm": "\u03bcm",
-		"km":      "km",
-		"":        "",
+		"\u00b5m":      "\u03bcm",
+		"\u03bcm":      "\u03bcm",
+		"km":           "km",
+		"":             "",
+		"k\u2126":      "k\u03a9", // OHM SIGN
+		"\u212b":       "\u00c5",  // ANGSTROM SIGN
+		"\u212a":       "K",       // KELVIN SIGN
+		"\u00b5\u2126": "\u03bc\u03a9",
 	}
 
 	for in, want := range cases {
@@ -92,6 +96,6 @@ func TestCanonicalUnit(t *testing.T) {
 	}
 
 	if n := testing.AllocsPerRun(100, func() { _ = rates.CanonicalUnit("km") }); n != 0 {
-		t.Errorf("CanonicalUnit allocates %v times without a micro sign", n)
+		t.Errorf("CanonicalUnit allocates %v times without a look-alike character", n)
 	}
 }

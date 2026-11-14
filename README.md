@@ -3,7 +3,7 @@
 [![Go Reference](https://pkg.go.dev/badge/github.com/asaphin/go-physics-units.svg)](https://pkg.go.dev/github.com/asaphin/go-physics-units)
 [![CI](https://github.com/asaphin/go-physics-units/actions/workflows/ci.yml/badge.svg)](https://github.com/asaphin/go-physics-units/actions/workflows/ci.yml)
 
-go-physics-units is a Go library for working with physical measurements: distance, area, volume, mass, time, velocity, acceleration, force, energy, power, pressure, frequency, angle, data size, density, data rate and temperature.
+go-physics-units is a Go library for working with physical measurements: distance, area, volume, mass, time, velocity, acceleration, force, energy, power, pressure, frequency, angle, angular velocity, data size, density, data rate, temperature, and the electric current, voltage, charge and resistance.
 You can create, parse, convert, compare, combine and encode measurements, and define measures of your own, such as currencies.
 It has no dependencies.
 
@@ -97,37 +97,53 @@ fmt.Println(ds) // [12 in 1 ft 1 mi]
 
 Operations that combine measures return their result in SI base units:
 
-| Operation                     | Result                                             |
-|-------------------------------|----------------------------------------------------|
-| `Distance.DivideByTime`       | `Velocity` in m/s                                  |
-| `Distance.Square`             | `Area` in m²                                       |
-| `Area.DivideByDistance`       | `Distance` in m                                    |
-| `Velocity.MultiplyByTime`     | `Distance` in m                                    |
-| `Velocity.DivideByTime`       | `Acceleration` in m/s²                             |
-| `Distance.Cube`               | `Volume` in m³                                     |
-| `Area.MultiplyByDistance`     | `Volume` in m³                                     |
-| `Volume.DivideByArea`         | `Distance` in m                                    |
-| `Volume.DivideByDistance`     | `Area` in m²                                       |
-| `Acceleration.MultiplyByTime` | `Velocity` in m/s                                  |
-| `Mass.MultiplyByAcceleration` | `Force` in N                                       |
-| `Acceleration.MultiplyByMass` | `Force` in N                                       |
-| `Force.DivideByMass`          | `Acceleration` in m/s²                             |
-| `Force.DivideByAcceleration`  | `Mass` in kg                                       |
-| `Force.DivideByArea`          | `Pressure` in Pa                                   |
-| `Force.MultiplyByDistance`    | `Energy` in J                                      |
-| `Energy.DivideByTime`         | `Power` in W                                       |
-| `Energy.DivideByDistance`     | `Force` in N                                       |
-| `Power.MultiplyByTime`        | `Energy` in J                                      |
-| `Pressure.MultiplyByArea`     | `Force` in N                                       |
-| `Frequency.Period`            | `Time` in s                                        |
-| `Mass.DivideByVolume`         | `Density` in kg/m³                                 |
-| `Mass.DivideByDensity`        | `Volume` in m³                                     |
-| `Density.MultiplyByVolume`    | `Mass` in kg                                       |
-| `DataSize.DivideByTime`       | `DataRate` in B/s                                  |
-| `DataSize.DivideByDataRate`   | `Time` in s                                        |
-| `DataRate.MultiplyByTime`     | `DataSize` in B                                    |
-| `ParseDuration`               | `Time` in s, from a `time.Duration`                |
-| `Time.ToDuration`             | `time.Duration`, rounded to the nearest nanosecond |
+| Operation                        | Result                                             |
+|----------------------------------|----------------------------------------------------|
+| `Distance.DivideByTime`          | `Velocity` in m/s                                  |
+| `Distance.Square`                | `Area` in m²                                       |
+| `Area.DivideByDistance`          | `Distance` in m                                    |
+| `Velocity.MultiplyByTime`        | `Distance` in m                                    |
+| `Velocity.DivideByTime`          | `Acceleration` in m/s²                             |
+| `Distance.Cube`                  | `Volume` in m³                                     |
+| `Area.MultiplyByDistance`        | `Volume` in m³                                     |
+| `Volume.DivideByArea`            | `Distance` in m                                    |
+| `Volume.DivideByDistance`        | `Area` in m²                                       |
+| `Acceleration.MultiplyByTime`    | `Velocity` in m/s                                  |
+| `Mass.MultiplyByAcceleration`    | `Force` in N                                       |
+| `Acceleration.MultiplyByMass`    | `Force` in N                                       |
+| `Force.DivideByMass`             | `Acceleration` in m/s²                             |
+| `Force.DivideByAcceleration`     | `Mass` in kg                                       |
+| `Force.DivideByArea`             | `Pressure` in Pa                                   |
+| `Force.MultiplyByDistance`       | `Energy` in J                                      |
+| `Energy.DivideByTime`            | `Power` in W                                       |
+| `Energy.DivideByDistance`        | `Force` in N                                       |
+| `Power.MultiplyByTime`           | `Energy` in J                                      |
+| `Pressure.MultiplyByArea`        | `Force` in N                                       |
+| `Frequency.Period`               | `Time` in s                                        |
+| `Mass.DivideByVolume`            | `Density` in kg/m³                                 |
+| `Mass.DivideByDensity`           | `Volume` in m³                                     |
+| `Density.MultiplyByVolume`       | `Mass` in kg                                       |
+| `DataSize.DivideByTime`          | `DataRate` in B/s                                  |
+| `DataSize.DivideByDataRate`      | `Time` in s                                        |
+| `DataRate.MultiplyByTime`        | `DataSize` in B                                    |
+| `Voltage.MultiplyByCurrent`      | `Power` in W                                       |
+| `Current.MultiplyByVoltage`      | `Power` in W                                       |
+| `Power.DivideByVoltage`          | `Current` in A                                     |
+| `Power.DivideByCurrent`          | `Voltage` in V                                     |
+| `Voltage.DivideByCurrent`        | `Resistance` in Ω (Ohm's law)                      |
+| `Voltage.DivideByResistance`     | `Current` in A                                     |
+| `Current.MultiplyByResistance`   | `Voltage` in V                                     |
+| `Resistance.MultiplyByCurrent`   | `Voltage` in V                                     |
+| `Current.MultiplyByTime`         | `Charge` in C                                      |
+| `Charge.DivideByTime`            | `Current` in A                                     |
+| `Charge.DivideByCurrent`         | `Time` in s, such as how long a battery lasts      |
+| `Charge.MultiplyByVoltage`       | `Energy` in J                                      |
+| `Voltage.MultiplyByCharge`       | `Energy` in J                                      |
+| `Energy.DivideByCharge`          | `Voltage` in V                                     |
+| `Angle.DivideByTime`             | `AngularVelocity` in rad/s                         |
+| `AngularVelocity.MultiplyByTime` | `Angle` in rad                                     |
+| `ParseDuration`                  | `Time` in s, from a `time.Duration`                |
+| `Time.ToDuration`                | `time.Duration`, rounded to the nearest nanosecond |
 
 The divisions fail with `ErrZeroDivision` when the divisor is zero, as `Div(0)` does.
 
@@ -216,16 +232,16 @@ Temperatures don't implement `Measurement`; `ParseString` rejects their units an
 
 Every error matches exactly one sentinel, which you can test for with `errors.Is`:
 
-| Sentinel                  | Returned when                                                                             |
-|---------------------------|-------------------------------------------------------------------------------------------|
-| `ErrUnknownUnit`          | a unit symbol doesn't belong to the measure (a `*UnitError`)                              |
-| `ErrIncompatibleMeasures` | the measurements belong to different measures, or one is nil                              |
-| `ErrZeroDivision`         | the divisor is zero                                                                       |
-| `ErrInvalidFormat`        | the string isn't `"<value> <unit>"` with a finite value                                   |
-| `ErrInvalidFactors`       | custom conversion factors are invalid or lack the base unit                               |
-| `ErrInvalidMeasure`       | `NewUnitSet` gets an empty or predefined measure name, or a measure has no units          |
-| `ErrAmbiguousUnit`        | a case-insensitive `Parser` gets a unit that matches several symbols, such as `KN`        |
-| `ErrInvalidOption`        | `NewParser` gets an invalid alias, or two measures that share a symbol                    |
+| Sentinel                  | Returned when                                                                              |
+|---------------------------|--------------------------------------------------------------------------------------------|
+| `ErrUnknownUnit`          | a unit symbol doesn't belong to the measure (a `*UnitError`)                               |
+| `ErrIncompatibleMeasures` | the measurements belong to different measures, or one is nil                               |
+| `ErrZeroDivision`         | the divisor is zero                                                                        |
+| `ErrInvalidFormat`        | the string isn't `"<value> <unit>"` with a finite value                                    |
+| `ErrInvalidFactors`       | custom conversion factors are invalid or lack the base unit                                |
+| `ErrInvalidMeasure`       | `NewUnitSet` gets an empty or predefined measure name, or a measure has no units           |
+| `ErrAmbiguousUnit`        | a case-insensitive `Parser` gets a unit that matches several symbols, such as `KN`         |
+| `ErrInvalidOption`        | `NewParser` gets an invalid alias, or two measures that share a symbol                     |
 | `ErrOutOfRange`           | a temperature below absolute zero, `Time.ToDuration` beyond ±292 years, or marshalling NaN |
 
 ```go
@@ -322,25 +338,30 @@ fmt.Println(err) // unknown distance unit fur
 
 ## Supported units
 
-| Measure      | Package        | Base unit | Symbols                                                                   |
-|--------------|----------------|-----------|---------------------------------------------------------------------------|
-| Distance     | `distance`     | m         | lp, fm, pm, Å, nm, μm, mm, cm, dm, m, km, in, ft, yd, mi, nmi, AU, ly, pc |
-| Area         | `area`         | m²        | mm², cm², in², ft², m², km², mi²                                          |
-| Mass         | `mass`         | kg        | Da, μg, mg, g, kg, oz, lb, q, t, M⊕, M☉                                   |
-| Time         | `time`         | s         | tp, ns, μs, ms, s, min, h, d, wk, yr                                      |
-| Velocity     | `velocity`     | m/s       | km/h, ft/s, mph, kn, m/s, c                                               |
-| Volume       | `volume`       | m³        | mm³, μL, cm³, mL, in³, L, pt, qt, gal, ft³, bbl, yd³, m³, km³             |
-| Acceleration | `acceleration` | m/s²      | cm/s², ft/s², m/s², gₙ                                                    |
-| Force        | `force`        | N         | dyn, mN, N, lbf, kgf, kN, MN                                              |
-| Energy       | `energy`       | J         | eV, erg, J, ft·lbf, cal, kJ, Btu, kcal, Wh, MJ, kWh, GJ, MWh              |
-| Power        | `power`        | W         | mW, W, Btu/h, PS, hp, kW, MW, GW                                          |
-| Pressure     | `pressure`     | Pa        | Pa, hPa, mbar, kPa, Torr, mmHg, inHg, psi, bar, atm, MPa, GPa             |
-| Frequency    | `frequency`    | Hz        | rpm, Hz, kHz, MHz, GHz, THz                                               |
-| Angle        | `angle`        | rad       | arcsec, arcmin, mrad, gon, °, rad, rev                                    |
-| Data size    | `datasize`     | B         | bit, B, kbit, kB, KiB, Mbit, MB, MiB, Gbit, GB, GiB, TB, TiB, PB, PiB     |
-| Density      | `density`      | kg/m³     | kg/m³, g/L, lb/ft³, lb/gal, kg/L, g/mL, g/cm³                             |
-| Data rate    | `datarate`     | B/s       | bit/s, B/s, kbit/s, kB/s, KiB/s, Mbit/s, MB/s, MiB/s, Gbit/s, GB/s, GiB/s |
-| Temperature  | `temperature`  | K         | K, °C, °F, °R                                                             |
+| Measure          | Package           | Base unit | Symbols                                                                   |
+|------------------|-------------------|-----------|---------------------------------------------------------------------------|
+| Distance         | `distance`        | m         | lp, fm, pm, Å, nm, μm, mm, cm, dm, m, km, in, ft, yd, mi, nmi, AU, ly, pc |
+| Area             | `area`            | m²        | mm², cm², in², ft², m², km², mi²                                          |
+| Mass             | `mass`            | kg        | Da, μg, mg, g, kg, oz, lb, q, t, M⊕, M☉                                   |
+| Time             | `time`            | s         | tp, ns, μs, ms, s, min, h, d, wk, yr                                      |
+| Velocity         | `velocity`        | m/s       | km/h, ft/s, mph, kn, m/s, c                                               |
+| Volume           | `volume`          | m³        | mm³, μL, cm³, mL, in³, L, pt, qt, gal, ft³, bbl, yd³, m³, km³             |
+| Acceleration     | `acceleration`    | m/s²      | cm/s², ft/s², m/s², gₙ                                                    |
+| Force            | `force`           | N         | dyn, mN, N, lbf, kgf, kN, MN                                              |
+| Energy           | `energy`          | J         | eV, erg, J, ft·lbf, cal, kJ, Btu, kcal, Wh, MJ, kWh, GJ, MWh              |
+| Power            | `power`           | W         | mW, W, Btu/h, PS, hp, kW, MW, GW                                          |
+| Pressure         | `pressure`        | Pa        | Pa, hPa, mbar, kPa, Torr, mmHg, inHg, psi, bar, atm, MPa, GPa             |
+| Frequency        | `frequency`       | Hz        | rpm, Hz, kHz, MHz, GHz, THz                                               |
+| Angle            | `angle`           | rad       | arcsec, arcmin, mrad, gon, °, rad, rev                                    |
+| Data size        | `datasize`        | B         | bit, B, kbit, kB, KiB, Mbit, MB, MiB, Gbit, GB, GiB, TB, TiB, PB, PiB     |
+| Density          | `density`         | kg/m³     | kg/m³, g/L, lb/ft³, lb/gal, kg/L, g/mL, g/cm³                             |
+| Data rate        | `datarate`        | B/s       | bit/s, B/s, kbit/s, kB/s, KiB/s, Mbit/s, MB/s, MiB/s, Gbit/s, GB/s, GiB/s |
+| Temperature      | `temperature`     | K         | K, °C, °F, °R                                                             |
+| Angular velocity | `angularvelocity` | rad/s     | rad/s, °/s, rev/min, rev/s                                                |
+| Electric current | `current`         | A         | A, μA, mA, kA                                                             |
+| Voltage          | `voltage`         | V         | V, μV, mV, kV, MV                                                         |
+| Electric charge  | `charge`          | C         | C, μC, mC, mAh, Ah                                                        |
+| Resistance       | `resistance`      | Ω         | Ω, mΩ, kΩ, MΩ, GΩ                                                         |
 
 - Every unit is a typed constant in its package, for example `distance.LightYear` or `mass.Pound`; `String()` returns its symbol.
 - Each unit package also provides `ParseUnit(symbol)`, `Units()`, `ConversionFactors()`, a copy of its factors, and `Rate(from, to)`, the multiplier between two units. For example, `distance.Rate(distance.Mile, distance.Kilometer)` returns 1.609344. The `temperature` package has `Convert` and `DifferenceRate` instead.
@@ -350,7 +371,8 @@ fmt.Println(err) // unknown distance unit fur
 - `yr` is the Julian year of 365.25 days.
 - `pt`, `qt` and `gal` are US liquid measures, `bbl` the 42-gallon oil barrel, `cal` the thermochemical calorie, `Btu` the International Table one, `hp` mechanical horsepower and `PS` metric horsepower. `mmHg` and `inHg` are the conventional values, and `gₙ` (with U+2099) is standard gravity, 9.80665 m/s².
 - Mind the case: `kN` is a kilonewton and `kn` a knot.
-- `℃` (U+2103) and `℉` (U+2109) are accepted for `°C` and `°F`.
+- `℃` (U+2103) and `℉` (U+2109) are accepted for `°C` and `°F`, `Ω` (U+2126 OHM SIGN) for `Ω` (U+03A9), `Å` (U+212B ANGSTROM SIGN) for `Å`, and `K` (U+212A KELVIN SIGN) for `K`.
+- Angular velocity's `rev/min` counts radians; frequency's `rpm` counts cycles. Convert between them through `Angle.DivideByTime` or the factor 2π.
 - Data sizes have both decimal (`kB` = 1000 B) and binary (`KiB` = 1024 B) prefixes, and bits (`bit`, `Mbit`, …).
 - Strings are parsed in the form `"<value> <unit>"`, with whitespace between the value and the unit. NaN and infinite values are rejected.
 

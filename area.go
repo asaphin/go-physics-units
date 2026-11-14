@@ -6,10 +6,10 @@ import (
 	"github.com/asaphin/go-physics-units/volume"
 )
 
-// Area is an area: a value in a area.Unit, such as 10 m². Create one with
+// Area is an area: a value in an area.Unit, such as 10 m². Create one with
 // NewArea or StringToArea.
 //
-// A Area is a small immutable value: every method returns a new value, so
+// An Area is a small immutable value: every method returns a new value, so
 // copy and share it freely. The zero Area is 0 m².
 type Area struct {
 	value float64

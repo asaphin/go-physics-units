@@ -54,6 +54,14 @@ var measures = []measure{
 	{"DataSize", "datasize", "s", "data size", "data sizes", "bytes", "B", "1.5 GB"},
 	{"Density", "density", "d", "density", "densities", "kilograms per cubic metre", "kg/m³", "1.2 kg/m³"},
 	{"DataRate", "datarate", "r", "data rate", "data rates", "bytes per second", "B/s", "100 Mbit/s"},
+	{"Current", "current", "i", "electric current", "electric currents", "amperes", "A", "2.5 mA"},
+	{"Voltage", "voltage", "v", "voltage", "voltages", "volts", "V", "230 V"},
+	{"Charge", "charge", "q", "electric charge", "electric charges", "coulombs", "C", "3000 mAh"},
+	{"Resistance", "resistance", "r", "resistance", "resistances", "ohms", "Ω", "4.7 kΩ"},
+	{
+		"AngularVelocity", "angularvelocity", "w", "angular velocity", "angular velocities",
+		"radians per second", "rad/s", "33.3 rev/min",
+	},
 }
 
 func main() {

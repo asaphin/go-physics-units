@@ -6,8 +6,11 @@ import (
 	units "github.com/asaphin/go-physics-units"
 	"github.com/asaphin/go-physics-units/acceleration"
 	"github.com/asaphin/go-physics-units/angle"
+	"github.com/asaphin/go-physics-units/angularvelocity"
 	"github.com/asaphin/go-physics-units/area"
+	"github.com/asaphin/go-physics-units/charge"
 	"github.com/asaphin/go-physics-units/conversion"
+	"github.com/asaphin/go-physics-units/current"
 	"github.com/asaphin/go-physics-units/datarate"
 	"github.com/asaphin/go-physics-units/datasize"
 	"github.com/asaphin/go-physics-units/density"
@@ -18,9 +21,11 @@ import (
 	"github.com/asaphin/go-physics-units/mass"
 	"github.com/asaphin/go-physics-units/power"
 	"github.com/asaphin/go-physics-units/pressure"
+	"github.com/asaphin/go-physics-units/resistance"
 	"github.com/asaphin/go-physics-units/temperature"
 	"github.com/asaphin/go-physics-units/time"
 	"github.com/asaphin/go-physics-units/velocity"
+	"github.com/asaphin/go-physics-units/voltage"
 	"github.com/asaphin/go-physics-units/volume"
 )
 
@@ -323,4 +328,182 @@ func ExampleTemperature_Sub() {
 	// 23.4 °F
 	// 13.0 °C
 	// 68.0 °F
+}
+
+func ExampleNewCurrent() {
+	led := units.NewCurrent(20, current.Milliampere)
+
+	fmt.Println(led.ConvertTo(current.Ampere))
+	// Output: 0.02 A
+}
+
+func ExampleNewVoltage() {
+	mains := units.NewVoltage(230, voltage.Volt)
+
+	fmt.Println(mains.ConvertTo(voltage.Kilovolt))
+	// Output: 0.23 kV
+}
+
+func ExampleNewCharge() {
+	battery := units.NewCharge(5000, charge.MilliampereHour)
+
+	fmt.Println(battery.ConvertTo(charge.Coulomb))
+	// Output: 18000 C
+}
+
+func ExampleNewResistance() {
+	pullUp, err := units.StringToResistance("4.7 kΩ")
+	if err != nil {
+		panic(err)
+	}
+
+	fmt.Println(pullUp.ConvertToBaseUnits())
+	// Output: 4700 Ω
+}
+
+func ExampleNewAngularVelocity() {
+	record := units.NewAngularVelocity(33.3, angularvelocity.RevolutionPerMinute)
+
+	fmt.Printf("%.3f\n", record.ConvertToBaseUnits())
+	// Output: 3.487 rad/s
+}
+
+func ExampleVoltage_MultiplyByCurrent() {
+	kettle := units.NewVoltage(230, voltage.Volt).MultiplyByCurrent(units.NewCurrent(10, current.Ampere))
+
+	fmt.Printf("%.1f\n", kettle.ConvertTo(power.Kilowatt))
+	// Output: 2.3 kW
+}
+
+func ExampleCurrent_MultiplyByVoltage() {
+	p := units.NewCurrent(500, current.Milliampere).MultiplyByVoltage(units.NewVoltage(5, voltage.Volt))
+
+	fmt.Println(p)
+	// Output: 2.5 W
+}
+
+func ExampleCurrent_MultiplyByResistance() {
+	drop := units.NewCurrent(20, current.Milliampere).MultiplyByResistance(units.NewResistance(150, resistance.Ohm))
+
+	fmt.Println(drop)
+	// Output: 3 V
+}
+
+func ExampleResistance_MultiplyByCurrent() {
+	drop := units.NewResistance(1, resistance.Kiloohm).MultiplyByCurrent(units.NewCurrent(5, current.Milliampere))
+
+	fmt.Println(drop)
+	// Output: 5 V
+}
+
+func ExampleCurrent_MultiplyByTime() {
+	q := units.NewCurrent(2, current.Ampere).MultiplyByTime(units.NewTime(3, time.Hour))
+
+	fmt.Println(q.ConvertTo(charge.AmpereHour))
+	// Output: 6 Ah
+}
+
+func ExampleVoltage_DivideByCurrent() {
+	r, err := units.NewVoltage(12, voltage.Volt).DivideByCurrent(units.NewCurrent(3, current.Ampere))
+	if err != nil {
+		panic(err) // the current is zero
+	}
+
+	fmt.Println(r)
+	// Output: 4 Ω
+}
+
+func ExampleVoltage_DivideByResistance() {
+	i, err := units.NewVoltage(5, voltage.Volt).DivideByResistance(units.NewResistance(250, resistance.Ohm))
+	if err != nil {
+		panic(err) // the resistance is zero
+	}
+
+	fmt.Println(i.ConvertTo(current.Milliampere))
+	// Output: 20 mA
+}
+
+func ExampleVoltage_MultiplyByCharge() {
+	e := units.NewVoltage(3.7, voltage.Volt).MultiplyByCharge(units.NewCharge(5000, charge.MilliampereHour))
+
+	fmt.Printf("%.1f\n", e.ConvertTo(energy.WattHour))
+	// Output: 18.5 Wh
+}
+
+func ExampleCharge_MultiplyByVoltage() {
+	e := units.NewCharge(1, charge.Coulomb).MultiplyByVoltage(units.NewVoltage(9, voltage.Volt))
+
+	fmt.Println(e)
+	// Output: 9 J
+}
+
+func ExampleCharge_DivideByTime() {
+	i, err := units.NewCharge(3000, charge.MilliampereHour).DivideByTime(units.NewTime(2, time.Hour))
+	if err != nil {
+		panic(err) // the time is zero
+	}
+
+	fmt.Println(i)
+	// Output: 1.5 A
+}
+
+// How long a battery lasts: its charge divided by the current drawn.
+func ExampleCharge_DivideByCurrent() {
+	battery := units.NewCharge(3000, charge.MilliampereHour)
+
+	t, err := battery.DivideByCurrent(units.NewCurrent(250, current.Milliampere))
+	if err != nil {
+		panic(err) // the current is zero
+	}
+
+	fmt.Println(t.ConvertTo(time.Hour))
+	// Output: 12 h
+}
+
+func ExamplePower_DivideByVoltage() {
+	i, err := units.NewPower(2.3, power.Kilowatt).DivideByVoltage(units.NewVoltage(230, voltage.Volt))
+	if err != nil {
+		panic(err) // the voltage is zero
+	}
+
+	fmt.Println(i)
+	// Output: 10 A
+}
+
+func ExamplePower_DivideByCurrent() {
+	v, err := units.NewPower(60, power.Watt).DivideByCurrent(units.NewCurrent(5, current.Ampere))
+	if err != nil {
+		panic(err) // the current is zero
+	}
+
+	fmt.Println(v)
+	// Output: 12 V
+}
+
+func ExampleEnergy_DivideByCharge() {
+	v, err := units.NewEnergy(18, energy.Joule).DivideByCharge(units.NewCharge(2, charge.Coulomb))
+	if err != nil {
+		panic(err) // the charge is zero
+	}
+
+	fmt.Println(v)
+	// Output: 9 V
+}
+
+func ExampleAngle_DivideByTime() {
+	w, err := units.NewAngle(90, angle.Degree).DivideByTime(units.NewTime(3, time.Second))
+	if err != nil {
+		panic(err) // the time is zero
+	}
+
+	fmt.Printf("%.0f\n", w.ConvertTo(angularvelocity.DegreePerSecond))
+	// Output: 30 °/s
+}
+
+func ExampleAngularVelocity_MultiplyByTime() {
+	turned := units.NewAngularVelocity(60, angularvelocity.RevolutionPerMinute).
+		MultiplyByTime(units.NewTime(30, time.Second))
+
+	fmt.Printf("%.0f\n", turned.ConvertTo(angle.Revolution))
+	// Output: 30 rev
 }
