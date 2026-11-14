@@ -288,6 +288,7 @@ func TestConversion_ReferenceValues(t *testing.T) {
 		{energy.Gigaelectronvolt, energy.Joule, 1.602176634e-10},
 		{energy.TonneOfOilEquivalent, energy.Gigajoule, 41.868},
 		{energy.TonneOfOilEquivalent, energy.MegawattHour, 11.63},
+		{energy.Joule, energy.Millijoule, 1000},
 		{area.Hectare, area.SquareMeter, 1e4},
 		{area.SquareKilometer, area.Hectare, 100},
 		{area.Acre, area.SquareFoot, 43560},

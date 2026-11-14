@@ -36,6 +36,7 @@ const (
 	Gigaelectronvolt                 // GeV
 	Teraelectronvolt                 // TeV
 	TonneOfOilEquivalent             // toe: tonne of oil equivalent
+	Millijoule                       // mJ
 
 	unitCount // the number of units; keep it last
 )
@@ -71,4 +72,5 @@ var definitions = [unitCount]definition{
 	Gigaelectronvolt:     {"GeV", 1.602176634e-10},
 	Teraelectronvolt:     {"TeV", 1.602176634e-7},
 	TonneOfOilEquivalent: {"toe", 41.868e9}, // the IEA and OECD convention
+	Millijoule:           {"mJ", 1e-3},
 }
