@@ -1,44 +1,36 @@
+// Package velocity defines the velocity (speed) units of the units package and
+// their conversion factors to the base unit, the metre per second.
 package velocity
 
-import (
-	"github.com/asaphin/go-physics-units/conversion"
-	"github.com/asaphin/go-physics-units/internal/immutable"
-	"github.com/asaphin/go-physics-units/internal/rates"
-)
+// Unit is a velocity unit: one of the constants below. String returns its
+// symbol and ParseUnit finds the unit of a symbol.
+//
+// The zero Unit is the base unit, MeterPerSecond. The numbers behind the constants may
+// change between versions: store and exchange units by their symbols.
+type Unit uint8
 
+// BaseUnit is the SI unit of velocity that all velocity factors are relative to.
 const BaseUnit = MeterPerSecond
 
+// Velocity units, with their symbols.
 const (
-	KilometerPerHour = "km/h"
-	FeetPerSecond    = "ft/s"
-	MilePerHour      = "mph"
-	Knot             = "kn"
-	MeterPerSecond   = "m/s"
-	SpeedOfLight     = "c"
+	MeterPerSecond   Unit = iota // m/s
+	KilometerPerHour             // km/h
+	FeetPerSecond                // ft/s
+	MilePerHour                  // mph
+	Knot                         // kn
+	SpeedOfLight                 // c
+
+	unitCount // the number of units; keep it last
 )
 
-var conversionFactors = conversion.Factors{
-	KilometerPerHour: 0.277778,
-	FeetPerSecond:    0.3048,
-	MilePerHour:      0.44704,
-	Knot:             0.514444,
-	MeterPerSecond:   1,
-	SpeedOfLight:     299792458,
-}
-
-// ConversionFactors shows how many base units (m/s) in specified unit.
-func ConversionFactors() conversion.Factors {
-	return conversion.CopyConversionFactors(conversionFactors)
-}
-
-var conversionRates immutable.Float64Map
-
-// ConversionRates returns pointer to conversion rates storage.
-// Rates stored by composite keys unitFrom + unitTo.
-func ConversionRates() immutable.Float64Map {
-	if conversionRates == nil {
-		conversionRates = immutable.MakeImmutable(rates.FactorsToRates(conversionFactors))
-	}
-
-	return conversionRates
+// definitions holds the symbol of each unit and its factor: how many base
+// units (m/s) there are in one unit.
+var definitions = [unitCount]definition{
+	MeterPerSecond:   {"m/s", 1},
+	KilometerPerHour: {"km/h", 1000.0 / 3600},
+	FeetPerSecond:    {"ft/s", 0.3048},
+	MilePerHour:      {"mph", 0.44704},
+	Knot:             {"kn", 1852.0 / 3600}, // one nautical mile per hour
+	SpeedOfLight:     {"c", 299792458},      // exact by definition
 }

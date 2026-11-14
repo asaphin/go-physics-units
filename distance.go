@@ -1,143 +1,42 @@
 package units
 
 import (
-	"errors"
-	"fmt"
+	"github.com/asaphin/go-physics-units/area"
 	"github.com/asaphin/go-physics-units/distance"
 	"github.com/asaphin/go-physics-units/velocity"
+	"github.com/asaphin/go-physics-units/volume"
 )
 
-// Distance interface represents a distance measurement.
-type Distance interface {
-	Measurement
-	UnitConverter[Distance]
-	Arithmetics[Distance]
-
-	DivideByTime(t Time) Velocity
+// Distance is a length: a value in a distance.Unit, such as 10 km. Create one with
+// NewDistance or StringToDistance.
+//
+// A Distance is a small immutable value: every method returns a new value, so
+// copy and share it freely. The zero Distance is 0 m.
+type Distance struct {
+	value float64
+	unit  distance.Unit
 }
 
-// distanceImplementation is a concrete implementation of the Distance interface.
-type distanceImplementation struct {
-	baseMeasurement
-}
-
-// ConvertTo implements the ConvertTo method of the Distance interface.
-func (d *distanceImplementation) ConvertTo(unit string) (Distance, error) {
-	msm, err := d.convertTo(unit)
-	if err != nil {
-		return nil, err
+// DivideByTime returns the velocity d/t (m/s) in velocity.BaseUnit. It fails with
+// ErrZeroDivision if t is zero.
+func (d Distance) DivideByTime(t Time) (Velocity, error) {
+	if t.value == 0 {
+		return Velocity{}, ErrZeroDivision
 	}
 
-	return &distanceImplementation{*msm}, nil
+	return Velocity{value: d.baseValue() / t.baseValue(), unit: velocity.BaseUnit}, nil
 }
 
-// MustConvertTo implements the MustConvertTo method of the Distance interface.
-func (d *distanceImplementation) MustConvertTo(unit string) Distance {
-	msm, err := d.convertTo(unit)
-	if err != nil {
-		panic(err)
-	}
+// Square returns the area d² in area.BaseUnit (m²).
+func (d Distance) Square() Area {
+	base := d.baseValue()
 
-	return &distanceImplementation{*msm}
+	return Area{value: base * base, unit: area.BaseUnit}
 }
 
-// ConvertToBaseUnits implements the MustConvertToBaseUnits method of the Distance interface.
-func (d *distanceImplementation) ConvertToBaseUnits() Distance {
-	msm := d.unsafeConvertTo(distance.BaseUnit)
+// Cube returns the volume d³ in volume.BaseUnit (m³).
+func (d Distance) Cube() Volume {
+	base := d.baseValue()
 
-	return &distanceImplementation{*msm}
-}
-
-func (d *distanceImplementation) valueInBaseUnits() float64 {
-	return d.unsafeGetValueIn(distance.BaseUnit)
-}
-
-func (d *distanceImplementation) valueInUnits(unit string) float64 {
-	return d.unsafeGetValueIn(unit)
-}
-
-func (d *distanceImplementation) Add(dist Distance) Distance {
-	d1 := d.value
-	d2 := dist.valueInUnits(d.unit)
-
-	return newDistance(d1+d2, d.unit)
-}
-
-func (d *distanceImplementation) Sub(dist Distance) Distance {
-	d1 := d.value
-	d2 := dist.valueInUnits(d.unit)
-
-	return newDistance(d1-d2, d.unit)
-}
-
-func (d *distanceImplementation) Mul(multiplier float64) Distance {
-	msm := newUnsafeBaseMeasurement(d.value*multiplier, d.unit, d.conversionRates)
-
-	return &distanceImplementation{*msm}
-}
-
-func (d *distanceImplementation) Div(divisor float64) (Distance, error) {
-	if divisor == 0 {
-		return nil, errZeroDivision
-	}
-
-	msm := newUnsafeBaseMeasurement(d.value/divisor, d.unit, d.conversionRates)
-
-	return &distanceImplementation{*msm}, nil
-}
-
-// DivideByTime implements the DivideByTime method of the Distance interface.
-func (d *distanceImplementation) DivideByTime(t Time) Velocity {
-	if t.Value() == 0 {
-		panic("division by zero")
-	}
-
-	baseD := d.valueInBaseUnits()
-	baseT := t.valueInBaseUnits()
-
-	return newVelocity(baseD/baseT, velocity.BaseUnit)
-}
-
-// NewDistance creates a new Distance instance.
-func NewDistance(value float64, unit string) (Distance, error) {
-	rates := distance.ConversionRates()
-
-	if _, ok := rates.Has(unit + unit); !ok {
-		return nil, fmt.Errorf("unknown Distance unit %s", unit)
-	}
-
-	msm := newUnsafeBaseMeasurement(value, unit, rates)
-
-	return &distanceImplementation{*msm}, nil
-}
-
-// newDistance unsafe distance constructor without checks for internal usage.
-func newDistance(value float64, unit string) Distance {
-	msm := newUnsafeBaseMeasurement(value, unit, distance.ConversionRates())
-
-	return &distanceImplementation{*msm}
-}
-
-var errDistanceConversion = errors.New("not a distance measure")
-
-func ToDistance(m Measurement) (Distance, error) {
-	if m.Type() == MeasureDistance {
-		b, ok := m.(*baseMeasurement)
-		if !ok {
-			return nil, errBaseMeasurementConversion
-		}
-
-		return &distanceImplementation{*b}, nil
-	}
-
-	return nil, errDistanceConversion
-}
-
-func StringToDistance(s string) (Distance, error) {
-	m, err := ParseString(s)
-	if err != nil {
-		return nil, err
-	}
-
-	return ToDistance(m)
+	return Volume{value: base * base * base, unit: volume.BaseUnit}
 }

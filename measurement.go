@@ -1,204 +1,190 @@
 package units
 
 import (
-	"errors"
 	"fmt"
-	"github.com/asaphin/go-physics-units/conversion"
-	"github.com/asaphin/go-physics-units/internal/immutable"
-	"github.com/asaphin/go-physics-units/internal/rates"
+	"io"
+	"math"
 	"strconv"
 	"strings"
+
+	"github.com/asaphin/go-physics-units/internal/rates"
 )
 
+// Measurement is the interface that every value of this package implements:
+// the predefined measures (Distance, Time, …) and Quantity, the values of
+// user-defined measures. Use it for code that handles measurements of any
+// measure, such as the results of ParseString; the concrete types have typed
+// methods that can't fail where these can.
+//
+// A value of a concrete type converts to Measurement and back:
+//
+//	m, _ := units.ParseString("10 km") // m holds a units.Distance
+//	d, ok := m.(units.Distance)
+//
+// Measurement has an unexported method, so it can't be implemented outside
+// this package.
 type Measurement interface {
+	// Value returns the numeric value, expressed in the unit.
 	Value() float64
-	Unit() string
-	convertTo(targetUnit string) (*baseMeasurement, error)
-	unsafeConvertTo(targetUnit string) *baseMeasurement
-	unsafeGetValueIn(targetUnit string) float64
-	ConvertToMeasurement(targetUnit string) (Measurement, error)
+	// Symbol returns the unit symbol, such as "km".
+	Symbol() string
+	// Type returns the measure the measurement belongs to.
 	Type() MeasureType
 	fmt.Stringer
+	// Format implements fmt.Formatter: %v prints String(), %.2f formats the
+	// value and appends the symbol ("5.00 km"). See the package documentation.
+	fmt.Formatter
 
+	// ConvertToMeasurement returns the measurement expressed in the unit with
+	// the given symbol. It fails with ErrUnknownUnit if the symbol isn't a
+	// unit of the measure.
+	ConvertToMeasurement(symbol string) (Measurement, error)
+	// AddMeasurement returns the sum of the measurement and m, expressed in the
+	// receiver's unit. It fails with ErrIncompatibleMeasures if m is nil or of
+	// another measure.
 	AddMeasurement(m Measurement) (Measurement, error)
+	// SubMeasurement returns the difference of the measurement and m, expressed
+	// in the receiver's unit. It fails like AddMeasurement.
 	SubMeasurement(m Measurement) (Measurement, error)
+	// MulMeasurement returns the measurement multiplied by multiplier.
 	MulMeasurement(multiplier float64) Measurement
+	// DivMeasurement returns the measurement divided by divisor. It fails with
+	// ErrZeroDivision if divisor is zero.
 	DivMeasurement(divisor float64) (Measurement, error)
+	// CompareMeasurement compares the measurement with m as Comparer.Compare
+	// does: it returns -1, 0 or +1 as the measurement is less than, equal to or
+	// greater than m. It fails like AddMeasurement.
+	CompareMeasurement(m Measurement) (int, error)
+
+	generic() genericValue
 }
 
-type baseMeasurement struct {
-	value           float64
-	unit            string
-	conversionRates immutable.Float64Map
+// genericValue is a measurement seen by the generic code: its value, the
+// index of its unit in its measure's unit set, and that set.
+type genericValue struct {
+	value float64
+	unit  uint16
+	set   *unitSet
 }
 
-func (b *baseMeasurement) AddMeasurement(m Measurement) (Measurement, error) {
-	baseType := b.Type()
-	adderType := m.Type()
-
-	if baseType != adderType {
-		return nil, fmt.Errorf("incompatible types %s and %s", baseType, adderType)
-	}
-
-	adder := m.unsafeGetValueIn(b.unit)
-
-	return newUnsafeBaseMeasurement(b.value+adder, b.unit, b.conversionRates), nil
-}
-
-func (b *baseMeasurement) SubMeasurement(m Measurement) (Measurement, error) {
-	baseType := b.Type()
-	adderType := m.Type()
-
-	if baseType != adderType {
-		return nil, fmt.Errorf("incompatible types %s and %s", baseType, adderType)
-	}
-
-	subtract := m.unsafeGetValueIn(b.unit)
-
-	return newUnsafeBaseMeasurement(b.value-subtract, b.unit, b.conversionRates), nil
-}
-
-func (b *baseMeasurement) MulMeasurement(multiplier float64) Measurement {
-	return &baseMeasurement{value: b.value * multiplier, unit: b.unit, conversionRates: b.conversionRates}
-}
-
-func (b *baseMeasurement) DivMeasurement(divisor float64) (Measurement, error) {
-	if divisor == 0 {
-		return nil, errZeroDivision
-	}
-
-	return &baseMeasurement{value: b.value / divisor, unit: b.unit, conversionRates: b.conversionRates}, nil
-}
-
-var errBaseMeasurementConversion = errors.New("not a *baseMeasurement type")
-
-func (b *baseMeasurement) Value() float64 {
-	return b.value
-}
-
-func (b *baseMeasurement) Unit() string {
-	return b.unit
-}
-
-func (b *baseMeasurement) ConvertToMeasurement(targetUnit string) (Measurement, error) {
-	return b.convertTo(targetUnit)
-}
-
-func (b *baseMeasurement) convertTo(targetUnit string) (*baseMeasurement, error) {
-	if b.unit == targetUnit {
-		return newBaseMeasurement(b.value, targetUnit, b.conversionRates)
-	}
-
-	factor, ok := b.conversionRates.Has(b.unit + targetUnit)
+// NewMeasurement creates a measurement of one of the predefined measures,
+// detected from the unit symbol: NewMeasurement(10, "km") returns a Distance.
+// It fails with ErrUnknownUnit if no predefined measure has the unit. Use the
+// measure-specific constructors (NewDistance, …) when the measure is known in
+// advance.
+func NewMeasurement(value float64, symbol string) (Measurement, error) {
+	pu, ok := predefinedUnits[rates.CanonicalUnit(symbol)]
 	if !ok {
-		measureFactors := getMeasureFactors(b.Type())
-
-		if _, ok = measureFactors[b.unit]; !ok {
-			return nil, fmt.Errorf("initial unit %s unspecified in conversionRates", b.unit)
-		}
-
-		if _, ok = measureFactors[targetUnit]; !ok {
-			return nil, fmt.Errorf("target unit %s unspecified in conversionRates", targetUnit)
-		}
-
-		return nil, errors.New("global conversion units error")
+		return nil, unknownSymbolError(symbol)
 	}
 
-	return newBaseMeasurement(b.value*factor, targetUnit, b.conversionRates)
+	return pu.box(value, pu.unit), nil
 }
 
-func (b *baseMeasurement) unsafeConvertTo(targetUnit string) *baseMeasurement {
-	if b.unit == targetUnit {
-		return newUnsafeBaseMeasurement(b.value, targetUnit, b.conversionRates)
-	}
-
-	factor := b.conversionRates.Get(b.unit + targetUnit)
-
-	return newUnsafeBaseMeasurement(b.value*factor, targetUnit, b.conversionRates)
-}
-
-func (b *baseMeasurement) unsafeGetValueIn(targetUnit string) float64 {
-	if b.unit == targetUnit {
-		return b.value
-	}
-
-	factor := b.conversionRates.Get(b.unit + targetUnit)
-
-	return b.value * factor
-}
-
-func (b *baseMeasurement) Type() MeasureType {
-	return DetectMeasureType(b.unit)
-}
-
-func (b *baseMeasurement) String() string {
-	return fmt.Sprintf("%v %s", b.value, b.unit)
-}
-
-func NewMeasurement(value float64, unit string) (Measurement, error) {
-	mt := DetectMeasureType(unit)
-	if mt == MeasureCustom {
-		return nil, fmt.Errorf("unknown unit %s", unit)
-	}
-
-	return newBaseMeasurement(value, unit, measureToConversionRatesMapping[mt])
-}
-
+// ParseString parses a measurement of a predefined measure from a string of the
+// form "<value> <symbol>", such as "10 km" or "1.5e3 m". The value must be
+// finite. The result has the measure's concrete type: "10 km" gives a Distance.
 func ParseString(s string) (Measurement, error) {
-	parts := strings.Fields(s)
-	if len(parts) != 2 {
-		return nil, fmt.Errorf("invalid string format: %s", s)
+	value, symbol, err := parseValueAndUnit(s)
+	if err != nil {
+		return nil, err
+	}
+
+	return NewMeasurement(value, symbol)
+}
+
+// parseValueAndUnit splits a "<value> <unit>" string and parses the value.
+func parseValueAndUnit(s string) (float64, string, error) {
+	// FieldsSeq instead of Fields: no slice is allocated for the fields.
+	var parts [2]string
+
+	n := 0
+	for field := range strings.FieldsSeq(s) {
+		if n == len(parts) {
+			n++ // a third field: the format is invalid
+
+			break
+		}
+
+		parts[n] = field
+		n++
+	}
+
+	if n != len(parts) {
+		return 0, "", newError(ErrInvalidFormat, "invalid string format: "+s, nil)
 	}
 
 	value, err := strconv.ParseFloat(parts[0], 64)
 	if err != nil {
-		return nil, fmt.Errorf("failed to parse value %v: %w", parts[0], err)
+		return 0, "", newError(ErrInvalidFormat, "failed to parse value "+parts[0]+": "+err.Error(), err)
 	}
 
-	return NewMeasurement(value, parts[1])
+	if math.IsNaN(value) || math.IsInf(value, 0) {
+		return 0, "", newError(ErrInvalidFormat, "value "+parts[0]+" is not a finite number", nil)
+	}
+
+	return value, parts[1], nil
 }
 
-// NewBaseMeasurement is intended to create measurements based on your custom conversion factors.
-// To create common measurement use NewMeasurement.
-func NewBaseMeasurement(value float64, unit string, conversionFactors conversion.Factors) (Measurement, error) {
-	factor, ok := conversionFactors[unit]
+// formatString formats a measurement as "<value> <symbol>". The value is
+// formatted like fmt's %v, in the shortest form that parses back to the same
+// float64.
+func formatString(value float64, symbol string) string {
+	// strconv instead of fmt.Sprintf: same output, a third of the time.
+	var buf [64]byte
 
-	if !ok {
-		return nil, fmt.Errorf("unit %s unspecified in conversionRates", unit)
-	}
-
-	if factor == 0 {
-		return nil, fmt.Errorf("unit conversion factor can not be zero (%s)", unit)
-	}
-
-	return &baseMeasurement{
-		value:           value,
-		unit:            unit,
-		conversionRates: immutable.MakeImmutable(rates.FactorsToRates(conversionFactors)),
-	}, nil
+	return string(appendMeasurement(buf[:0], value, symbol))
 }
 
-func newBaseMeasurement(value float64, unit string, conversionRates immutable.Float64Map) (*baseMeasurement, error) {
-	factor, ok := conversionRates.Has(unit + unit)
-	if !ok {
-		return nil, fmt.Errorf("unit %s unspecified in conversionRates", unit)
-	}
+// appendMeasurement appends the String form of a measurement to b.
+func appendMeasurement(b []byte, value float64, symbol string) []byte {
+	b = strconv.AppendFloat(b, value, 'g', -1, 64)
+	b = append(b, ' ')
 
-	if factor == 0 {
-		return nil, fmt.Errorf("unit conversion factor can not be zero (%s)", unit)
-	}
-
-	return &baseMeasurement{
-		value:           value,
-		unit:            unit,
-		conversionRates: conversionRates,
-	}, nil
+	return append(b, symbol...)
 }
 
-func newUnsafeBaseMeasurement(value float64, unit string, conversionRates immutable.Float64Map) *baseMeasurement {
-	return &baseMeasurement{
-		value:           value,
-		unit:            unit,
-		conversionRates: conversionRates,
+// appendText appends the text form of a measurement to b, for AppendText. It
+// fails for a value that isn't finite, which ParseString wouldn't accept.
+func appendText(b []byte, value float64, symbol string) ([]byte, error) {
+	if math.IsNaN(value) || math.IsInf(value, 0) {
+		return b, newError(ErrOutOfRange, "value "+strconv.FormatFloat(value, 'g', -1, 64)+
+			" "+symbol+" can't be encoded as text: it isn't finite", nil)
+	}
+
+	return appendMeasurement(b, value, symbol), nil
+}
+
+// formatMeasurement implements fmt.Formatter for every measurement type:
+//
+//   - %v and %s print String(), honoring width and the '-' flag: "5 km".
+//   - %b, %e, %E, %f, %F, %g, %G, %x and %X format the value with the given
+//     flags, width and precision, then append the symbol: %.2f gives "5.00 km".
+//   - %q prints String() quoted: "\"5 km\"".
+//   - %#v prints a Go-like form: units.Distance{Value:5, Unit:"km"}.
+//   - Other verbs print fmt's usual error form: %!d(units.Distance=5 km).
+func formatMeasurement(f fmt.State, verb rune, typeName string, value float64, symbol string) {
+	switch verb {
+	case 'v', 's':
+		if verb == 'v' && f.Flag('#') {
+			_, _ = fmt.Fprintf(f, "units.%s{Value:%#v, Unit:%q}", typeName, value, symbol)
+
+			return
+		}
+
+		if _, ok := f.Width(); !ok && !f.Flag('-') {
+			_, _ = io.WriteString(f, formatString(value, symbol)) // fast path: fmt.Print, Println, plain %v
+
+			return
+		}
+
+		_, _ = fmt.Fprintf(f, fmt.FormatString(f, 's'), formatString(value, symbol))
+	case 'q':
+		_, _ = fmt.Fprintf(f, fmt.FormatString(f, 'q'), formatString(value, symbol))
+	case 'b', 'e', 'E', 'f', 'F', 'g', 'G', 'x', 'X':
+		_, _ = fmt.Fprintf(f, fmt.FormatString(f, verb), value)
+		_, _ = io.WriteString(f, " "+symbol)
+	default:
+		_, _ = fmt.Fprintf(f, "%%!%c(units.%s=%s)", verb, typeName, formatString(value, symbol))
 	}
 }

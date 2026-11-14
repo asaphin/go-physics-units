@@ -1,59 +1,258 @@
+# golangci-lint configuration for go-physics-units.
+#
+# Pinned to golangci-lint v2.15.0: see .github/workflows/ci.yml and the Makefile.
+#
+# Linters are listed explicitly instead of `default: all`, so an upgrade never
+# adds checks silently. Enabling or disabling a linter is a reviewed change,
+# and every disabled linter below says why.
+#
+# Based on the golden config by Marat Reimers (MIT license),
+# https://github.com/maratori/golangci-lint-config (v2.15.0). It is adapted to
+# a dependency-free library with a public API and the three design principles
+# in AGENTS.md: performance (P1), immutability after init (P2) and
+# customization (P3). Unlike the golden config, it requires documentation on
+# the exported API.
+
+version: "2"
+
+formatters:
+  enable:
+    - gofumpt # stricter gofmt
+    - goimports # import grouping: standard library, then this module
+    - golines # wraps lines longer than max-len
+
+  settings:
+    gofumpt:
+      module-path: github.com/asaphin/go-physics-units
+    goimports:
+      local-prefixes:
+        - github.com/asaphin/go-physics-units
+    golines:
+      max-len: 120
+
 linters:
-  # Enable all linters by default
-  enable-all: true
-  # Disable some specific linters
-  disable:
-    - gochecknoglobals
-    - gocyclo
-    - goimports
-    - deadcode
-    - interfacer
-    - structcheck
-    - golint
-    - ifshort
-    - varcheck
-    - exhaustivestruct
-    - nosnakecase
-    - maligned
-    - scopelint
-    - gomnd
-    - ireturn
-    - gci
-    - paralleltest
-    - gofumpt
-    - depguard
-    - goerr113
-    - dupl
-    - forcetypeassert
-    - gofmt
+  default: none
+  enable:
+    # Bugs and correctness.
+    - asasalint # []any passed as a single any in variadic calls
+    - bidichk # dangerous Unicode sequences; unit symbols use non-ASCII text (μ, ², Å)
+    - copyloopvar # loop variable copies made redundant by Go 1.22
+    - durationcheck # multiplied durations
+    - errcheck # unchecked errors
+    - errorlint # error comparisons and type assertions that break wrapping
+    - exhaustive # switches over enum-like constants
+    - gocheckcompilerdirectives # malformed //go: directives
+    - gochecksumtype # exhaustive switches over sum types
+    - gosec # security problems
+    - govet # the go vet analyzers, all enabled below
+    - ineffassign # assignments that are never used
+    - makezero # slices made with a length, then appended to
+    - musttag # missing struct tags on (un)marshaled types; text and JSON encoding is planned
+    - nilerr # returns nil after checking err != nil
+    - nilnesserr # returns a different nil error after checking err != nil
+    - nilnil # returns nil, nil
+    - reassign # P2: reassigned package variables
+    - staticcheck # staticcheck, gosimple and stylecheck
+    - unused # unused code
+    - wastedassign # assignments overwritten before use
+
+    # Errors.
+    - errname # sentinel errors start with err/Err, error types end with Error
+    - wrapcheck # errors from other packages are wrapped with context
+
+    # Performance (P1).
+    - perfsprint # fmt.Sprintf and friends where a faster function exists
+    - prealloc # slices that could be preallocated
+
+    # Dependencies and public API.
+    - depguard # no third-party dependencies, see the settings below
+    - gomoddirectives # replace and retract directives in go.mod
+    - iface # interface pollution
+    - inamedparam # interface methods name their parameters, so godoc shows them
+    - interfacebloat # interfaces with too many methods
+
+    # Documentation.
+    - dupword # duplicated words, such as "the the"
+    - godoclint # godoc conventions; every exported symbol is documented
+    - godot # comments end with a period
+    - misspell # common misspellings (British spelling is fine)
+    - revive # golint successor: naming, doc comments, error strings
+
+    # Complexity.
+    - cyclop # cyclomatic complexity
+    - funlen # function length
+    - gocognit # cognitive complexity
+    - nakedret # naked returns
+    - nestif # deeply nested ifs
+
+    # Style and modern Go.
+    - asciicheck # non-ASCII identifiers
+    - embeddedstructfieldcheck # embedded fields first, no embedded mutexes
+    - exptostd # golang.org/x/exp functions now in the standard library
+    - forbidigo # print statements in library code
+    - funcorder # constructors after their type, exported methods before unexported ones
+    - gochecknoinits # init functions
+    - goconst # repeated strings that should be constants
+    - gocritic # diagnostic, style and performance checks
+    - godox # TODO and FIXME comments: track work in ROADMAP.md instead
+    - goprintffuncname # printf-like functions end with f
+    - intrange # loops that could range over an integer
+    - iotamixing # iota mixed with other constants
+    - mirror # bytes/strings functions called with converted arguments
+    - modernize # newer language and library features (Go 1.27)
+    - nolintlint # nolint directives must be specific and explained
+    - nonamedreturns # named results
+    - predeclared # shadowed predeclared identifiers
+    - recvcheck # mixed value and pointer receivers
+    - unconvert # unnecessary conversions
+    - unparam # unused function parameters and results
+    - usestdlibvars # literals that the standard library defines as constants
+    - whitespace # leading and trailing blank lines
+
+    # Tests.
+    - testableexamples # examples have an // Output: comment
+    - testpackage # black-box tests in package units_test
+    - thelper # test helpers call t.Helper
+    - tparallel # t.Parallel used consistently
+    - usetesting # testing package replacements, such as t.TempDir
+
+  # Disabled on purpose:
+  # - dupl: the measure files mirror each other deliberately.
+  # - err113: errors name the offending unit, so they are built dynamically.
+  #   Revisit with ROADMAP step 1.4 (exported errors).
+  # - exhaustruct_v5: zero values are meaningful here, and it is very noisy.
+  # - gochecknoglobals: unit tables and registries are package-level by
+  #   design. TestNoExportedPackageVariables forbids exported variables, and
+  #   reassign catches reassignment (P2).
+  # - gocyclo, maintidx: cyclop and gocognit cover complexity.
+  # - ireturn: the public API returns interfaces by design (see ROADMAP 2.1).
+  # - lll: golines wraps long lines.
+  # - mnd: conversion factors are magic numbers by nature.
+  # - nlreturn, noinlineerr, varnamelen, wsl_v5: whitespace and naming style
+  #   with many false positives.
+  # - paralleltest: the suite is fast; tparallel checks correct use.
+  # - Domain linters (HTTP, SQL, logging, protobuf, OpenTelemetry, Prometheus,
+  #   testify, ginkgo and others): the library does no I/O and has no
+  #   dependencies.
+
+  settings:
+    depguard:
+      rules:
+        dependencies:
+          # AGENTS.md: no third-party dependencies, including in tests.
+          files:
+            - $all
+          allow:
+            - $gostd
+            - github.com/asaphin/go-physics-units
+          deny:
+            - pkg: math/rand$
+              desc: use math/rand/v2
+
+    embeddedstructfieldcheck:
+      forbid-mutex: true
+
+    errcheck:
+      check-type-assertions: true
+
+    exhaustive:
+      check:
+        - switch
+        - mapliteral
+      # Maps keyed by measure list the Measurement measures. Custom isn't one,
+      # and temperatures aren't Measurements.
+      ignore-constants:
+        - MeasureCustom$
+        - MeasureTemperature$
+
+    forbidigo:
+      analyze-types: true
+
+    funcorder:
+      # Methods are grouped by purpose, not by visibility.
+      struct-method: false
+
+    gocognit:
+      min-complexity: 20
+
+    gocritic:
+      enabled-tags:
+        - diagnostic
+        - performance
+        - style
+      disabled-checks:
+        - unnamedResult # contradicts nonamedreturns
+        - whyNoLint # nolintlint checks nolint directives
+      settings:
+        captLocal:
+          paramsOnly: false
+        underef:
+          skipRecvDeref: false
+
+    godoclint:
+      default: basic
+      enable:
+        - require-pkg-doc
+        - require-doc
+        - no-unused-link
+
+    govet:
+      enable-all: true
+      disable:
+        - fieldalignment # the structs are small; readable field order wins
+      settings:
+        shadow:
+          # Strict mode flags every `if v, err := f(); err != nil` inside a function
+          # that already has an err. Default mode flags only shadowing that can
+          # mislead: the outer variable is used again afterwards.
+          strict: false
+
+    interfacebloat:
+      # Measure interfaces combine Measurement, UnitConverter and Arithmetics.
+      max: 24
+
+    nolintlint:
+      require-explanation: true
+      require-specific: true
+
+    reassign:
+      # P2: no package variable is ever reassigned, not only errors.
+      patterns:
+        - .*
+
+    staticcheck:
+      checks:
+        - all
+
+    usetesting:
+      os-temp-dir: true
+
+    wrapcheck:
+      # Errors from this module's own packages need no extra wrapping.
+      ignore-package-globs:
+        - github.com/asaphin/go-physics-units/*
+
+  exclusions:
+    warn-unused: true
+    presets:
+      - common-false-positives
+      - std-error-handling
+    rules:
+      # Tests and examples: long table-driven tests, printed example output,
+      # and random benchmark data.
+      - path: _test\.go
+        linters:
+          - cyclop
+          - forbidigo
+          - funlen
+          - gocognit
+          - goconst
+          - godoclint # test functions aren't public API
+          - gosec
+          - iface
+          - unparam
+          - wrapcheck
 
 issues:
-  # Set the severity level for different issues
-  severity:
-    default: error
-    style: warning
-    perf: warning
-
-workflow:
-  # Enable parallel linting
-  allow-parallel-runners: true
-
-# Additional configuration for specific linters
-gci:
-  - name: goimports
-    # Set the import order style
-    style: golangci-lint
-
-# Enable golangci-lint documentation linter
-docs:
-  enabled: true
-
-run:
-  tests: false
-
-linters-settings:
-  varnamelen:
-    max-distance: 24
-
-  interfacebloat:
-    max: 24
+  max-issues-per-linter: 0
+  max-same-issues: 0

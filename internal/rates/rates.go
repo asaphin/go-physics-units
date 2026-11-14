@@ -1,36 +1,99 @@
+// Package rates validates the units of a measure and builds their conversion
+// rates. The unit packages and the root package use it at package init, and
+// NewUnitSet once per custom measure; nothing here runs on a hot path.
 package rates
 
-import "github.com/asaphin/go-physics-units/conversion"
+import (
+	"errors"
+	"fmt"
+	"math"
+	"strings"
+)
 
-// Rates stores conversion rates by complex keys from_unit + to_unit.
-type Rates = map[string]float64
+// Validate checks the units of one measure, given as parallel slices indexed
+// by unit: every symbol must be non-empty and unique in canonical form (see
+// CanonicalUnit), and every factor positive and finite.
+func Validate(symbols []string, factors []float64) error {
+	if len(symbols) == 0 {
+		return errors.New("conversion factors are empty")
+	}
 
-func FactorsToRates(f conversion.Factors) Rates {
-	rates := make(Rates)
+	if len(symbols) != len(factors) {
+		return fmt.Errorf("%d symbols but %d factors", len(symbols), len(factors))
+	}
 
-	u := getUnits(f)
+	seen := make(map[string]string, len(symbols))
 
-	for i := range u {
-		for j := range u {
-			if u[i] == u[j] {
-				rates[u[i]+u[j]] = 1
+	for i, symbol := range symbols {
+		if symbol == "" {
+			return errors.New("unit symbol must not be empty")
+		}
 
-				continue
+		if f := factors[i]; !(f > 0) || math.IsInf(f, 1) {
+			return fmt.Errorf("conversion factor of unit %s must be positive and finite, got %v", symbol, f)
+		}
+
+		canonical := CanonicalUnit(symbol)
+		if prev, ok := seen[canonical]; ok {
+			if prev == symbol {
+				return fmt.Errorf("unit symbol %s is defined twice", symbol)
 			}
 
-			rates[u[i]+u[j]] = f[u[i]] / f[u[j]]
+			return fmt.Errorf("unit symbols %s and %s differ only in the micro sign", prev, symbol)
+		}
+
+		seen[canonical] = symbol
+	}
+
+	return nil
+}
+
+// MustValidate is like Validate but panics if the units of the named measure
+// are invalid. It is intended for the predefined measures, built from
+// constant data.
+func MustValidate(measure string, symbols []string, factors []float64) {
+	if err := Validate(symbols, factors); err != nil {
+		panic("rates: invalid " + measure + " units: " + err.Error())
+	}
+}
+
+// Matrix returns the conversion rates between every pair of units, flattened
+// in row-major order: the rate from unit i to unit j, factors[i] / factors[j],
+// is at index i·n + j. A value in unit i times that rate is the value in unit
+// j. The rate from a unit to itself is exactly 1.
+func Matrix(factors []float64) []float64 {
+	n := len(factors)
+	m := make([]float64, n*n)
+
+	for i, from := range factors {
+		for j, to := range factors {
+			m[i*n+j] = from / to
 		}
 	}
 
-	return rates
+	return m
 }
 
-func getUnits(f conversion.Factors) []string {
-	units := make([]string, 0, len(f))
+// canonical maps the look-alike characters of unit symbols to the forms the
+// tables store, as Unicode NFKC does: U+00B5 MICRO SIGN to U+03BC GREEK SMALL
+// LETTER MU, U+2126 OHM SIGN to U+03A9 GREEK CAPITAL LETTER OMEGA, U+212B
+// ANGSTROM SIGN to U+00C5 and U+212A KELVIN SIGN to K. A Replacer is safe for
+// concurrent use, and this one is never changed after init.
+var canonical = strings.NewReplacer(
+	"\u00b5", "\u03bc",
+	"\u2126", "\u03a9",
+	"\u212b", "\u00c5",
+	"\u212a", "K",
+)
 
-	for k := range f {
-		units = append(units, k)
+// CanonicalUnit returns unit with its look-alike characters replaced by the
+// forms the tables store: "µm" (MICRO SIGN) and "μm" (GREEK SMALL LETTER MU)
+// denote the same unit, as do "Ω" (OHM SIGN) and "Ω" (GREEK CAPITAL LETTER
+// OMEGA). It doesn't allocate unless unit contains one of them.
+func CanonicalUnit(unit string) string {
+	if !strings.ContainsAny(unit, "\u00b5\u2126\u212b\u212a") {
+		return unit
 	}
 
-	return units
+	return canonical.Replace(unit)
 }

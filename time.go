@@ -1,128 +1,41 @@
 package units
 
 import (
-	"errors"
-	"fmt"
-	"github.com/asaphin/go-physics-units/time"
-
+	"math"
 	builtintime "time"
+
+	"github.com/asaphin/go-physics-units/time"
 )
 
-type Time interface {
-	Measurement
-	UnitConverter[Time]
-	Arithmetics[Time]
+// Time is a duration: a value in a time.Unit (of this module's time package),
+// such as 10 min. Create one with NewTime, StringToTime or ParseDuration.
+//
+// A Time is a small immutable value: every method returns a new value, so copy
+// and share it freely. The zero Time is 0 s.
+type Time struct {
+	value float64
+	unit  time.Unit
 }
 
-type timeImplementation struct {
-	baseMeasurement
-}
-
-func (t *timeImplementation) ConvertTo(unit string) (Time, error) {
-	msm, err := t.convertTo(unit)
-	if err != nil {
-		return nil, err
-	}
-
-	return &timeImplementation{*msm}, nil
-}
-
-func (t *timeImplementation) MustConvertTo(unit string) Time {
-	msm, err := t.convertTo(unit)
-	if err != nil {
-		panic(err)
-	}
-
-	return &timeImplementation{*msm}
-}
-
-func (t *timeImplementation) ConvertToBaseUnits() Time {
-	msm := t.unsafeConvertTo(time.BaseUnit)
-
-	return &timeImplementation{*msm}
-}
-
-func (t *timeImplementation) valueInBaseUnits() float64 {
-	return t.unsafeGetValueIn(time.BaseUnit)
-}
-
-func (t *timeImplementation) valueInUnits(unit string) float64 {
-	return t.unsafeGetValueIn(unit)
-}
-
-func (t *timeImplementation) Add(tm Time) Time {
-	t1 := t.value
-	t2 := tm.valueInUnits(t.unit)
-
-	return newTime(t1+t2, t.unit)
-}
-
-func (t *timeImplementation) Sub(tm Time) Time {
-	t1 := t.value
-	t2 := tm.valueInUnits(t.unit)
-
-	return newTime(t1-t2, t.unit)
-}
-
-func (t *timeImplementation) Mul(multiplier float64) Time {
-	msm := newUnsafeBaseMeasurement(t.value*multiplier, t.unit, t.conversionRates)
-
-	return &timeImplementation{*msm}
-}
-
-func (t *timeImplementation) Div(divisor float64) (Time, error) {
-	if divisor == 0 {
-		return nil, errZeroDivision
-	}
-
-	msm := newUnsafeBaseMeasurement(t.value/divisor, t.unit, t.conversionRates)
-
-	return &timeImplementation{*msm}, nil
-}
-
-// newTime unsafe time constructor without checks for internal usage.
-func newTime(value float64, unit string) Time {
-	m := newUnsafeBaseMeasurement(value, unit, time.ConversionRates())
-
-	return &timeImplementation{*m}
-}
-
-func NewTime(value float64, unit string) (Time, error) {
-	rates := time.ConversionRates()
-
-	if _, ok := rates.Has(unit + unit); !ok {
-		return nil, fmt.Errorf("unknown Time unit %s", unit)
-	}
-
-	m := newUnsafeBaseMeasurement(value, unit, rates)
-
-	return &timeImplementation{*m}, nil
-}
-
-var errTimeConversion = errors.New("not a time measure")
-
-func ToTime(m Measurement) (Time, error) {
-	b, ok := m.(*baseMeasurement)
-	if !ok {
-		return nil, errBaseMeasurementConversion
-	}
-
-	if m.Type() == MeasureTime {
-		return &timeImplementation{*b}, nil
-	}
-
-	return nil, errTimeConversion
-}
-
-func StringToTime(s string) (Time, error) {
-	m, err := ParseString(s)
-	if err != nil {
-		return nil, err
-	}
-
-	return ToTime(m)
-}
-
+// ParseDuration converts a standard library time.Duration into a Time in
+// seconds. Time.ToDuration converts back.
 func ParseDuration(d builtintime.Duration) Time {
-	return newTime(d.Seconds(), time.BaseUnit)
+	return Time{value: d.Seconds(), unit: time.BaseUnit}
+}
+
+// ToDuration converts the time into a standard library time.Duration, rounded
+// to the nearest nanosecond. It fails with ErrOutOfRange if the time is NaN or
+// outside the range of time.Duration, about ±292 years.
+func (t Time) ToDuration() (builtintime.Duration, error) {
+	// Through seconds: 1e9 is exact, while the s→ns rate, 1/1e-9 in binary
+	// floating point, is not, and its error grows with the value.
+	ns := math.Round(t.baseValue() * float64(builtintime.Second))
+
+	// Duration is an int64 count of nanoseconds, whose range [-2⁶³, 2⁶³) has
+	// exact float64 bounds. NaN fails both comparisons.
+	if !(ns >= math.MinInt64 && ns < -math.MinInt64) {
+		return 0, newError(ErrOutOfRange, "time "+t.String()+" can't be represented as a time.Duration", nil)
+	}
+
+	return builtintime.Duration(ns), nil
 }

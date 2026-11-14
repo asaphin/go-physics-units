@@ -25,3 +25,9 @@ go.work
 
 # Code coverage report
 coverage/
+
+# make bench-compare
+.bench/
+
+# make tools
+/bin/

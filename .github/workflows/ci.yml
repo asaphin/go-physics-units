@@ -1,0 +1,94 @@
+name: CI
+
+on:
+  push:
+    branches: [main, dev]
+  pull_request:
+
+permissions:
+  contents: read
+
+jobs:
+  test:
+    name: test (Go ${{ matrix.name }})
+    runs-on: ubuntu-latest
+    strategy:
+      fail-fast: false
+      matrix:
+        include:
+          # The minimum version declared in go.mod, and the latest release.
+          - name: minimum
+            go-version-file: go.mod
+          - name: stable
+            go-version: stable
+    steps:
+      - uses: actions/checkout@v7
+      - uses: actions/setup-go@v7
+        with:
+          go-version: ${{ matrix.go-version }}
+          go-version-file: ${{ matrix.go-version-file }}
+      - run: go mod tidy -diff
+      - run: go vet ./...
+      - run: go test -race -count=1 -coverpkg=./... -coverprofile=coverage.out ./...
+      - run: go tool cover -func=coverage.out | tail -n 1
+      - name: allocation guards (excluded from -race builds)
+        run: go test -count=1 -run='^TestAllocations$' .
+      - name: fuzz ParseString
+        run: go test -run='^$' -fuzz=FuzzParseString -fuzztime=20s .
+      - name: fuzz Parser
+        run: go test -run='^$' -fuzz=FuzzParser -fuzztime=20s .
+
+  lint:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v7
+      - uses: actions/setup-go@v7
+        with:
+          # The go.mod version, not stable: a golangci-lint binary can't read the
+          # export data of Go releases newer than it supports, so linting with the
+          # latest Go breaks whenever Go is released.
+          go-version-file: go.mod
+      - uses: golangci/golangci-lint-action@v9
+        with:
+          # Pinned, like the linter list in .golangci.yaml, so upgrades are explicit.
+          # Keep in sync with GOLANGCI_LINT_VERSION in the Makefile.
+          version: v2.15.0
+      - name: go fix
+        # The modernizers and //go:fix inline directives of the go.mod Go version.
+        # The modernize linter reports most of the same findings; make fix applies both.
+        if: ${{ !cancelled() }}
+        run: go fix -diff ./...
+
+  api:
+    name: API changes
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v7
+        with:
+          fetch-depth: 0 # gorelease compares with the latest release tag
+      - uses: actions/setup-go@v7
+        with:
+          go-version-file: go.mod
+      - name: gorelease
+        # Report only, until v1.0.0 (ROADMAP 5.1): in v0 a release may break the API.
+        # It fails only if gorelease itself reports errors. GOTOOLCHAIN builds the
+        # tool with this module's Go, so its type checker understands the code.
+        # Keep the version in sync with GORELEASE in the Makefile. The report goes
+        # to RUNNER_TEMP: gorelease refuses to run on a checkout with untracked files.
+        shell: bash
+        run: |
+          GOTOOLCHAIN="$(go env GOVERSION)" go run golang.org/x/exp/cmd/gorelease@v0.0.0-20261014143641-f0251eb4aa3e \
+            | tee "$RUNNER_TEMP/gorelease.txt"
+          {
+            echo '## Exported API changes since the latest release'
+            echo '```'
+            cat "$RUNNER_TEMP/gorelease.txt"
+            echo '```'
+          } >> "$GITHUB_STEP_SUMMARY"
+
+  vulncheck:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: golang/govulncheck-action@v1
+        with:
+          go-version-input: stable

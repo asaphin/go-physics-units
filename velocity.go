@@ -1,132 +1,32 @@
 package units
 
 import (
-	"errors"
-	"fmt"
+	"github.com/asaphin/go-physics-units/acceleration"
 	"github.com/asaphin/go-physics-units/distance"
 	"github.com/asaphin/go-physics-units/velocity"
 )
 
-type Velocity interface {
-	Measurement
-	UnitConverter[Velocity]
-	Arithmetics[Velocity]
-
-	MultiplyByTime(t Time) Distance
+// Velocity is a speed: a value in a velocity.Unit, such as 10 km/h. Create one with
+// NewVelocity or StringToVelocity.
+//
+// A Velocity is a small immutable value: every method returns a new value, so
+// copy and share it freely. The zero Velocity is 0 m/s.
+type Velocity struct {
+	value float64
+	unit  velocity.Unit
 }
 
-type velocityImplenentation struct {
-	baseMeasurement
+// MultiplyByTime returns the distance v·t (m) in distance.BaseUnit.
+func (v Velocity) MultiplyByTime(t Time) Distance {
+	return Distance{value: v.baseValue() * t.baseValue(), unit: distance.BaseUnit}
 }
 
-func (v *velocityImplenentation) ConvertTo(unit string) (Velocity, error) {
-	msm, err := v.convertTo(unit)
-	if err != nil {
-		return nil, err
+// DivideByTime returns the acceleration v/t (m/s²) in acceleration.BaseUnit. It fails with
+// ErrZeroDivision if t is zero.
+func (v Velocity) DivideByTime(t Time) (Acceleration, error) {
+	if t.value == 0 {
+		return Acceleration{}, ErrZeroDivision
 	}
 
-	return &velocityImplenentation{*msm}, nil
-}
-
-func (v *velocityImplenentation) MustConvertTo(unit string) Velocity {
-	msm, err := v.convertTo(unit)
-	if err != nil {
-		panic(err)
-	}
-
-	return &velocityImplenentation{*msm}
-}
-
-func (v *velocityImplenentation) ConvertToBaseUnits() Velocity {
-	msm := v.unsafeConvertTo(velocity.BaseUnit)
-
-	return &velocityImplenentation{*msm}
-}
-
-func (v *velocityImplenentation) valueInBaseUnits() float64 {
-	return v.unsafeGetValueIn(velocity.BaseUnit)
-}
-
-func (v *velocityImplenentation) valueInUnits(unit string) float64 {
-	return v.unsafeGetValueIn(unit)
-}
-
-func (v *velocityImplenentation) Add(vl Velocity) Velocity {
-	v1 := v.value
-	v2 := vl.valueInUnits(v.unit)
-
-	return newVelocity(v1+v2, v.unit)
-}
-
-func (v *velocityImplenentation) Sub(vl Velocity) Velocity {
-	v1 := v.value
-	v2 := vl.valueInUnits(v.unit)
-
-	return newVelocity(v1-v2, v.unit)
-}
-
-func (v *velocityImplenentation) Mul(multiplier float64) Velocity {
-	msm := newUnsafeBaseMeasurement(v.value*multiplier, v.unit, v.conversionRates)
-
-	return &velocityImplenentation{*msm}
-}
-
-func (v *velocityImplenentation) Div(divisor float64) (Velocity, error) {
-	if divisor == 0 {
-		return nil, errZeroDivision
-	}
-
-	msm := newUnsafeBaseMeasurement(v.value/divisor, v.unit, v.conversionRates)
-
-	return &velocityImplenentation{*msm}, nil
-}
-
-func (v *velocityImplenentation) MultiplyByTime(t Time) Distance {
-	baseV := v.valueInBaseUnits()
-	baseT := t.valueInBaseUnits()
-
-	return newDistance(baseV*baseT, distance.BaseUnit)
-}
-
-func NewVelocity(value float64, unit string) (Velocity, error) {
-	rates := velocity.ConversionRates()
-
-	if _, ok := rates.Has(unit + unit); !ok {
-		return nil, fmt.Errorf("unknown Velocity unit %s", unit)
-	}
-
-	m := newUnsafeBaseMeasurement(value, unit, rates)
-
-	return &velocityImplenentation{*m}, nil
-}
-
-// newVelocity unsafe velocity constructor without checks for internal usage.
-func newVelocity(value float64, unit string) Velocity {
-	m := newUnsafeBaseMeasurement(value, unit, velocity.ConversionRates())
-
-	return &velocityImplenentation{*m}
-}
-
-var errVelocityConversion = errors.New("not a velocity measure")
-
-func ToVelocity(m Measurement) (Velocity, error) {
-	b, ok := m.(*baseMeasurement)
-	if !ok {
-		return nil, errBaseMeasurementConversion
-	}
-
-	if m.Type() == MeasureVelocity {
-		return &velocityImplenentation{*b}, nil
-	}
-
-	return nil, errVelocityConversion
-}
-
-func StringToVelocity(s string) (Velocity, error) {
-	m, err := ParseString(s)
-	if err != nil {
-		return nil, err
-	}
-
-	return ToVelocity(m)
+	return Acceleration{value: v.baseValue() / t.baseValue(), unit: acceleration.BaseUnit}, nil
 }
