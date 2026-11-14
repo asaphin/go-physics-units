@@ -28,6 +28,8 @@ const (
 	Barrel                      // bbl: oil barrel, 42 US gallons
 	CubicYard                   // yd³
 	CubicKilometer              // km³
+	Centiliter                  // cL
+	Deciliter                   // dL
 
 	unitCount // the number of units; keep it last
 )
@@ -55,4 +57,6 @@ var definitions = [unitCount]definition{
 	Barrel:          {"bbl", 42 * 231 * 0.0254 * 0.0254 * 0.0254},
 	CubicYard:       {"yd³", 0.9144 * 0.9144 * 0.9144},
 	CubicKilometer:  {"km³", 1e9},
+	Centiliter:      {"cL", 1e-5},
+	Deciliter:       {"dL", 1e-4},
 }

@@ -35,6 +35,11 @@ const (
 	AstronomicalUnit             // AU
 	LightYear                    // ly
 	Parsec                       // pc
+	Kiloparsec                   // kpc
+	Megaparsec                   // Mpc
+	Gigaparsec                   // Gpc
+	Mil                          // mil: a thousandth of an inch, also called a thou
+	Fathom                       // ftm: 6 ft
 
 	unitCount // the number of units; keep it last
 )
@@ -56,7 +61,7 @@ const (
 // units (m) there are in one unit.
 var definitions = [unitCount]definition{
 	Meter:            {"m", 1},
-	PlanckLength:     {"lp", 1.616255e-35}, // CODATA 2018
+	PlanckLength:     {"lp", 1.616255e-35}, // CODATA 2022
 	Femtometer:       {"fm", 1e-15},
 	Picometer:        {"pm", 1e-12},
 	Angstrom:         {"Å", 1e-10},
@@ -74,4 +79,9 @@ var definitions = [unitCount]definition{
 	AstronomicalUnit: {"AU", astronomicalUnit},
 	LightYear:        {"ly", speedOfLight * julianYear},           // exact (IAU)
 	Parsec:           {"pc", astronomicalUnit * 648000 / math.Pi}, // exact by definition (IAU 2015)
+	Kiloparsec:       {"kpc", astronomicalUnit * 648000 / math.Pi * 1e3},
+	Megaparsec:       {"Mpc", astronomicalUnit * 648000 / math.Pi * 1e6},
+	Gigaparsec:       {"Gpc", astronomicalUnit * 648000 / math.Pi * 1e9},
+	Mil:              {"mil", 0.0254 / 1000},
+	Fathom:           {"ftm", 6 * 0.3048},
 }
