@@ -11,24 +11,46 @@ import (
 	"testing"
 
 	units "github.com/asaphin/go-physics-units"
+	"github.com/asaphin/go-physics-units/absorbeddose"
 	"github.com/asaphin/go-physics-units/acceleration"
+	"github.com/asaphin/go-physics-units/amount"
 	"github.com/asaphin/go-physics-units/angle"
 	"github.com/asaphin/go-physics-units/angularvelocity"
 	"github.com/asaphin/go-physics-units/area"
+	"github.com/asaphin/go-physics-units/capacitance"
 	"github.com/asaphin/go-physics-units/charge"
 	"github.com/asaphin/go-physics-units/current"
 	"github.com/asaphin/go-physics-units/datarate"
 	"github.com/asaphin/go-physics-units/datasize"
 	"github.com/asaphin/go-physics-units/density"
 	"github.com/asaphin/go-physics-units/distance"
+	"github.com/asaphin/go-physics-units/doserate"
 	"github.com/asaphin/go-physics-units/energy"
+	"github.com/asaphin/go-physics-units/energydensity"
+	"github.com/asaphin/go-physics-units/equivalentdose"
+	"github.com/asaphin/go-physics-units/flowrate"
 	"github.com/asaphin/go-physics-units/force"
 	"github.com/asaphin/go-physics-units/frequency"
+	"github.com/asaphin/go-physics-units/fuelconsumption"
+	"github.com/asaphin/go-physics-units/fueleconomy"
+	"github.com/asaphin/go-physics-units/illuminance"
+	"github.com/asaphin/go-physics-units/inductance"
+	"github.com/asaphin/go-physics-units/luminousflux"
+	"github.com/asaphin/go-physics-units/magneticfield"
 	"github.com/asaphin/go-physics-units/mass"
+	"github.com/asaphin/go-physics-units/massflowrate"
+	"github.com/asaphin/go-physics-units/molarity"
+	"github.com/asaphin/go-physics-units/molarmass"
+	"github.com/asaphin/go-physics-units/momentum"
+	"github.com/asaphin/go-physics-units/pace"
 	"github.com/asaphin/go-physics-units/power"
 	"github.com/asaphin/go-physics-units/pressure"
+	"github.com/asaphin/go-physics-units/radioactivity"
+	"github.com/asaphin/go-physics-units/ratio"
 	"github.com/asaphin/go-physics-units/resistance"
+	"github.com/asaphin/go-physics-units/specificenergy"
 	"github.com/asaphin/go-physics-units/time"
+	"github.com/asaphin/go-physics-units/torque"
 	"github.com/asaphin/go-physics-units/velocity"
 	"github.com/asaphin/go-physics-units/voltage"
 	"github.com/asaphin/go-physics-units/volume"
@@ -230,6 +252,160 @@ var (
 		unitA: angularvelocity.RevolutionPerSecond, unitB: angularvelocity.RevolutionPerMinute, ratio: 60,
 		baseUnit: angularvelocity.BaseUnit, baseRatio: 2 * math.Pi, foreignSymbol: frequency.Hertz.String(),
 	}
+	torqueCase = typedCase[units.Torque, torque.Unit]{
+		measureType: units.MeasureTorque,
+		newFn:       units.NewTorque, toFn: units.ToTorque, parseFn: units.StringToTorque,
+		parseUnit: torque.ParseUnit, allUnits: torque.Units, rate: torque.Rate,
+		unitA: torque.PoundForceFoot, unitB: torque.PoundForceInch, ratio: 12,
+		baseUnit: torque.BaseUnit, baseRatio: 1.3558179483314004, foreignSymbol: force.Newton.String(),
+	}
+	flowRateCase = typedCase[units.FlowRate, flowrate.Unit]{
+		measureType: units.MeasureFlowRate,
+		newFn:       units.NewFlowRate, toFn: units.ToFlowRate, parseFn: units.StringToFlowRate,
+		parseUnit: flowrate.ParseUnit, allUnits: flowrate.Units, rate: flowrate.Rate,
+		unitA: flowrate.CubicMeterPerHour, unitB: flowrate.LiterPerMinute, ratio: 1000.0 / 60,
+		baseUnit: flowrate.BaseUnit, baseRatio: 1.0 / 3600, foreignSymbol: volume.Liter.String(),
+	}
+	massFlowRateCase = typedCase[units.MassFlowRate, massflowrate.Unit]{
+		measureType: units.MeasureMassFlowRate,
+		newFn:       units.NewMassFlowRate, toFn: units.ToMassFlowRate, parseFn: units.StringToMassFlowRate,
+		parseUnit: massflowrate.ParseUnit, allUnits: massflowrate.Units, rate: massflowrate.Rate,
+		unitA: massflowrate.TonnePerHour, unitB: massflowrate.KilogramPerMinute, ratio: 1000.0 / 60,
+		baseUnit: massflowrate.BaseUnit, baseRatio: 1000.0 / 3600, foreignSymbol: mass.Kilogram.String(),
+	}
+	momentumCase = typedCase[units.Momentum, momentum.Unit]{
+		measureType: units.MeasureMomentum,
+		newFn:       units.NewMomentum, toFn: units.ToMomentum, parseFn: units.StringToMomentum,
+		parseUnit: momentum.ParseUnit, allUnits: momentum.Units, rate: momentum.Rate,
+		unitA: momentum.PoundForceSecond, unitB: momentum.NewtonSecond, ratio: 4.4482216152605,
+		baseUnit: momentum.BaseUnit, baseRatio: 4.4482216152605, foreignSymbol: force.Newton.String(),
+	}
+	paceCase = typedCase[units.Pace, pace.Unit]{
+		measureType: units.MeasurePace,
+		newFn:       units.NewPace, toFn: units.ToPace, parseFn: units.StringToPace,
+		parseUnit: pace.ParseUnit, allUnits: pace.Units, rate: pace.Rate,
+		unitA: pace.MinutePerKilometer, unitB: pace.SecondPerKilometer, ratio: 60,
+		baseUnit: pace.BaseUnit, baseRatio: 0.06, foreignSymbol: velocity.KilometerPerHour.String(),
+	}
+	fuelEconomyCase = typedCase[units.FuelEconomy, fueleconomy.Unit]{
+		measureType: units.MeasureFuelEconomy,
+		newFn:       units.NewFuelEconomy, toFn: units.ToFuelEconomy, parseFn: units.StringToFuelEconomy,
+		parseUnit: fueleconomy.ParseUnit, allUnits: fueleconomy.Units, rate: fueleconomy.Rate,
+		unitA: fueleconomy.MilePerGallon, unitB: fueleconomy.KilometerPerLiter, ratio: 0.4251437074302721,
+		baseUnit: fueleconomy.BaseUnit, baseRatio: 425143.7074302721, foreignSymbol: volume.Liter.String(),
+	}
+	fuelConsumptionCase = typedCase[units.FuelConsumption, fuelconsumption.Unit]{
+		measureType: units.MeasureFuelConsumption,
+		newFn:       units.NewFuelConsumption, toFn: units.ToFuelConsumption, parseFn: units.StringToFuelConsumption,
+		parseUnit: fuelconsumption.ParseUnit, allUnits: fuelconsumption.Units, rate: fuelconsumption.Rate,
+		unitA: fuelconsumption.LiterPerKilometer, unitB: fuelconsumption.LiterPer100Kilometers, ratio: 100,
+		baseUnit: fuelconsumption.BaseUnit, baseRatio: 1e-6, foreignSymbol: distance.Kilometer.String(),
+	}
+	amountCase = typedCase[units.Amount, amount.Unit]{
+		measureType: units.MeasureAmount,
+		newFn:       units.NewAmount, toFn: units.ToAmount, parseFn: units.StringToAmount,
+		parseUnit: amount.ParseUnit, allUnits: amount.Units, rate: amount.Rate,
+		unitA: amount.Millimole, unitB: amount.Micromole, ratio: 1000,
+		baseUnit: amount.BaseUnit, baseRatio: 1e-3, foreignSymbol: mass.Gram.String(),
+	}
+	molarMassCase = typedCase[units.MolarMass, molarmass.Unit]{
+		measureType: units.MeasureMolarMass,
+		newFn:       units.NewMolarMass, toFn: units.ToMolarMass, parseFn: units.StringToMolarMass,
+		parseUnit: molarmass.ParseUnit, allUnits: molarmass.Units, rate: molarmass.Rate,
+		unitA: molarmass.KilogramPerMole, unitB: molarmass.GramPerMole, ratio: 1000,
+		baseUnit: molarmass.BaseUnit, baseRatio: 1, foreignSymbol: mass.Gram.String(),
+	}
+	molarityCase = typedCase[units.Molarity, molarity.Unit]{
+		measureType: units.MeasureMolarity,
+		newFn:       units.NewMolarity, toFn: units.ToMolarity, parseFn: units.StringToMolarity,
+		parseUnit: molarity.ParseUnit, allUnits: molarity.Units, rate: molarity.Rate,
+		unitA: molarity.Molar, unitB: molarity.Millimolar, ratio: 1000,
+		baseUnit: molarity.BaseUnit, baseRatio: 1000, foreignSymbol: amount.Mole.String(),
+	}
+	radioactivityCase = typedCase[units.Radioactivity, radioactivity.Unit]{
+		measureType: units.MeasureRadioactivity,
+		newFn:       units.NewRadioactivity, toFn: units.ToRadioactivity, parseFn: units.StringToRadioactivity,
+		parseUnit: radioactivity.ParseUnit, allUnits: radioactivity.Units, rate: radioactivity.Rate,
+		unitA: radioactivity.Curie, unitB: radioactivity.Gigabecquerel, ratio: 37,
+		baseUnit: radioactivity.BaseUnit, baseRatio: 3.7e10, foreignSymbol: frequency.Hertz.String(),
+	}
+	absorbedDoseCase = typedCase[units.AbsorbedDose, absorbeddose.Unit]{
+		measureType: units.MeasureAbsorbedDose,
+		newFn:       units.NewAbsorbedDose, toFn: units.ToAbsorbedDose, parseFn: units.StringToAbsorbedDose,
+		parseUnit: absorbeddose.ParseUnit, allUnits: absorbeddose.Units, rate: absorbeddose.Rate,
+		unitA: absorbeddose.Gray, unitB: absorbeddose.Rad, ratio: 100,
+		baseUnit: absorbeddose.BaseUnit, baseRatio: 1, foreignSymbol: equivalentdose.Sievert.String(),
+	}
+	equivalentDoseCase = typedCase[units.EquivalentDose, equivalentdose.Unit]{
+		measureType: units.MeasureEquivalentDose,
+		newFn:       units.NewEquivalentDose, toFn: units.ToEquivalentDose, parseFn: units.StringToEquivalentDose,
+		parseUnit: equivalentdose.ParseUnit, allUnits: equivalentdose.Units, rate: equivalentdose.Rate,
+		unitA: equivalentdose.Rem, unitB: equivalentdose.Millisievert, ratio: 10,
+		baseUnit: equivalentdose.BaseUnit, baseRatio: 0.01, foreignSymbol: absorbeddose.Gray.String(),
+	}
+	doseRateCase = typedCase[units.DoseRate, doserate.Unit]{
+		measureType: units.MeasureDoseRate,
+		newFn:       units.NewDoseRate, toFn: units.ToDoseRate, parseFn: units.StringToDoseRate,
+		parseUnit: doserate.ParseUnit, allUnits: doserate.Units, rate: doserate.Rate,
+		unitA: doserate.MillisievertPerHour, unitB: doserate.MicrosievertPerHour, ratio: 1000,
+		baseUnit: doserate.BaseUnit, baseRatio: 1e-3 / 3600, foreignSymbol: equivalentdose.Sievert.String(),
+	}
+	capacitanceCase = typedCase[units.Capacitance, capacitance.Unit]{
+		measureType: units.MeasureCapacitance,
+		newFn:       units.NewCapacitance, toFn: units.ToCapacitance, parseFn: units.StringToCapacitance,
+		parseUnit: capacitance.ParseUnit, allUnits: capacitance.Units, rate: capacitance.Rate,
+		unitA: capacitance.Microfarad, unitB: capacitance.Nanofarad, ratio: 1000,
+		baseUnit: capacitance.BaseUnit, baseRatio: 1e-6, foreignSymbol: charge.Coulomb.String(),
+	}
+	inductanceCase = typedCase[units.Inductance, inductance.Unit]{
+		measureType: units.MeasureInductance,
+		newFn:       units.NewInductance, toFn: units.ToInductance, parseFn: units.StringToInductance,
+		parseUnit: inductance.ParseUnit, allUnits: inductance.Units, rate: inductance.Rate,
+		unitA: inductance.Millihenry, unitB: inductance.Microhenry, ratio: 1000,
+		baseUnit: inductance.BaseUnit, baseRatio: 1e-3, foreignSymbol: resistance.Ohm.String(),
+	}
+	magneticFieldCase = typedCase[units.MagneticField, magneticfield.Unit]{
+		measureType: units.MeasureMagneticField,
+		newFn:       units.NewMagneticField, toFn: units.ToMagneticField, parseFn: units.StringToMagneticField,
+		parseUnit: magneticfield.ParseUnit, allUnits: magneticfield.Units, rate: magneticfield.Rate,
+		unitA: magneticfield.Gauss, unitB: magneticfield.Microtesla, ratio: 100,
+		baseUnit: magneticfield.BaseUnit, baseRatio: 1e-4, foreignSymbol: mass.Gram.String(),
+	}
+	illuminanceCase = typedCase[units.Illuminance, illuminance.Unit]{
+		measureType: units.MeasureIlluminance,
+		newFn:       units.NewIlluminance, toFn: units.ToIlluminance, parseFn: units.StringToIlluminance,
+		parseUnit: illuminance.ParseUnit, allUnits: illuminance.Units, rate: illuminance.Rate,
+		unitA: illuminance.Phot, unitB: illuminance.Lux, ratio: 1e4,
+		baseUnit: illuminance.BaseUnit, baseRatio: 1e4, foreignSymbol: luminousflux.Lumen.String(),
+	}
+	luminousFluxCase = typedCase[units.LuminousFlux, luminousflux.Unit]{
+		measureType: units.MeasureLuminousFlux,
+		newFn:       units.NewLuminousFlux, toFn: units.ToLuminousFlux, parseFn: units.StringToLuminousFlux,
+		parseUnit: luminousflux.ParseUnit, allUnits: luminousflux.Units, rate: luminousflux.Rate,
+		unitA: luminousflux.Kilolumen, unitB: luminousflux.Lumen, ratio: 1000,
+		baseUnit: luminousflux.BaseUnit, baseRatio: 1000, foreignSymbol: illuminance.Lux.String(),
+	}
+	specificEnergyCase = typedCase[units.SpecificEnergy, specificenergy.Unit]{
+		measureType: units.MeasureSpecificEnergy,
+		newFn:       units.NewSpecificEnergy, toFn: units.ToSpecificEnergy, parseFn: units.StringToSpecificEnergy,
+		parseUnit: specificenergy.ParseUnit, allUnits: specificenergy.Units, rate: specificenergy.Rate,
+		unitA: specificenergy.KilowattHourPerKilogram, unitB: specificenergy.WattHourPerKilogram, ratio: 1000,
+		baseUnit: specificenergy.BaseUnit, baseRatio: 3.6e6, foreignSymbol: energy.Joule.String(),
+	}
+	energyDensityCase = typedCase[units.EnergyDensity, energydensity.Unit]{
+		measureType: units.MeasureEnergyDensity,
+		newFn:       units.NewEnergyDensity, toFn: units.ToEnergyDensity, parseFn: units.StringToEnergyDensity,
+		parseUnit: energydensity.ParseUnit, allUnits: energydensity.Units, rate: energydensity.Rate,
+		unitA: energydensity.MegajoulePerLiter, unitB: energydensity.WattHourPerLiter, ratio: 1e9 / 3.6e6,
+		baseUnit: energydensity.BaseUnit, baseRatio: 1e9, foreignSymbol: pressure.Pascal.String(),
+	}
+	ratioCase = typedCase[units.Ratio, ratio.Unit]{
+		measureType: units.MeasureRatio,
+		newFn:       units.NewRatio, toFn: units.ToRatio, parseFn: units.StringToRatio,
+		parseUnit: ratio.ParseUnit, allUnits: ratio.Units, rate: ratio.Rate,
+		unitA: ratio.Percent, unitB: ratio.BasisPoint, ratio: 100,
+		baseUnit: ratio.BaseUnit, baseRatio: 0.01, foreignSymbol: time.Second.String(),
+	}
 )
 
 func TestTypedMeasures(t *testing.T) {
@@ -260,6 +436,67 @@ func TestTypedMeasures(t *testing.T) {
 		"angular velocity",
 		func(t *testing.T) { testTypedMeasure(t, angularVelocityCase); testUnitPackage(t, angularVelocityCase) },
 	)
+	t.Run("torque", func(t *testing.T) { testTypedMeasure(t, torqueCase); testUnitPackage(t, torqueCase) })
+	t.Run("flow rate", func(t *testing.T) { testTypedMeasure(t, flowRateCase); testUnitPackage(t, flowRateCase) })
+	t.Run(
+		"mass flow rate",
+		func(t *testing.T) { testTypedMeasure(t, massFlowRateCase); testUnitPackage(t, massFlowRateCase) },
+	)
+	t.Run("momentum", func(t *testing.T) { testTypedMeasure(t, momentumCase); testUnitPackage(t, momentumCase) })
+	t.Run("pace", func(t *testing.T) { testTypedMeasure(t, paceCase); testUnitPackage(t, paceCase) })
+	t.Run(
+		"fuel economy",
+		func(t *testing.T) { testTypedMeasure(t, fuelEconomyCase); testUnitPackage(t, fuelEconomyCase) },
+	)
+	t.Run(
+		"fuel consumption",
+		func(t *testing.T) { testTypedMeasure(t, fuelConsumptionCase); testUnitPackage(t, fuelConsumptionCase) },
+	)
+	t.Run("amount of substance", func(t *testing.T) { testTypedMeasure(t, amountCase); testUnitPackage(t, amountCase) })
+	t.Run("molar mass", func(t *testing.T) { testTypedMeasure(t, molarMassCase); testUnitPackage(t, molarMassCase) })
+	t.Run(
+		"molar concentration",
+		func(t *testing.T) { testTypedMeasure(t, molarityCase); testUnitPackage(t, molarityCase) },
+	)
+	t.Run(
+		"radioactivity",
+		func(t *testing.T) { testTypedMeasure(t, radioactivityCase); testUnitPackage(t, radioactivityCase) },
+	)
+	t.Run(
+		"absorbed dose",
+		func(t *testing.T) { testTypedMeasure(t, absorbedDoseCase); testUnitPackage(t, absorbedDoseCase) },
+	)
+	t.Run(
+		"equivalent dose",
+		func(t *testing.T) { testTypedMeasure(t, equivalentDoseCase); testUnitPackage(t, equivalentDoseCase) },
+	)
+	t.Run("dose rate", func(t *testing.T) { testTypedMeasure(t, doseRateCase); testUnitPackage(t, doseRateCase) })
+	t.Run(
+		"capacitance",
+		func(t *testing.T) { testTypedMeasure(t, capacitanceCase); testUnitPackage(t, capacitanceCase) },
+	)
+	t.Run("inductance", func(t *testing.T) { testTypedMeasure(t, inductanceCase); testUnitPackage(t, inductanceCase) })
+	t.Run(
+		"magnetic flux density",
+		func(t *testing.T) { testTypedMeasure(t, magneticFieldCase); testUnitPackage(t, magneticFieldCase) },
+	)
+	t.Run(
+		"illuminance",
+		func(t *testing.T) { testTypedMeasure(t, illuminanceCase); testUnitPackage(t, illuminanceCase) },
+	)
+	t.Run(
+		"luminous flux",
+		func(t *testing.T) { testTypedMeasure(t, luminousFluxCase); testUnitPackage(t, luminousFluxCase) },
+	)
+	t.Run(
+		"specific energy",
+		func(t *testing.T) { testTypedMeasure(t, specificEnergyCase); testUnitPackage(t, specificEnergyCase) },
+	)
+	t.Run(
+		"energy density",
+		func(t *testing.T) { testTypedMeasure(t, energyDensityCase); testUnitPackage(t, energyDensityCase) },
+	)
+	t.Run("ratio", func(t *testing.T) { testTypedMeasure(t, ratioCase); testUnitPackage(t, ratioCase) })
 }
 
 func testTypedMeasure[T typedMeasure[T, U], U unitType](t *testing.T, c typedCase[T, U]) {
@@ -482,7 +719,7 @@ func testText[T typedMeasure[T, U], U unitType](t *testing.T, x T, parse func(st
 
 // testGenericMethods checks the Measurement methods of x, which is 2 in some
 // unit, and y, which is 1 in unitB = 1/ratio of x's unit.
-func testGenericMethods(t *testing.T, x, y units.Measurement, unitB string, ratio float64, foreignSymbol string) {
+func testGenericMethods(t *testing.T, x, y units.Measurement, unitB string, unitRatio float64, foreignSymbol string) {
 	t.Helper()
 
 	converted, err := x.ConvertToMeasurement(unitB)
@@ -490,7 +727,7 @@ func testGenericMethods(t *testing.T, x, y units.Measurement, unitB string, rati
 		t.Fatal(err)
 	}
 
-	assertMeasurement(t, converted, 2*ratio, unitB)
+	assertMeasurement(t, converted, 2*unitRatio, unitB)
 
 	if bad, convErr := x.ConvertToMeasurement(foreignSymbol); !errors.Is(convErr, units.ErrUnknownUnit) || bad != nil {
 		t.Errorf("ConvertToMeasurement(%s) = %v, %v; want nil and ErrUnknownUnit", foreignSymbol, bad, convErr)
@@ -501,14 +738,14 @@ func testGenericMethods(t *testing.T, x, y units.Measurement, unitB string, rati
 		t.Fatal(err)
 	}
 
-	assertMeasurement(t, sum, 2+1/ratio, x.Symbol())
+	assertMeasurement(t, sum, 2+1/unitRatio, x.Symbol())
 
 	diff, err := x.SubMeasurement(y)
 	if err != nil {
 		t.Fatal(err)
 	}
 
-	assertMeasurement(t, diff, 2-1/ratio, x.Symbol())
+	assertMeasurement(t, diff, 2-1/unitRatio, x.Symbol())
 	assertMeasurement(t, x.MulMeasurement(3), 6, x.Symbol())
 
 	quot, err := x.DivMeasurement(4)
@@ -526,8 +763,8 @@ func testGenericMethods(t *testing.T, x, y units.Measurement, unitB string, rati
 		t.Errorf("CompareMeasurement with itself = %d, %v; want 0", c, cmpErr)
 	}
 
-	if c, cmpErr := x.CompareMeasurement(y); cmpErr != nil || c != cmp.Compare(2, 1/ratio) {
-		t.Errorf("CompareMeasurement = %d, %v; want %d", c, cmpErr, cmp.Compare(2, 1/ratio))
+	if c, cmpErr := x.CompareMeasurement(y); cmpErr != nil || c != cmp.Compare(2, 1/unitRatio) {
+		t.Errorf("CompareMeasurement = %d, %v; want %d", c, cmpErr, cmp.Compare(2, 1/unitRatio))
 	}
 
 	foreign, err := units.NewMeasurement(1, foreignSymbol)
