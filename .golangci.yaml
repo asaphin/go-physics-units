@@ -159,9 +159,11 @@ linters:
       check:
         - switch
         - mapliteral
-      # The registries list the predefined measures; custom is not one of them.
+      # Maps keyed by measure list the Measurement measures. Custom isn't one,
+      # and temperatures aren't Measurements.
       ignore-constants:
         - MeasureCustom$
+        - MeasureTemperature$
 
     forbidigo:
       analyze-types: true

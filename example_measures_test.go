@@ -18,6 +18,7 @@ import (
 	"github.com/asaphin/go-physics-units/mass"
 	"github.com/asaphin/go-physics-units/power"
 	"github.com/asaphin/go-physics-units/pressure"
+	"github.com/asaphin/go-physics-units/temperature"
 	"github.com/asaphin/go-physics-units/time"
 	"github.com/asaphin/go-physics-units/velocity"
 	"github.com/asaphin/go-physics-units/volume"
@@ -283,4 +284,43 @@ func ExampleDataSize_DivideByDataRate() {
 	d, _ := t.ToDuration()
 	fmt.Println(t, d)
 	// Output: 376 s 6m16s
+}
+
+func ExampleNewTemperature() {
+	room, err := units.NewTemperature(20, temperature.Celsius)
+	if err != nil {
+		panic(err) // below absolute zero
+	}
+
+	fmt.Println(room.ConvertTo(temperature.Fahrenheit))
+	fmt.Println(room.Kelvin())
+
+	_, err = units.NewTemperature(-300, temperature.Celsius)
+	fmt.Println(err)
+	// Output:
+	// 68 °F
+	// 293.15
+	// temperature -300 °C is below absolute zero, -273.15 °C
+}
+
+// The difference of two temperatures is a TemperatureDifference, which
+// converts without an offset.
+func ExampleTemperature_Sub() {
+	morning, _ := units.StringToTemperature("12 °C")
+	noon, _ := units.StringToTemperature("77 °F")
+
+	rise := noon.Sub(morning) // in °F, the receiver's unit
+	fmt.Printf("%.1f\n", rise)
+	fmt.Printf("%.1f\n", rise.ConvertTo(temperature.Celsius))
+
+	evening, err := noon.SubDifference(units.NewTemperatureDifference(5, temperature.Kelvin))
+	if err != nil {
+		panic(err) // below absolute zero
+	}
+
+	fmt.Printf("%.1f\n", evening)
+	// Output:
+	// 23.4 °F
+	// 13.0 °C
+	// 68.0 °F
 }

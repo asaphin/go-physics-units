@@ -75,7 +75,7 @@ type genericValue struct {
 func NewMeasurement(value float64, symbol string) (Measurement, error) {
 	pu, ok := predefinedUnits[rates.CanonicalUnit(symbol)]
 	if !ok {
-		return nil, unknownUnitError("", symbol)
+		return nil, unknownSymbolError(symbol)
 	}
 
 	return pu.box(value, pu.unit), nil

@@ -6,6 +6,7 @@ import (
 	"testing"
 
 	"github.com/asaphin/go-physics-units/internal/rates"
+	"github.com/asaphin/go-physics-units/temperature"
 )
 
 func TestMeasuresSelfCheck(t *testing.T) {
@@ -34,6 +35,12 @@ func TestMeasuresSelfCheck(t *testing.T) {
 	if len(duplicates) != 0 {
 		slices.Sort(duplicates)
 		t.Errorf("non unique units found: %s", strings.Join(duplicates, "; "))
+	}
+
+	for u := range temperature.Units() {
+		if other, ok := seen[u.String()]; ok {
+			t.Errorf("temperature symbol %s is also a %s unit", u, other)
+		}
 	}
 
 	if len(predefinedUnits) != len(seen) {

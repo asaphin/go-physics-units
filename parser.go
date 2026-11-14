@@ -275,7 +275,7 @@ func (p *parser) resolve(symbol string) (parsedUnit, error) {
 		}
 	}
 
-	return parsedUnit{}, unknownUnitError("", symbol)
+	return parsedUnit{}, unknownSymbolError(symbol)
 }
 
 // lookupFolded looks canonical up in the case-insensitive index. Short ASCII

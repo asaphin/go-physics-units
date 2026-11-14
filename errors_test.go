@@ -11,6 +11,7 @@ import (
 	"github.com/asaphin/go-physics-units/conversion"
 	"github.com/asaphin/go-physics-units/distance"
 	"github.com/asaphin/go-physics-units/mass"
+	"github.com/asaphin/go-physics-units/temperature"
 	"github.com/asaphin/go-physics-units/time"
 )
 
@@ -67,7 +68,16 @@ func TestErrors(t *testing.T) {
 			units.ErrUnknownUnit, "unknown distance unit distance.Unit(200)",
 		},
 
+		{
+			"StringToTemperature", errOf(units.StringToTemperature("1 C")),
+			units.ErrUnknownUnit, "unknown temperature unit C",
+		},
+
 		{"ToDistance", errOf(units.ToDistance(kg)), units.ErrIncompatibleMeasures, "not a distance measure"},
+		{
+			"ParseString of a temperature", errOf(units.ParseString("20 °C")), units.ErrIncompatibleMeasures,
+			"unit °C is a temperature unit, and temperatures aren't Measurements: use StringToTemperature",
+		},
 		{"ToArea", errOf(units.ToArea(nil)), units.ErrIncompatibleMeasures, "not an area measure"},
 		{"ToQuantity", errOf(units.ToQuantity[currency](km)), units.ErrIncompatibleMeasures, "not a currency measure"},
 		{
@@ -89,6 +99,10 @@ func TestErrors(t *testing.T) {
 		{
 			"ToDuration", errOf(units.NewTime(293, time.Year).ToDuration()),
 			units.ErrOutOfRange, "time 293 yr can't be represented as a time.Duration",
+		},
+		{
+			"below absolute zero", errOf(units.NewTemperature(-300, temperature.Celsius)),
+			units.ErrOutOfRange, "temperature -300 °C is below absolute zero, -273.15 °C",
 		},
 		{
 			"MarshalText of NaN", errOf(units.NewDistance(math.NaN(), distance.Meter).MarshalText()),

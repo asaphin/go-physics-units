@@ -2,7 +2,10 @@ package units
 
 //go:generate go run ./internal/gen
 
-import "github.com/asaphin/go-physics-units/internal/rates"
+import (
+	"github.com/asaphin/go-physics-units/internal/rates"
+	"github.com/asaphin/go-physics-units/temperature"
+)
 
 // MeasureType identifies a measure (a kind of physical quantity), such as
 // distance or time. Measurements can only be combined with measurements of the
@@ -30,6 +33,10 @@ const (
 	MeasureDensity      MeasureType = "density"
 	MeasureDataRate     MeasureType = "data rate"
 	MeasureCustom       MeasureType = "custom"
+
+	// MeasureTemperature names the temperature measure in errors and in
+	// DetectMeasureType. Temperatures aren't Measurements: see Temperature.
+	MeasureTemperature MeasureType = "temperature"
 )
 
 // parsedUnit is what a symbol denotes: a unit of a unit set, and how to make
@@ -61,19 +68,36 @@ func buildUnitIndex() map[string]parsedUnit {
 }
 
 // DetectMeasureType returns the predefined measure that the unit symbol belongs
-// to, or MeasureCustom if it isn't a predefined symbol.
+// to, MeasureTemperature for a temperature symbol, or MeasureCustom if it isn't
+// a predefined symbol.
 func DetectMeasureType(symbol string) MeasureType {
 	if pu, ok := predefinedUnits[rates.CanonicalUnit(symbol)]; ok {
 		return pu.set.name
 	}
 
+	if _, ok := temperature.ParseUnit(symbol); ok {
+		return MeasureTemperature
+	}
+
 	return MeasureCustom
 }
 
+// unknownSymbolError returns the error for a symbol that no Measurement has.
+// Temperature symbols get an error of their own, which says where to parse
+// them.
+func unknownSymbolError(symbol string) error {
+	if _, ok := temperature.ParseUnit(symbol); ok {
+		return newError(ErrIncompatibleMeasures, "unit "+symbol+
+			" is a temperature unit, and temperatures aren't Measurements: use StringToTemperature", nil)
+	}
+
+	return unknownUnitError("", symbol)
+}
+
 // isReservedMeasureType reports whether mt is the name of a predefined
-// measure, or MeasureCustom.
+// measure, MeasureTemperature or MeasureCustom.
 func isReservedMeasureType(mt MeasureType) bool {
-	if mt == MeasureCustom {
+	if mt == MeasureCustom || mt == MeasureTemperature {
 		return true
 	}
 

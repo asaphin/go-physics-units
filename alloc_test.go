@@ -7,6 +7,7 @@ import (
 
 	units "github.com/asaphin/go-physics-units"
 	"github.com/asaphin/go-physics-units/distance"
+	"github.com/asaphin/go-physics-units/temperature"
 	"github.com/asaphin/go-physics-units/time"
 )
 
@@ -29,6 +30,8 @@ func TestAllocations(t *testing.T) {
 	var m500m units.Measurement = m500
 	hour := units.NewTime(1, time.Hour)
 	eur := units.NewQuantity(1, eurUnit)
+	room := units.Temperature{} // 0 K
+	rise := units.NewTemperatureDifference(10, temperature.Celsius)
 
 	parser, err := units.NewParser(units.AllowNoSpace(), units.CaseInsensitive())
 	if err != nil {
@@ -60,6 +63,9 @@ func TestAllocations(t *testing.T) {
 		{"Quantity.Add", 0, func() { sinkMoney = eur.Add(eur) }},
 		{"Quantity.ConvertTo", 0, func() { sinkMoney = eur.ConvertTo(usdUnit) }},
 		{"ParseQuantity", 0, func() { sinkMoney, errSink = units.ParseQuantity[currency]("1 EUR") }},
+		{"Temperature.ConvertTo", 0, func() { sinkTemperature = room.ConvertTo(temperature.Fahrenheit) }},
+		{"Temperature.Add", 0, func() { sinkTemperature, errSink = room.Add(rise) }},
+		{"Temperature.Sub", 0, func() { sinkDifference = room.Sub(room) }},
 		{"CompareMeasurement", 0, func() { sinkInt, errSink = km.CompareMeasurement(m500m) }},
 		{"AppendText", 0, func() { sinkBytes, errSink = km.AppendText(buf[:0]) }},
 

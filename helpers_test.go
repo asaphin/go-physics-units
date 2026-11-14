@@ -18,6 +18,8 @@ var (
 	sinkVelocity    units.Velocity
 	sinkMeasurement units.Measurement
 	sinkMoney       Money
+	sinkTemperature units.Temperature
+	sinkDifference  units.TemperatureDifference
 	sinkUnit        distance.Unit
 	sinkString      string
 	sinkBytes       []byte
@@ -45,9 +47,16 @@ func almostEqual(a, b, epsilon float64) bool {
 	return diff/(absA+absB) < epsilon
 }
 
+// valueWithSymbol is what assertMeasurement checks: a Measurement, or a
+// temperature, which isn't one.
+type valueWithSymbol interface {
+	Value() float64
+	Symbol() string
+}
+
 // assertMeasurement fails the test unless m has the given value (within a
 // relative error of 1e-12) and unit.
-func assertMeasurement(t *testing.T, m units.Measurement, value float64, unit string) {
+func assertMeasurement(t *testing.T, m valueWithSymbol, value float64, unit string) {
 	t.Helper()
 
 	if m == nil {
