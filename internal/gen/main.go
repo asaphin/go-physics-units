@@ -449,6 +449,18 @@ func ({{.Recv}} {{.Type}}) EqualWithinRel(other {{.Type}}, tol float64) bool {
 	return equalWithinRel(x, y, tol)
 }
 
+// Ratio returns {{.Recv}}/other, the ratio of the {{.Plural}}, in ratio.BaseUnit:
+// convert it with ConvertTo(ratio.Percent) for a percentage. It fails with
+// ErrZeroDivision if other is zero.
+func ({{.Recv}} {{.Type}}) Ratio(other {{.Type}}) (Ratio, error) {
+	x, y := {{.Recv}}.common(other)
+	if y == 0 {
+		return Ratio{}, ErrZeroDivision
+	}
+
+	return Ratio{value: x / y, unit: ratio.BaseUnit}, nil
+}
+
 // common returns the values of the {{.Plural}} in a common unit: their own if
 // they share it, otherwise the base unit. Either way the result doesn't depend
 // on the order of the operands, so comparisons are symmetric.

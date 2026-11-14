@@ -1,6 +1,7 @@
 package units
 
 import (
+	"github.com/asaphin/go-physics-units/charge"
 	"github.com/asaphin/go-physics-units/current"
 	"github.com/asaphin/go-physics-units/energy"
 	"github.com/asaphin/go-physics-units/power"
@@ -46,4 +47,9 @@ func (v Voltage) DivideByResistance(r Resistance) (Current, error) {
 // MultiplyByCharge returns the energy v·q (J) in energy.BaseUnit.
 func (v Voltage) MultiplyByCharge(q Charge) Energy {
 	return Energy{value: v.baseValue() * q.baseValue(), unit: energy.BaseUnit}
+}
+
+// MultiplyByCapacitance returns the charge v·c (C) in charge.BaseUnit: the charge a capacitor c holds.
+func (v Voltage) MultiplyByCapacitance(c Capacitance) Charge {
+	return Charge{value: v.baseValue() * c.baseValue(), unit: charge.BaseUnit}
 }

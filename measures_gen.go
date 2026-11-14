@@ -339,6 +339,18 @@ func (d Distance) EqualWithinRel(other Distance, tol float64) bool {
 	return equalWithinRel(x, y, tol)
 }
 
+// Ratio returns d/other, the ratio of the distances, in ratio.BaseUnit:
+// convert it with ConvertTo(ratio.Percent) for a percentage. It fails with
+// ErrZeroDivision if other is zero.
+func (d Distance) Ratio(other Distance) (Ratio, error) {
+	x, y := d.common(other)
+	if y == 0 {
+		return Ratio{}, ErrZeroDivision
+	}
+
+	return Ratio{value: x / y, unit: ratio.BaseUnit}, nil
+}
+
 // common returns the values of the distances in a common unit: their own if
 // they share it, otherwise the base unit. Either way the result doesn't depend
 // on the order of the operands, so comparisons are symmetric.
@@ -573,6 +585,18 @@ func (t Time) EqualWithinRel(other Time, tol float64) bool {
 	x, y := t.common(other)
 
 	return equalWithinRel(x, y, tol)
+}
+
+// Ratio returns t/other, the ratio of the times, in ratio.BaseUnit:
+// convert it with ConvertTo(ratio.Percent) for a percentage. It fails with
+// ErrZeroDivision if other is zero.
+func (t Time) Ratio(other Time) (Ratio, error) {
+	x, y := t.common(other)
+	if y == 0 {
+		return Ratio{}, ErrZeroDivision
+	}
+
+	return Ratio{value: x / y, unit: ratio.BaseUnit}, nil
 }
 
 // common returns the values of the times in a common unit: their own if
@@ -811,6 +835,18 @@ func (m Mass) EqualWithinRel(other Mass, tol float64) bool {
 	return equalWithinRel(x, y, tol)
 }
 
+// Ratio returns m/other, the ratio of the masses, in ratio.BaseUnit:
+// convert it with ConvertTo(ratio.Percent) for a percentage. It fails with
+// ErrZeroDivision if other is zero.
+func (m Mass) Ratio(other Mass) (Ratio, error) {
+	x, y := m.common(other)
+	if y == 0 {
+		return Ratio{}, ErrZeroDivision
+	}
+
+	return Ratio{value: x / y, unit: ratio.BaseUnit}, nil
+}
+
 // common returns the values of the masses in a common unit: their own if
 // they share it, otherwise the base unit. Either way the result doesn't depend
 // on the order of the operands, so comparisons are symmetric.
@@ -1045,6 +1081,18 @@ func (v Velocity) EqualWithinRel(other Velocity, tol float64) bool {
 	x, y := v.common(other)
 
 	return equalWithinRel(x, y, tol)
+}
+
+// Ratio returns v/other, the ratio of the velocities, in ratio.BaseUnit:
+// convert it with ConvertTo(ratio.Percent) for a percentage. It fails with
+// ErrZeroDivision if other is zero.
+func (v Velocity) Ratio(other Velocity) (Ratio, error) {
+	x, y := v.common(other)
+	if y == 0 {
+		return Ratio{}, ErrZeroDivision
+	}
+
+	return Ratio{value: x / y, unit: ratio.BaseUnit}, nil
 }
 
 // common returns the values of the velocities in a common unit: their own if
@@ -1283,6 +1331,18 @@ func (a Area) EqualWithinRel(other Area, tol float64) bool {
 	return equalWithinRel(x, y, tol)
 }
 
+// Ratio returns a/other, the ratio of the areas, in ratio.BaseUnit:
+// convert it with ConvertTo(ratio.Percent) for a percentage. It fails with
+// ErrZeroDivision if other is zero.
+func (a Area) Ratio(other Area) (Ratio, error) {
+	x, y := a.common(other)
+	if y == 0 {
+		return Ratio{}, ErrZeroDivision
+	}
+
+	return Ratio{value: x / y, unit: ratio.BaseUnit}, nil
+}
+
 // common returns the values of the areas in a common unit: their own if
 // they share it, otherwise the base unit. Either way the result doesn't depend
 // on the order of the operands, so comparisons are symmetric.
@@ -1517,6 +1577,18 @@ func (v Volume) EqualWithinRel(other Volume, tol float64) bool {
 	x, y := v.common(other)
 
 	return equalWithinRel(x, y, tol)
+}
+
+// Ratio returns v/other, the ratio of the volumes, in ratio.BaseUnit:
+// convert it with ConvertTo(ratio.Percent) for a percentage. It fails with
+// ErrZeroDivision if other is zero.
+func (v Volume) Ratio(other Volume) (Ratio, error) {
+	x, y := v.common(other)
+	if y == 0 {
+		return Ratio{}, ErrZeroDivision
+	}
+
+	return Ratio{value: x / y, unit: ratio.BaseUnit}, nil
 }
 
 // common returns the values of the volumes in a common unit: their own if
@@ -1755,6 +1827,18 @@ func (a Acceleration) EqualWithinRel(other Acceleration, tol float64) bool {
 	return equalWithinRel(x, y, tol)
 }
 
+// Ratio returns a/other, the ratio of the accelerations, in ratio.BaseUnit:
+// convert it with ConvertTo(ratio.Percent) for a percentage. It fails with
+// ErrZeroDivision if other is zero.
+func (a Acceleration) Ratio(other Acceleration) (Ratio, error) {
+	x, y := a.common(other)
+	if y == 0 {
+		return Ratio{}, ErrZeroDivision
+	}
+
+	return Ratio{value: x / y, unit: ratio.BaseUnit}, nil
+}
+
 // common returns the values of the accelerations in a common unit: their own if
 // they share it, otherwise the base unit. Either way the result doesn't depend
 // on the order of the operands, so comparisons are symmetric.
@@ -1989,6 +2073,18 @@ func (f Force) EqualWithinRel(other Force, tol float64) bool {
 	x, y := f.common(other)
 
 	return equalWithinRel(x, y, tol)
+}
+
+// Ratio returns f/other, the ratio of the forces, in ratio.BaseUnit:
+// convert it with ConvertTo(ratio.Percent) for a percentage. It fails with
+// ErrZeroDivision if other is zero.
+func (f Force) Ratio(other Force) (Ratio, error) {
+	x, y := f.common(other)
+	if y == 0 {
+		return Ratio{}, ErrZeroDivision
+	}
+
+	return Ratio{value: x / y, unit: ratio.BaseUnit}, nil
 }
 
 // common returns the values of the forces in a common unit: their own if
@@ -2227,6 +2323,18 @@ func (e Energy) EqualWithinRel(other Energy, tol float64) bool {
 	return equalWithinRel(x, y, tol)
 }
 
+// Ratio returns e/other, the ratio of the energies, in ratio.BaseUnit:
+// convert it with ConvertTo(ratio.Percent) for a percentage. It fails with
+// ErrZeroDivision if other is zero.
+func (e Energy) Ratio(other Energy) (Ratio, error) {
+	x, y := e.common(other)
+	if y == 0 {
+		return Ratio{}, ErrZeroDivision
+	}
+
+	return Ratio{value: x / y, unit: ratio.BaseUnit}, nil
+}
+
 // common returns the values of the energies in a common unit: their own if
 // they share it, otherwise the base unit. Either way the result doesn't depend
 // on the order of the operands, so comparisons are symmetric.
@@ -2461,6 +2569,18 @@ func (p Power) EqualWithinRel(other Power, tol float64) bool {
 	x, y := p.common(other)
 
 	return equalWithinRel(x, y, tol)
+}
+
+// Ratio returns p/other, the ratio of the powers, in ratio.BaseUnit:
+// convert it with ConvertTo(ratio.Percent) for a percentage. It fails with
+// ErrZeroDivision if other is zero.
+func (p Power) Ratio(other Power) (Ratio, error) {
+	x, y := p.common(other)
+	if y == 0 {
+		return Ratio{}, ErrZeroDivision
+	}
+
+	return Ratio{value: x / y, unit: ratio.BaseUnit}, nil
 }
 
 // common returns the values of the powers in a common unit: their own if
@@ -2699,6 +2819,18 @@ func (p Pressure) EqualWithinRel(other Pressure, tol float64) bool {
 	return equalWithinRel(x, y, tol)
 }
 
+// Ratio returns p/other, the ratio of the pressures, in ratio.BaseUnit:
+// convert it with ConvertTo(ratio.Percent) for a percentage. It fails with
+// ErrZeroDivision if other is zero.
+func (p Pressure) Ratio(other Pressure) (Ratio, error) {
+	x, y := p.common(other)
+	if y == 0 {
+		return Ratio{}, ErrZeroDivision
+	}
+
+	return Ratio{value: x / y, unit: ratio.BaseUnit}, nil
+}
+
 // common returns the values of the pressures in a common unit: their own if
 // they share it, otherwise the base unit. Either way the result doesn't depend
 // on the order of the operands, so comparisons are symmetric.
@@ -2933,6 +3065,18 @@ func (f Frequency) EqualWithinRel(other Frequency, tol float64) bool {
 	x, y := f.common(other)
 
 	return equalWithinRel(x, y, tol)
+}
+
+// Ratio returns f/other, the ratio of the frequencies, in ratio.BaseUnit:
+// convert it with ConvertTo(ratio.Percent) for a percentage. It fails with
+// ErrZeroDivision if other is zero.
+func (f Frequency) Ratio(other Frequency) (Ratio, error) {
+	x, y := f.common(other)
+	if y == 0 {
+		return Ratio{}, ErrZeroDivision
+	}
+
+	return Ratio{value: x / y, unit: ratio.BaseUnit}, nil
 }
 
 // common returns the values of the frequencies in a common unit: their own if
@@ -3171,6 +3315,18 @@ func (a Angle) EqualWithinRel(other Angle, tol float64) bool {
 	return equalWithinRel(x, y, tol)
 }
 
+// Ratio returns a/other, the ratio of the angles, in ratio.BaseUnit:
+// convert it with ConvertTo(ratio.Percent) for a percentage. It fails with
+// ErrZeroDivision if other is zero.
+func (a Angle) Ratio(other Angle) (Ratio, error) {
+	x, y := a.common(other)
+	if y == 0 {
+		return Ratio{}, ErrZeroDivision
+	}
+
+	return Ratio{value: x / y, unit: ratio.BaseUnit}, nil
+}
+
 // common returns the values of the angles in a common unit: their own if
 // they share it, otherwise the base unit. Either way the result doesn't depend
 // on the order of the operands, so comparisons are symmetric.
@@ -3405,6 +3561,18 @@ func (s DataSize) EqualWithinRel(other DataSize, tol float64) bool {
 	x, y := s.common(other)
 
 	return equalWithinRel(x, y, tol)
+}
+
+// Ratio returns s/other, the ratio of the data sizes, in ratio.BaseUnit:
+// convert it with ConvertTo(ratio.Percent) for a percentage. It fails with
+// ErrZeroDivision if other is zero.
+func (s DataSize) Ratio(other DataSize) (Ratio, error) {
+	x, y := s.common(other)
+	if y == 0 {
+		return Ratio{}, ErrZeroDivision
+	}
+
+	return Ratio{value: x / y, unit: ratio.BaseUnit}, nil
 }
 
 // common returns the values of the data sizes in a common unit: their own if
@@ -3643,6 +3811,18 @@ func (d Density) EqualWithinRel(other Density, tol float64) bool {
 	return equalWithinRel(x, y, tol)
 }
 
+// Ratio returns d/other, the ratio of the densities, in ratio.BaseUnit:
+// convert it with ConvertTo(ratio.Percent) for a percentage. It fails with
+// ErrZeroDivision if other is zero.
+func (d Density) Ratio(other Density) (Ratio, error) {
+	x, y := d.common(other)
+	if y == 0 {
+		return Ratio{}, ErrZeroDivision
+	}
+
+	return Ratio{value: x / y, unit: ratio.BaseUnit}, nil
+}
+
 // common returns the values of the densities in a common unit: their own if
 // they share it, otherwise the base unit. Either way the result doesn't depend
 // on the order of the operands, so comparisons are symmetric.
@@ -3877,6 +4057,18 @@ func (r DataRate) EqualWithinRel(other DataRate, tol float64) bool {
 	x, y := r.common(other)
 
 	return equalWithinRel(x, y, tol)
+}
+
+// Ratio returns r/other, the ratio of the data rates, in ratio.BaseUnit:
+// convert it with ConvertTo(ratio.Percent) for a percentage. It fails with
+// ErrZeroDivision if other is zero.
+func (r DataRate) Ratio(other DataRate) (Ratio, error) {
+	x, y := r.common(other)
+	if y == 0 {
+		return Ratio{}, ErrZeroDivision
+	}
+
+	return Ratio{value: x / y, unit: ratio.BaseUnit}, nil
 }
 
 // common returns the values of the data rates in a common unit: their own if
@@ -4115,6 +4307,18 @@ func (i Current) EqualWithinRel(other Current, tol float64) bool {
 	return equalWithinRel(x, y, tol)
 }
 
+// Ratio returns i/other, the ratio of the electric currents, in ratio.BaseUnit:
+// convert it with ConvertTo(ratio.Percent) for a percentage. It fails with
+// ErrZeroDivision if other is zero.
+func (i Current) Ratio(other Current) (Ratio, error) {
+	x, y := i.common(other)
+	if y == 0 {
+		return Ratio{}, ErrZeroDivision
+	}
+
+	return Ratio{value: x / y, unit: ratio.BaseUnit}, nil
+}
+
 // common returns the values of the electric currents in a common unit: their own if
 // they share it, otherwise the base unit. Either way the result doesn't depend
 // on the order of the operands, so comparisons are symmetric.
@@ -4349,6 +4553,18 @@ func (v Voltage) EqualWithinRel(other Voltage, tol float64) bool {
 	x, y := v.common(other)
 
 	return equalWithinRel(x, y, tol)
+}
+
+// Ratio returns v/other, the ratio of the voltages, in ratio.BaseUnit:
+// convert it with ConvertTo(ratio.Percent) for a percentage. It fails with
+// ErrZeroDivision if other is zero.
+func (v Voltage) Ratio(other Voltage) (Ratio, error) {
+	x, y := v.common(other)
+	if y == 0 {
+		return Ratio{}, ErrZeroDivision
+	}
+
+	return Ratio{value: x / y, unit: ratio.BaseUnit}, nil
 }
 
 // common returns the values of the voltages in a common unit: their own if
@@ -4587,6 +4803,18 @@ func (q Charge) EqualWithinRel(other Charge, tol float64) bool {
 	return equalWithinRel(x, y, tol)
 }
 
+// Ratio returns q/other, the ratio of the electric charges, in ratio.BaseUnit:
+// convert it with ConvertTo(ratio.Percent) for a percentage. It fails with
+// ErrZeroDivision if other is zero.
+func (q Charge) Ratio(other Charge) (Ratio, error) {
+	x, y := q.common(other)
+	if y == 0 {
+		return Ratio{}, ErrZeroDivision
+	}
+
+	return Ratio{value: x / y, unit: ratio.BaseUnit}, nil
+}
+
 // common returns the values of the electric charges in a common unit: their own if
 // they share it, otherwise the base unit. Either way the result doesn't depend
 // on the order of the operands, so comparisons are symmetric.
@@ -4821,6 +5049,18 @@ func (r Resistance) EqualWithinRel(other Resistance, tol float64) bool {
 	x, y := r.common(other)
 
 	return equalWithinRel(x, y, tol)
+}
+
+// Ratio returns r/other, the ratio of the resistances, in ratio.BaseUnit:
+// convert it with ConvertTo(ratio.Percent) for a percentage. It fails with
+// ErrZeroDivision if other is zero.
+func (r Resistance) Ratio(other Resistance) (Ratio, error) {
+	x, y := r.common(other)
+	if y == 0 {
+		return Ratio{}, ErrZeroDivision
+	}
+
+	return Ratio{value: x / y, unit: ratio.BaseUnit}, nil
 }
 
 // common returns the values of the resistances in a common unit: their own if
@@ -5059,6 +5299,18 @@ func (w AngularVelocity) EqualWithinRel(other AngularVelocity, tol float64) bool
 	return equalWithinRel(x, y, tol)
 }
 
+// Ratio returns w/other, the ratio of the angular velocities, in ratio.BaseUnit:
+// convert it with ConvertTo(ratio.Percent) for a percentage. It fails with
+// ErrZeroDivision if other is zero.
+func (w AngularVelocity) Ratio(other AngularVelocity) (Ratio, error) {
+	x, y := w.common(other)
+	if y == 0 {
+		return Ratio{}, ErrZeroDivision
+	}
+
+	return Ratio{value: x / y, unit: ratio.BaseUnit}, nil
+}
+
 // common returns the values of the angular velocities in a common unit: their own if
 // they share it, otherwise the base unit. Either way the result doesn't depend
 // on the order of the operands, so comparisons are symmetric.
@@ -5293,6 +5545,18 @@ func (tq Torque) EqualWithinRel(other Torque, tol float64) bool {
 	x, y := tq.common(other)
 
 	return equalWithinRel(x, y, tol)
+}
+
+// Ratio returns tq/other, the ratio of the torques, in ratio.BaseUnit:
+// convert it with ConvertTo(ratio.Percent) for a percentage. It fails with
+// ErrZeroDivision if other is zero.
+func (tq Torque) Ratio(other Torque) (Ratio, error) {
+	x, y := tq.common(other)
+	if y == 0 {
+		return Ratio{}, ErrZeroDivision
+	}
+
+	return Ratio{value: x / y, unit: ratio.BaseUnit}, nil
 }
 
 // common returns the values of the torques in a common unit: their own if
@@ -5531,6 +5795,18 @@ func (q FlowRate) EqualWithinRel(other FlowRate, tol float64) bool {
 	return equalWithinRel(x, y, tol)
 }
 
+// Ratio returns q/other, the ratio of the flow rates, in ratio.BaseUnit:
+// convert it with ConvertTo(ratio.Percent) for a percentage. It fails with
+// ErrZeroDivision if other is zero.
+func (q FlowRate) Ratio(other FlowRate) (Ratio, error) {
+	x, y := q.common(other)
+	if y == 0 {
+		return Ratio{}, ErrZeroDivision
+	}
+
+	return Ratio{value: x / y, unit: ratio.BaseUnit}, nil
+}
+
 // common returns the values of the flow rates in a common unit: their own if
 // they share it, otherwise the base unit. Either way the result doesn't depend
 // on the order of the operands, so comparisons are symmetric.
@@ -5765,6 +6041,18 @@ func (mr MassFlowRate) EqualWithinRel(other MassFlowRate, tol float64) bool {
 	x, y := mr.common(other)
 
 	return equalWithinRel(x, y, tol)
+}
+
+// Ratio returns mr/other, the ratio of the mass flow rates, in ratio.BaseUnit:
+// convert it with ConvertTo(ratio.Percent) for a percentage. It fails with
+// ErrZeroDivision if other is zero.
+func (mr MassFlowRate) Ratio(other MassFlowRate) (Ratio, error) {
+	x, y := mr.common(other)
+	if y == 0 {
+		return Ratio{}, ErrZeroDivision
+	}
+
+	return Ratio{value: x / y, unit: ratio.BaseUnit}, nil
 }
 
 // common returns the values of the mass flow rates in a common unit: their own if
@@ -6003,6 +6291,18 @@ func (p Momentum) EqualWithinRel(other Momentum, tol float64) bool {
 	return equalWithinRel(x, y, tol)
 }
 
+// Ratio returns p/other, the ratio of the momenta, in ratio.BaseUnit:
+// convert it with ConvertTo(ratio.Percent) for a percentage. It fails with
+// ErrZeroDivision if other is zero.
+func (p Momentum) Ratio(other Momentum) (Ratio, error) {
+	x, y := p.common(other)
+	if y == 0 {
+		return Ratio{}, ErrZeroDivision
+	}
+
+	return Ratio{value: x / y, unit: ratio.BaseUnit}, nil
+}
+
 // common returns the values of the momenta in a common unit: their own if
 // they share it, otherwise the base unit. Either way the result doesn't depend
 // on the order of the operands, so comparisons are symmetric.
@@ -6237,6 +6537,18 @@ func (p Pace) EqualWithinRel(other Pace, tol float64) bool {
 	x, y := p.common(other)
 
 	return equalWithinRel(x, y, tol)
+}
+
+// Ratio returns p/other, the ratio of the paces, in ratio.BaseUnit:
+// convert it with ConvertTo(ratio.Percent) for a percentage. It fails with
+// ErrZeroDivision if other is zero.
+func (p Pace) Ratio(other Pace) (Ratio, error) {
+	x, y := p.common(other)
+	if y == 0 {
+		return Ratio{}, ErrZeroDivision
+	}
+
+	return Ratio{value: x / y, unit: ratio.BaseUnit}, nil
 }
 
 // common returns the values of the paces in a common unit: their own if
@@ -6475,6 +6787,18 @@ func (fe FuelEconomy) EqualWithinRel(other FuelEconomy, tol float64) bool {
 	return equalWithinRel(x, y, tol)
 }
 
+// Ratio returns fe/other, the ratio of the fuel economies, in ratio.BaseUnit:
+// convert it with ConvertTo(ratio.Percent) for a percentage. It fails with
+// ErrZeroDivision if other is zero.
+func (fe FuelEconomy) Ratio(other FuelEconomy) (Ratio, error) {
+	x, y := fe.common(other)
+	if y == 0 {
+		return Ratio{}, ErrZeroDivision
+	}
+
+	return Ratio{value: x / y, unit: ratio.BaseUnit}, nil
+}
+
 // common returns the values of the fuel economies in a common unit: their own if
 // they share it, otherwise the base unit. Either way the result doesn't depend
 // on the order of the operands, so comparisons are symmetric.
@@ -6709,6 +7033,18 @@ func (fc FuelConsumption) EqualWithinRel(other FuelConsumption, tol float64) boo
 	x, y := fc.common(other)
 
 	return equalWithinRel(x, y, tol)
+}
+
+// Ratio returns fc/other, the ratio of the fuel consumptions, in ratio.BaseUnit:
+// convert it with ConvertTo(ratio.Percent) for a percentage. It fails with
+// ErrZeroDivision if other is zero.
+func (fc FuelConsumption) Ratio(other FuelConsumption) (Ratio, error) {
+	x, y := fc.common(other)
+	if y == 0 {
+		return Ratio{}, ErrZeroDivision
+	}
+
+	return Ratio{value: x / y, unit: ratio.BaseUnit}, nil
 }
 
 // common returns the values of the fuel consumptions in a common unit: their own if
@@ -6947,6 +7283,18 @@ func (n Amount) EqualWithinRel(other Amount, tol float64) bool {
 	return equalWithinRel(x, y, tol)
 }
 
+// Ratio returns n/other, the ratio of the amounts of substance, in ratio.BaseUnit:
+// convert it with ConvertTo(ratio.Percent) for a percentage. It fails with
+// ErrZeroDivision if other is zero.
+func (n Amount) Ratio(other Amount) (Ratio, error) {
+	x, y := n.common(other)
+	if y == 0 {
+		return Ratio{}, ErrZeroDivision
+	}
+
+	return Ratio{value: x / y, unit: ratio.BaseUnit}, nil
+}
+
 // common returns the values of the amounts of substance in a common unit: their own if
 // they share it, otherwise the base unit. Either way the result doesn't depend
 // on the order of the operands, so comparisons are symmetric.
@@ -7181,6 +7529,18 @@ func (mm MolarMass) EqualWithinRel(other MolarMass, tol float64) bool {
 	x, y := mm.common(other)
 
 	return equalWithinRel(x, y, tol)
+}
+
+// Ratio returns mm/other, the ratio of the molar masses, in ratio.BaseUnit:
+// convert it with ConvertTo(ratio.Percent) for a percentage. It fails with
+// ErrZeroDivision if other is zero.
+func (mm MolarMass) Ratio(other MolarMass) (Ratio, error) {
+	x, y := mm.common(other)
+	if y == 0 {
+		return Ratio{}, ErrZeroDivision
+	}
+
+	return Ratio{value: x / y, unit: ratio.BaseUnit}, nil
 }
 
 // common returns the values of the molar masses in a common unit: their own if
@@ -7419,6 +7779,18 @@ func (c Molarity) EqualWithinRel(other Molarity, tol float64) bool {
 	return equalWithinRel(x, y, tol)
 }
 
+// Ratio returns c/other, the ratio of the molar concentrations, in ratio.BaseUnit:
+// convert it with ConvertTo(ratio.Percent) for a percentage. It fails with
+// ErrZeroDivision if other is zero.
+func (c Molarity) Ratio(other Molarity) (Ratio, error) {
+	x, y := c.common(other)
+	if y == 0 {
+		return Ratio{}, ErrZeroDivision
+	}
+
+	return Ratio{value: x / y, unit: ratio.BaseUnit}, nil
+}
+
 // common returns the values of the molar concentrations in a common unit: their own if
 // they share it, otherwise the base unit. Either way the result doesn't depend
 // on the order of the operands, so comparisons are symmetric.
@@ -7653,6 +8025,18 @@ func (a Radioactivity) EqualWithinRel(other Radioactivity, tol float64) bool {
 	x, y := a.common(other)
 
 	return equalWithinRel(x, y, tol)
+}
+
+// Ratio returns a/other, the ratio of the radioactivities, in ratio.BaseUnit:
+// convert it with ConvertTo(ratio.Percent) for a percentage. It fails with
+// ErrZeroDivision if other is zero.
+func (a Radioactivity) Ratio(other Radioactivity) (Ratio, error) {
+	x, y := a.common(other)
+	if y == 0 {
+		return Ratio{}, ErrZeroDivision
+	}
+
+	return Ratio{value: x / y, unit: ratio.BaseUnit}, nil
 }
 
 // common returns the values of the radioactivities in a common unit: their own if
@@ -7891,6 +8275,18 @@ func (d AbsorbedDose) EqualWithinRel(other AbsorbedDose, tol float64) bool {
 	return equalWithinRel(x, y, tol)
 }
 
+// Ratio returns d/other, the ratio of the absorbed doses, in ratio.BaseUnit:
+// convert it with ConvertTo(ratio.Percent) for a percentage. It fails with
+// ErrZeroDivision if other is zero.
+func (d AbsorbedDose) Ratio(other AbsorbedDose) (Ratio, error) {
+	x, y := d.common(other)
+	if y == 0 {
+		return Ratio{}, ErrZeroDivision
+	}
+
+	return Ratio{value: x / y, unit: ratio.BaseUnit}, nil
+}
+
 // common returns the values of the absorbed doses in a common unit: their own if
 // they share it, otherwise the base unit. Either way the result doesn't depend
 // on the order of the operands, so comparisons are symmetric.
@@ -8125,6 +8521,18 @@ func (h EquivalentDose) EqualWithinRel(other EquivalentDose, tol float64) bool {
 	x, y := h.common(other)
 
 	return equalWithinRel(x, y, tol)
+}
+
+// Ratio returns h/other, the ratio of the equivalent doses, in ratio.BaseUnit:
+// convert it with ConvertTo(ratio.Percent) for a percentage. It fails with
+// ErrZeroDivision if other is zero.
+func (h EquivalentDose) Ratio(other EquivalentDose) (Ratio, error) {
+	x, y := h.common(other)
+	if y == 0 {
+		return Ratio{}, ErrZeroDivision
+	}
+
+	return Ratio{value: x / y, unit: ratio.BaseUnit}, nil
 }
 
 // common returns the values of the equivalent doses in a common unit: their own if
@@ -8363,6 +8771,18 @@ func (r DoseRate) EqualWithinRel(other DoseRate, tol float64) bool {
 	return equalWithinRel(x, y, tol)
 }
 
+// Ratio returns r/other, the ratio of the dose rates, in ratio.BaseUnit:
+// convert it with ConvertTo(ratio.Percent) for a percentage. It fails with
+// ErrZeroDivision if other is zero.
+func (r DoseRate) Ratio(other DoseRate) (Ratio, error) {
+	x, y := r.common(other)
+	if y == 0 {
+		return Ratio{}, ErrZeroDivision
+	}
+
+	return Ratio{value: x / y, unit: ratio.BaseUnit}, nil
+}
+
 // common returns the values of the dose rates in a common unit: their own if
 // they share it, otherwise the base unit. Either way the result doesn't depend
 // on the order of the operands, so comparisons are symmetric.
@@ -8597,6 +9017,18 @@ func (c Capacitance) EqualWithinRel(other Capacitance, tol float64) bool {
 	x, y := c.common(other)
 
 	return equalWithinRel(x, y, tol)
+}
+
+// Ratio returns c/other, the ratio of the capacitances, in ratio.BaseUnit:
+// convert it with ConvertTo(ratio.Percent) for a percentage. It fails with
+// ErrZeroDivision if other is zero.
+func (c Capacitance) Ratio(other Capacitance) (Ratio, error) {
+	x, y := c.common(other)
+	if y == 0 {
+		return Ratio{}, ErrZeroDivision
+	}
+
+	return Ratio{value: x / y, unit: ratio.BaseUnit}, nil
 }
 
 // common returns the values of the capacitances in a common unit: their own if
@@ -8835,6 +9267,18 @@ func (l Inductance) EqualWithinRel(other Inductance, tol float64) bool {
 	return equalWithinRel(x, y, tol)
 }
 
+// Ratio returns l/other, the ratio of the inductances, in ratio.BaseUnit:
+// convert it with ConvertTo(ratio.Percent) for a percentage. It fails with
+// ErrZeroDivision if other is zero.
+func (l Inductance) Ratio(other Inductance) (Ratio, error) {
+	x, y := l.common(other)
+	if y == 0 {
+		return Ratio{}, ErrZeroDivision
+	}
+
+	return Ratio{value: x / y, unit: ratio.BaseUnit}, nil
+}
+
 // common returns the values of the inductances in a common unit: their own if
 // they share it, otherwise the base unit. Either way the result doesn't depend
 // on the order of the operands, so comparisons are symmetric.
@@ -9069,6 +9513,18 @@ func (mf MagneticField) EqualWithinRel(other MagneticField, tol float64) bool {
 	x, y := mf.common(other)
 
 	return equalWithinRel(x, y, tol)
+}
+
+// Ratio returns mf/other, the ratio of the magnetic flux densities, in ratio.BaseUnit:
+// convert it with ConvertTo(ratio.Percent) for a percentage. It fails with
+// ErrZeroDivision if other is zero.
+func (mf MagneticField) Ratio(other MagneticField) (Ratio, error) {
+	x, y := mf.common(other)
+	if y == 0 {
+		return Ratio{}, ErrZeroDivision
+	}
+
+	return Ratio{value: x / y, unit: ratio.BaseUnit}, nil
 }
 
 // common returns the values of the magnetic flux densities in a common unit: their own if
@@ -9307,6 +9763,18 @@ func (e Illuminance) EqualWithinRel(other Illuminance, tol float64) bool {
 	return equalWithinRel(x, y, tol)
 }
 
+// Ratio returns e/other, the ratio of the illuminances, in ratio.BaseUnit:
+// convert it with ConvertTo(ratio.Percent) for a percentage. It fails with
+// ErrZeroDivision if other is zero.
+func (e Illuminance) Ratio(other Illuminance) (Ratio, error) {
+	x, y := e.common(other)
+	if y == 0 {
+		return Ratio{}, ErrZeroDivision
+	}
+
+	return Ratio{value: x / y, unit: ratio.BaseUnit}, nil
+}
+
 // common returns the values of the illuminances in a common unit: their own if
 // they share it, otherwise the base unit. Either way the result doesn't depend
 // on the order of the operands, so comparisons are symmetric.
@@ -9541,6 +10009,18 @@ func (f LuminousFlux) EqualWithinRel(other LuminousFlux, tol float64) bool {
 	x, y := f.common(other)
 
 	return equalWithinRel(x, y, tol)
+}
+
+// Ratio returns f/other, the ratio of the luminous fluxes, in ratio.BaseUnit:
+// convert it with ConvertTo(ratio.Percent) for a percentage. It fails with
+// ErrZeroDivision if other is zero.
+func (f LuminousFlux) Ratio(other LuminousFlux) (Ratio, error) {
+	x, y := f.common(other)
+	if y == 0 {
+		return Ratio{}, ErrZeroDivision
+	}
+
+	return Ratio{value: x / y, unit: ratio.BaseUnit}, nil
 }
 
 // common returns the values of the luminous fluxes in a common unit: their own if
@@ -9779,6 +10259,18 @@ func (e SpecificEnergy) EqualWithinRel(other SpecificEnergy, tol float64) bool {
 	return equalWithinRel(x, y, tol)
 }
 
+// Ratio returns e/other, the ratio of the specific energies, in ratio.BaseUnit:
+// convert it with ConvertTo(ratio.Percent) for a percentage. It fails with
+// ErrZeroDivision if other is zero.
+func (e SpecificEnergy) Ratio(other SpecificEnergy) (Ratio, error) {
+	x, y := e.common(other)
+	if y == 0 {
+		return Ratio{}, ErrZeroDivision
+	}
+
+	return Ratio{value: x / y, unit: ratio.BaseUnit}, nil
+}
+
 // common returns the values of the specific energies in a common unit: their own if
 // they share it, otherwise the base unit. Either way the result doesn't depend
 // on the order of the operands, so comparisons are symmetric.
@@ -10015,6 +10507,18 @@ func (u EnergyDensity) EqualWithinRel(other EnergyDensity, tol float64) bool {
 	return equalWithinRel(x, y, tol)
 }
 
+// Ratio returns u/other, the ratio of the energy densities, in ratio.BaseUnit:
+// convert it with ConvertTo(ratio.Percent) for a percentage. It fails with
+// ErrZeroDivision if other is zero.
+func (u EnergyDensity) Ratio(other EnergyDensity) (Ratio, error) {
+	x, y := u.common(other)
+	if y == 0 {
+		return Ratio{}, ErrZeroDivision
+	}
+
+	return Ratio{value: x / y, unit: ratio.BaseUnit}, nil
+}
+
 // common returns the values of the energy densities in a common unit: their own if
 // they share it, otherwise the base unit. Either way the result doesn't depend
 // on the order of the operands, so comparisons are symmetric.
@@ -10249,6 +10753,18 @@ func (r Ratio) EqualWithinRel(other Ratio, tol float64) bool {
 	x, y := r.common(other)
 
 	return equalWithinRel(x, y, tol)
+}
+
+// Ratio returns r/other, the ratio of the ratios, in ratio.BaseUnit:
+// convert it with ConvertTo(ratio.Percent) for a percentage. It fails with
+// ErrZeroDivision if other is zero.
+func (r Ratio) Ratio(other Ratio) (Ratio, error) {
+	x, y := r.common(other)
+	if y == 0 {
+		return Ratio{}, ErrZeroDivision
+	}
+
+	return Ratio{value: x / y, unit: ratio.BaseUnit}, nil
 }
 
 // common returns the values of the ratios in a common unit: their own if

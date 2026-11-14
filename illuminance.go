@@ -1,6 +1,9 @@
 package units
 
-import "github.com/asaphin/go-physics-units/illuminance"
+import (
+	"github.com/asaphin/go-physics-units/illuminance"
+	"github.com/asaphin/go-physics-units/luminousflux"
+)
 
 // Illuminance is an illuminance: a value in a illuminance.Unit, such as 500 lx.
 // Create one with NewIlluminance or StringToIlluminance.
@@ -10,4 +13,10 @@ import "github.com/asaphin/go-physics-units/illuminance"
 type Illuminance struct {
 	value float64
 	unit  illuminance.Unit
+}
+
+// MultiplyByArea returns the luminous flux e·a (lm) in luminousflux.BaseUnit: the luminous flux that
+// lights a to e.
+func (e Illuminance) MultiplyByArea(a Area) LuminousFlux {
+	return LuminousFlux{value: e.baseValue() * a.baseValue(), unit: luminousflux.BaseUnit}
 }

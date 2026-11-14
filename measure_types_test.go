@@ -81,6 +81,7 @@ type typedMeasure[T any, U unitType] interface {
 	units.UnitConverter[T, U]
 	units.Comparer[T]
 	Unit() U
+	Ratio(other T) (units.Ratio, error)
 }
 
 type typedCase[T typedMeasure[T, U], U unitType] struct {
@@ -598,6 +599,18 @@ func testTypedMeasure[T typedMeasure[T, U], U unitType](t *testing.T, c typedCas
 		if x.EqualWithinRel(near, 1e-9) || !x.EqualWithinRel(near, 1e-5) {
 			t.Errorf("%v and %v: within 1e-9 = %v, within 1e-5 = %v; want false, true",
 				x, near, x.EqualWithinRel(near, 1e-9), x.EqualWithinRel(near, 1e-5))
+		}
+	})
+
+	t.Run("Ratio", func(t *testing.T) {
+		// x is 2 unitA and y is 1 unitB, so x/y is 2·ratio.
+		r, err := x.Ratio(y)
+		if err != nil || !almostEqual(r.Fraction(), 2*c.ratio, 1e-12) || r.Unit() != ratio.BaseUnit {
+			t.Errorf("%v.Ratio(%v) = %v, %v; want %v 1", x, y, r, err, 2*c.ratio)
+		}
+
+		if r, err := x.Ratio(c.newFn(0, c.unitB)); !errors.Is(err, units.ErrZeroDivision) || r != (units.Ratio{}) {
+			t.Errorf("Ratio of zero = %v, %v; want the zero Ratio and ErrZeroDivision", r, err)
 		}
 	})
 

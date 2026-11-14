@@ -3,6 +3,8 @@ package units
 import (
 	"cmp"
 	"fmt"
+
+	"github.com/asaphin/go-physics-units/ratio"
 )
 
 // Measure is implemented by the marker type of a user-defined measure. Its
@@ -259,6 +261,18 @@ func (q Quantity[M]) EqualWithinRel(other Quantity[M], tol float64) bool {
 	x, y := q.common(other)
 
 	return equalWithinRel(x, y, tol)
+}
+
+// Ratio returns q/other, the ratio of the quantities, in ratio.BaseUnit:
+// convert it with ConvertTo(ratio.Percent) for a percentage. It fails with
+// ErrZeroDivision if other is zero.
+func (q Quantity[M]) Ratio(other Quantity[M]) (Ratio, error) {
+	x, y := q.common(other)
+	if y == 0 {
+		return Ratio{}, ErrZeroDivision
+	}
+
+	return Ratio{value: x / y, unit: ratio.BaseUnit}, nil
 }
 
 // common returns the values of the quantities in a common unit, as the

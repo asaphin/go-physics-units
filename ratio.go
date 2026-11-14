@@ -11,3 +11,9 @@ type Ratio struct {
 	value float64
 	unit  ratio.Unit
 }
+
+// Fraction returns the ratio as a plain number, 0.25 for 25 %. Multiply a value
+// by it to take that share: d.Mul(r.Fraction()).
+func (r Ratio) Fraction() float64 {
+	return r.baseValue()
+}
