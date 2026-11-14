@@ -1,6 +1,6 @@
 # Roadmap
 
-This is the ordered plan for improving go-physics-units. Take the steps from top to bottom. It was last reviewed on 2026-11-13.
+This is the ordered plan for improving go-physics-units. Take the steps from top to bottom. It was last reviewed on 2026-11-14.
 
 ## How to use this plan
 
@@ -32,15 +32,15 @@ Size is relative effort: S < M < L.
 | ☑ | [1.6](#16-timetoduration) | `Time.ToDuration` | P3 | no | S | v0.1.x |
 | ☑ | [1.7](#17-examples-for-every-measure) | Examples for every measure | docs | no | S | v0.1.x |
 | ☑ | [2.1](#21-decision-gate-design-rfc-and-prototype) | RFC and prototype: value types, typed units | P1–P3 | **Decision gate** | M | — |
-| ☐ | [3.1](#31-typed-unit-symbols) | Typed unit symbols | P1, safety | yes | M | v0.2.0 |
-| ☐ | [3.2A](#32a-value-type-measures) | Value-type measures (Path A) | P1, P2 | yes | L | v0.2.0 |
-| ☐ | [3.3A](#33a-typed-custom-measures) | Typed custom measures (Path A) | P3 | yes | M | v0.2.0 |
-| ☐ | [3.2B](#32b-typed-results-from-generic-operations) | Typed results from generic operations (Path B) | P3 | no | M | v0.2.0 |
-| ☐ | [3.4](#34-migration-guide-and-release-v020) | Migration guide, release v0.2.0 | — | — | S | v0.2.0 |
-| ☐ | [4.1](#41-text-and-json-encoding) | Text and JSON encoding | P3 | no | M | v0.2.x |
+| ☑ | [3.1](#31-typed-unit-symbols) | Typed unit symbols | P1, safety | yes | M | v0.2.0 |
+| ☑ | [3.2A](#32a-value-type-measures) | Value-type measures (Path A) | P1, P2 | yes | L | v0.2.0 |
+| ☑ | [3.3A](#33a-typed-custom-measures) | Typed custom measures (Path A) | P3 | yes | M | v0.2.0 |
+| — | [3.2B](#32b-typed-results-from-generic-operations) | Typed results from generic operations (Path B, not taken) | P3 | no | M | — |
+| ◐ | [3.4](#34-migration-guide-and-release-v020) | Migration guide (done), release v0.2.0 | — | — | S | v0.2.0 |
+| ☑ | [4.1](#41-text-and-json-encoding) | Text and JSON encoding | P3 | no | M | v0.2.x |
 | ☑ | [4.2](#42-configurable-parser) | Configurable parser with aliases | P3, P2 | no | M | v0.2.x |
 | ☑ | [4.3](#43-new-measures-one-per-step) | New measures, one per step | P3 | no | S each | v0.2.x |
-| ☐ | [4.4](#44-decision-temperature) | Temperature (design first) | P3 | **Decision** | M | v0.2.x |
+| ☑ | [4.4](#44-decision-temperature) | Temperature (design first) | P3 | **Decision** | M | v0.2.x |
 | ☐ | [5.1](#51-stabilise-and-release-v100) | Stabilise and release v1.0.0 | — | removals | M | v1.0.0 |
 
 ## Phase 0: finish and ship v0.1.0
@@ -174,13 +174,15 @@ Prototype on a branch and benchmark it against v0.1.x.
   - a custom measure gets the typed API in about 10 lines;
   - the README examples need only mechanical changes.
 - **Outcome:** Path A (value types) or Path B (keep the interfaces) in Phase 3.
-- **Status:** the RFC and the prototype are written: [docs/rfc-value-types.md](docs/rfc-value-types.md). It recommends Path A with integer units; the decision is the author's.
+- **Status:** decided on 2026-11-14: **Path A** with integer units (option I), division by zero keeps its error, and `NewMeasurementCreator` and `NewBaseMeasurement` are removed in the same release. See [docs/rfc-value-types.md](docs/rfc-value-types.md). The prototype module was deleted once the library implemented the design.
 
 ## Phase 3: the breaking batch (v0.2.0)
 
 Each step is its own PR on `dev`, but nothing is tagged until the batch is complete, so users migrate once.
 
 > **Note (2026-11-13):** the author lifted the release ordering for now ("we'll take care about versioning later"), so steps 4.2 and 4.3 were done before Phase 3. The design decision of 2.1 still comes first for Phase 3 itself.
+>
+> **Status (2026-11-14):** steps 3.1, 3.2A and 3.3A are done, together, in one PR: the measures and the unit packages depend on each other's types, so they can't change one at a time. The shared code of the measures is generated (`internal/gen`). `MIGRATION.md` is written; the release itself waits for the author.
 
 ### 3.1 Typed unit symbols
 
@@ -201,6 +203,7 @@ Serves **P1** and **P2**.
 - **Order.** Start with mass, which has no cross-measure operations, then time, velocity, area and distance. The code compiles at every point in between.
 - **Generic code.** Each type keeps implementing `Measurement`, so generic code still works. Boxing allocates only on that generic path.
 - **Afterwards.** This removes the "interface-based design" and "XxxMeasurement methods lose the type" debt. Lower the allocation limits from step 1.1 to 0.
+- **As built:** all sixteen measures at once, generated from one template (`internal/gen`) plus hand-written cross-measure operations. The typed API takes 2–5 ns with no allocations.
 
 #### 3.3A Typed custom measures
 
@@ -209,8 +212,11 @@ Serves **P3**.
 - Implement the custom-measure design from the RFC, so user measures get the typed API (`Add`, `ConvertTo`, `Compare`, …) instead of the generic `Measurement`.
 - Decide what happens to `NewBaseMeasurement`, which builds an N×N table on every call. Either keep it as the one-off path or deprecate it in favour of the creator.
 - `TestMeasurementCreator_ExtendsPredefinedFactors` keeps passing, in its new form.
+- **As built:** `NewUnitSet`, `Measure`, `Unit[M]`, `UnitOf`, `Quantity[M]`, `ParseQuantity`, `ToQuantity`, and the `Parser` option `WithMeasure[M]`. `NewMeasurementCreator` and `NewBaseMeasurement` are removed, as the author decided. `TestNewUnitSet_ExtendsPredefinedFactors` is the new form of the extension test.
 
-### Path B: keep the interfaces
+### Path B: keep the interfaces (not taken)
+
+ROADMAP 2.1 chose Path A, so this path isn't planned. It stays here for the record.
 
 #### 3.2B Typed results from generic operations
 
@@ -237,6 +243,7 @@ Serves **P3**.
 - **The change.** Add `MarshalText` and `UnmarshalText` in the `"<value> <unit>"` form. That one change gives support for JSON, YAML, `flag.TextVar` and configuration loaders.
 - **Decide in the step** whether to add a `{"value": …, "unit": …}` JSON form as well.
 - **Why after Phase 3.** Unmarshalling needs a concrete type and can't target an interface.
+- **Status:** done. Every value, `Quantity` and the temperatures implement `TextMarshaler`, `TextAppender` and `TextUnmarshaler` in the `"<value> <unit>"` form; JSON uses it, so a value encodes as `"12.5 km"`. The `{"value": …, "unit": …}` form isn't offered: the text form is what `ParseString` reads, and one form keeps encoded data unambiguous.
 
 ### 4.2 Configurable parser
 
@@ -266,7 +273,7 @@ Serves **P3**.
 - The factor model is multiplicative only. Temperature needs an offset (°C, °F).
 - It also needs to tell absolute temperatures apart from differences: 20 °C plus a 10 K difference is 30 °C, but adding two absolute temperatures is meaningless.
 - Design the model for affine units, and the operations they allow, before writing any code.
-- **Status:** the design proposal is written: [docs/rfc-temperature.md](docs/rfc-temperature.md). It proposes two types (`Temperature` and `TemperatureDifference`), implemented after Phase 3; the decisions are the author's.
+- **Status:** done, after Phase 3, as proposed in [docs/rfc-temperature.md](docs/rfc-temperature.md), with one change the author decided on 2026-11-14: temperatures below absolute zero are rejected with `ErrOutOfRange`.
 
 ### Not planned unless there is demand
 
