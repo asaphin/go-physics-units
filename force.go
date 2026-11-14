@@ -5,7 +5,9 @@ import (
 	"github.com/asaphin/go-physics-units/energy"
 	"github.com/asaphin/go-physics-units/force"
 	"github.com/asaphin/go-physics-units/mass"
+	"github.com/asaphin/go-physics-units/momentum"
 	"github.com/asaphin/go-physics-units/pressure"
+	"github.com/asaphin/go-physics-units/torque"
 )
 
 // Force is a force: a value in a force.Unit, such as 10 N. Create one with
@@ -51,4 +53,16 @@ func (f Force) DivideByArea(a Area) (Pressure, error) {
 // MultiplyByDistance returns the energy (work) f·d (J) in energy.BaseUnit.
 func (f Force) MultiplyByDistance(d Distance) Energy {
 	return Energy{value: f.baseValue() * d.baseValue(), unit: energy.BaseUnit}
+}
+
+// MultiplyByTime returns the momentum f·t (kg·m/s) in momentum.BaseUnit: the impulse, the change of
+// momentum.
+func (f Force) MultiplyByTime(t Time) Momentum {
+	return Momentum{value: f.baseValue() * t.baseValue(), unit: momentum.BaseUnit}
+}
+
+// TorqueAt returns the torque f·arm (N·m) in torque.BaseUnit: the torque of f at a lever arm,
+// perpendicular to it.
+func (f Force) TorqueAt(arm Distance) Torque {
+	return Torque{value: f.baseValue() * arm.baseValue(), unit: torque.BaseUnit}
 }

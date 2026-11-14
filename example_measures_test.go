@@ -4,10 +4,13 @@ import (
 	"fmt"
 
 	units "github.com/asaphin/go-physics-units"
+	"github.com/asaphin/go-physics-units/absorbeddose"
 	"github.com/asaphin/go-physics-units/acceleration"
+	"github.com/asaphin/go-physics-units/amount"
 	"github.com/asaphin/go-physics-units/angle"
 	"github.com/asaphin/go-physics-units/angularvelocity"
 	"github.com/asaphin/go-physics-units/area"
+	"github.com/asaphin/go-physics-units/capacitance"
 	"github.com/asaphin/go-physics-units/charge"
 	"github.com/asaphin/go-physics-units/conversion"
 	"github.com/asaphin/go-physics-units/current"
@@ -15,15 +18,34 @@ import (
 	"github.com/asaphin/go-physics-units/datasize"
 	"github.com/asaphin/go-physics-units/density"
 	"github.com/asaphin/go-physics-units/distance"
+	"github.com/asaphin/go-physics-units/doserate"
 	"github.com/asaphin/go-physics-units/energy"
+	"github.com/asaphin/go-physics-units/energydensity"
+	"github.com/asaphin/go-physics-units/equivalentdose"
+	"github.com/asaphin/go-physics-units/flowrate"
 	"github.com/asaphin/go-physics-units/force"
 	"github.com/asaphin/go-physics-units/frequency"
+	"github.com/asaphin/go-physics-units/fuelconsumption"
+	"github.com/asaphin/go-physics-units/fueleconomy"
+	"github.com/asaphin/go-physics-units/illuminance"
+	"github.com/asaphin/go-physics-units/inductance"
+	"github.com/asaphin/go-physics-units/luminousflux"
+	"github.com/asaphin/go-physics-units/magneticfield"
 	"github.com/asaphin/go-physics-units/mass"
+	"github.com/asaphin/go-physics-units/massflowrate"
+	"github.com/asaphin/go-physics-units/molarity"
+	"github.com/asaphin/go-physics-units/molarmass"
+	"github.com/asaphin/go-physics-units/momentum"
+	"github.com/asaphin/go-physics-units/pace"
 	"github.com/asaphin/go-physics-units/power"
 	"github.com/asaphin/go-physics-units/pressure"
+	"github.com/asaphin/go-physics-units/radioactivity"
+	"github.com/asaphin/go-physics-units/ratio"
 	"github.com/asaphin/go-physics-units/resistance"
+	"github.com/asaphin/go-physics-units/specificenergy"
 	"github.com/asaphin/go-physics-units/temperature"
 	"github.com/asaphin/go-physics-units/time"
+	"github.com/asaphin/go-physics-units/torque"
 	"github.com/asaphin/go-physics-units/velocity"
 	"github.com/asaphin/go-physics-units/voltage"
 	"github.com/asaphin/go-physics-units/volume"
@@ -74,13 +96,13 @@ func ExampleDistance_DivideByTime() {
 	marathon := units.NewDistance(42.195, distance.Kilometer)
 	finish := units.NewTime(2, time.Hour)
 
-	pace, err := marathon.DivideByTime(finish)
+	speed, err := marathon.DivideByTime(finish)
 	if err != nil {
 		panic(err) // the time is zero
 	}
 
-	fmt.Printf("%.4f\n", pace) // in the base unit, m/s
-	fmt.Printf("%.4f\n", pace.ConvertTo(velocity.KilometerPerHour))
+	fmt.Printf("%.4f\n", speed) // in the base unit, m/s
+	fmt.Printf("%.4f\n", speed.ConvertTo(velocity.KilometerPerHour))
 	// Output:
 	// 5.8604 m/s
 	// 21.0975 km/h
@@ -506,4 +528,169 @@ func ExampleAngularVelocity_MultiplyByTime() {
 
 	fmt.Printf("%.0f\n", turned.ConvertTo(angle.Revolution))
 	// Output: 30 rev
+}
+
+func ExampleNewTorque() {
+	wheelNut := units.NewTorque(100, torque.PoundForceFoot)
+
+	fmt.Printf("%.1f\n", wheelNut.ConvertTo(torque.NewtonMeter))
+	// Output: 135.6 N·m
+}
+
+func ExampleNewFlowRate() {
+	pump := units.NewFlowRate(10, flowrate.GallonPerMinute)
+
+	fmt.Printf("%.1f\n", pump.ConvertTo(flowrate.LiterPerMinute))
+	// Output: 37.9 L/min
+}
+
+func ExampleNewMassFlowRate() {
+	// An airliner burns about 2.4 t of fuel an hour in cruise.
+	burn := units.NewMassFlowRate(2400, massflowrate.KilogramPerHour)
+
+	fmt.Printf("%.0f\n", burn.ConvertTo(massflowrate.PoundPerHour))
+	// Output: 5291 lb/h
+}
+
+func ExampleNewMomentum() {
+	// The Mars Climate Orbiter was lost in 1999 because software read
+	// impulses in lbf·s as if they were in N·s.
+	impulse := units.NewMomentum(1, momentum.PoundForceSecond)
+
+	fmt.Printf("%.2f\n", impulse.ConvertTo(momentum.NewtonSecond))
+	// Output: 4.45 N·s
+}
+
+func ExampleNewPace() {
+	p := units.NewPace(5, pace.MinutePerKilometer)
+
+	fmt.Printf("%.2f\n", p.ConvertTo(pace.MinutePerMile))
+	// Output: 8.05 min/mi
+}
+
+func ExampleNewFuelEconomy() {
+	car := units.NewFuelEconomy(40, fueleconomy.MilePerGallon)
+
+	fmt.Printf("%.1f\n", car.ConvertTo(fueleconomy.KilometerPerLiter))
+	// Output: 17.0 km/L
+}
+
+func ExampleNewFuelConsumption() {
+	car := units.NewFuelConsumption(6.5, fuelconsumption.LiterPer100Kilometers)
+
+	fmt.Printf("%.2f\n", car.ConvertTo(fuelconsumption.GallonPer100Miles))
+	// Output: 2.76 gal/100mi
+}
+
+func ExampleNewAmount() {
+	n := units.NewAmount(250, amount.Millimole)
+
+	fmt.Println(n.ConvertTo(amount.Mole))
+	// Output: 0.25 mol
+}
+
+func ExampleNewMolarMass() {
+	water := units.NewMolarMass(18.015, molarmass.GramPerMole)
+
+	fmt.Println(water.ConvertToBaseUnits())
+	// Output: 0.018015 kg/mol
+}
+
+func ExampleNewMolarity() {
+	saline := units.NewMolarity(0.154, molarity.MolePerLiter)
+
+	fmt.Println(saline.ConvertTo(molarity.Millimolar))
+	// Output: 154 mM
+}
+
+func ExampleNewRadioactivity() {
+	// A household smoke detector holds about 1 μCi of americium-241.
+	source := units.NewRadioactivity(1, radioactivity.Microcurie)
+
+	fmt.Println(source.ConvertTo(radioactivity.Kilobecquerel))
+	// Output: 37 kBq
+}
+
+func ExampleNewAbsorbedDose() {
+	// A typical radiotherapy fraction.
+	fraction := units.NewAbsorbedDose(2, absorbeddose.Gray)
+
+	fmt.Println(fraction.ConvertTo(absorbeddose.Centigray))
+	// Output: 200 cGy
+}
+
+func ExampleNewEquivalentDose() {
+	// The worldwide average yearly dose from natural sources.
+	background := units.NewEquivalentDose(2.4, equivalentdose.Millisievert)
+
+	fmt.Println(background.ConvertTo(equivalentdose.Millirem))
+	// Output: 240 mrem
+}
+
+func ExampleNewDoseRate() {
+	// At cruising altitude, cosmic rays give about 5 μSv/h.
+	cruise := units.NewDoseRate(5, doserate.MicrosievertPerHour)
+
+	fmt.Printf("%.1f\n", cruise.ConvertTo(doserate.MillisievertPerYear))
+	// Output: 43.8 mSv/yr
+}
+
+func ExampleNewCapacitance() {
+	c := units.NewCapacitance(4700, capacitance.Nanofarad)
+
+	fmt.Println(c.ConvertTo(capacitance.Microfarad))
+	// Output: 4.7 μF
+}
+
+func ExampleNewInductance() {
+	coil := units.NewInductance(220, inductance.Microhenry)
+
+	fmt.Println(coil.ConvertTo(inductance.Millihenry))
+	// Output: 0.22 mH
+}
+
+func ExampleNewMagneticField() {
+	// The Earth's magnetic field at the surface is about half a gauss.
+	earth := units.NewMagneticField(0.5, magneticfield.Gauss)
+
+	fmt.Printf("%.0f\n", earth.ConvertTo(magneticfield.Microtesla))
+	// Output: 50 μT
+}
+
+func ExampleNewIlluminance() {
+	office := units.NewIlluminance(50, illuminance.FootCandle)
+
+	fmt.Printf("%.0f\n", office.ConvertTo(illuminance.Lux))
+	// Output: 538 lx
+}
+
+func ExampleNewLuminousFlux() {
+	lamp := units.NewLuminousFlux(1.6, luminousflux.Kilolumen)
+
+	fmt.Println(lamp.ConvertTo(luminousflux.Lumen))
+	// Output: 1600 lm
+}
+
+func ExampleNewSpecificEnergy() {
+	// A lithium-ion cell stores about 250 Wh per kilogram.
+	cell := units.NewSpecificEnergy(250, specificenergy.WattHourPerKilogram)
+
+	fmt.Println(cell.ConvertTo(specificenergy.MegajoulePerKilogram))
+	// Output: 0.9 MJ/kg
+}
+
+func ExampleNewEnergyDensity() {
+	// Petrol holds about 34.2 MJ per litre.
+	petrol := units.NewEnergyDensity(34.2, energydensity.MegajoulePerLiter)
+
+	fmt.Printf("%.1f\n", petrol.ConvertTo(energydensity.KilowattHourPerLiter))
+	// Output: 9.5 kWh/L
+}
+
+func ExampleNewRatio() {
+	// The CO₂ in the air.
+	co2 := units.NewRatio(420, ratio.PartsPerMillion)
+
+	fmt.Printf("%.3f\n", co2.ConvertTo(ratio.Percent))
+	// Output: 0.042 %
 }

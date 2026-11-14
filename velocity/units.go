@@ -14,12 +14,13 @@ const BaseUnit = MeterPerSecond
 
 // Velocity units, with their symbols.
 const (
-	MeterPerSecond   Unit = iota // m/s
-	KilometerPerHour             // km/h
-	FeetPerSecond                // ft/s
-	MilePerHour                  // mph
-	Knot                         // kn
-	SpeedOfLight                 // c
+	MeterPerSecond     Unit = iota // m/s
+	KilometerPerHour               // km/h
+	FeetPerSecond                  // ft/s
+	MilePerHour                    // mph
+	Knot                           // kn
+	SpeedOfLight                   // c
+	KilometerPerSecond             // km/s
 
 	unitCount // the number of units; keep it last
 )
@@ -27,10 +28,11 @@ const (
 // definitions holds the symbol of each unit and its factor: how many base
 // units (m/s) there are in one unit.
 var definitions = [unitCount]definition{
-	MeterPerSecond:   {"m/s", 1},
-	KilometerPerHour: {"km/h", 1000.0 / 3600},
-	FeetPerSecond:    {"ft/s", 0.3048},
-	MilePerHour:      {"mph", 0.44704},
-	Knot:             {"kn", 1852.0 / 3600}, // one nautical mile per hour
-	SpeedOfLight:     {"c", 299792458},      // exact by definition
+	MeterPerSecond:     {"m/s", 1},
+	KilometerPerHour:   {"km/h", 1000.0 / 3600},
+	FeetPerSecond:      {"ft/s", 0.3048},
+	MilePerHour:        {"mph", 0.44704},
+	Knot:               {"kn", 1852.0 / 3600}, // one nautical mile per hour
+	SpeedOfLight:       {"c", 299792458},      // exact by definition
+	KilometerPerSecond: {"km/s", 1000},
 }

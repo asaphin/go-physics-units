@@ -25,6 +25,10 @@ const (
 	Tonne                 // t
 	EarthMass             // M⊕
 	SolarMass             // M☉
+	Stone                 // st: 14 lb
+	Carat                 // ct: metric carat, for gemstones
+	Grain                 // gr: 1/7000 lb
+	TroyOunce             // ozt: troy ounce, 480 grains, for precious metals
 
 	unitCount // the number of units; keep it last
 )
@@ -33,7 +37,7 @@ const (
 // units (kg) there are in one unit.
 var definitions = [unitCount]definition{
 	Kilogram:  {"kg", 1},
-	Dalton:    {"Da", 1.6605390666e-27}, // CODATA 2018
+	Dalton:    {"Da", 1.66053906892e-27}, // CODATA 2022
 	Microgram: {"μg", 1e-9},
 	Milligram: {"mg", 1e-6},
 	Gram:      {"g", 0.001},
@@ -43,4 +47,8 @@ var definitions = [unitCount]definition{
 	Tonne:     {"t", 1000},
 	EarthMass: {"M⊕", 5.9722e24},
 	SolarMass: {"M☉", 1.98847e30},
+	Stone:     {"st", 14 * 0.45359237},
+	Carat:     {"ct", 200e-6},
+	Grain:     {"gr", 64.79891e-6},
+	TroyOunce: {"ozt", 480 * 64.79891e-6},
 }

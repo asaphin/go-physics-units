@@ -1,22 +1,26 @@
 # Use cases
 
-Real-world scenarios for go-physics-units, from a running app to a fuel truck.
+Real-world scenarios for go-physics-units, from a running app to a space station.
 Each one is short, complete, and shows the output it prints.
 
 Unit mix-ups are costly. In 1999, NASA lost the Mars Climate Orbiter because one team's software reported impulse in pound-force seconds and another's read the numbers as newton-seconds.
 With this library, a value carries its unit, a unit of the wrong measure doesn't compile, and text in the wrong unit is rejected when it is parsed.
 
-| Scenario                                        | Domain           | What it shows                                                    |
-|-------------------------------------------------|------------------|------------------------------------------------------------------|
-| [Fitness tracker](#fitness-tracker)             | consumer apps    | parsing what people type, `time.Duration`, speed and pace        |
-| [IoT telemetry](#iot-telemetry)                 | backend services | JSON in mixed units, temperatures, thresholds                    |
-| [Service configuration](#service-configuration) | infrastructure   | config files and flags with units, timeouts from sizes and rates |
-| [Importing mixed data](#importing-mixed-data)   | data engineering | parsing any measure, generic code over `Measurement`             |
-| [Electronics](#electronics)                     | hardware         | Ohm's law, power, battery life                                   |
-| [Home energy](#home-energy)                     | smart home       | temperature differences, energy, kWh                             |
-| [Aviation fuel](#aviation-fuel)                 | safety-critical  | density, litres, US gallons, kilograms and pounds                |
-| [Pressure under a heel](#pressure-under-a-heel) | education        | mass, gravity, force and pressure                                |
-| [Recipe scaling](#recipe-scaling)               | custom measures  | extending a predefined measure, volume to weight                 |
+| Scenario                                                            | Domain           | What it shows                                                    |
+|---------------------------------------------------------------------|------------------|------------------------------------------------------------------|
+| [Fitness tracker](#fitness-tracker)                                 | consumer apps    | parsing what people type, `time.Duration`, speed and pace        |
+| [IoT telemetry](#iot-telemetry)                                     | backend services | JSON in mixed units, temperatures, thresholds                    |
+| [Service configuration](#service-configuration)                     | infrastructure   | config files and flags with units, timeouts from sizes and rates |
+| [Importing mixed data](#importing-mixed-data)                       | data engineering | parsing any measure, generic code over `Measurement`             |
+| [Electronics](#electronics)                                         | hardware         | Ohm's law, power, battery life                                   |
+| [Home energy](#home-energy)                                         | smart home       | temperature differences, energy, kWh                             |
+| [Aviation fuel](#aviation-fuel)                                     | safety-critical  | density, litres, US gallons, kilograms and pounds                |
+| [Pressure under a heel](#pressure-under-a-heel)                     | education        | mass, gravity, force and pressure                                |
+| [Recipe scaling](#recipe-scaling)                                   | custom measures  | extending a predefined measure, volume to weight                 |
+| [Car performance and a road trip](#car-performance-and-a-road-trip) | automotive       | engine power from torque, trip fuel, mpg, travel time            |
+| [Preparing a lab solution](#preparing-a-lab-solution)               | chemistry        | molarity, molar mass, dilution, Avogadro's number                |
+| [Radiation on a long-haul flight](#radiation-on-a-long-haul-flight) | health physics   | dose rates, ratios                                               |
+| [Orbits and escape velocity](#orbits-and-escape-velocity)           | spaceflight      | the physics package                                              |
 
 ## Conventions
 
@@ -478,6 +482,185 @@ butter  6 tbsp      89 mL    85 g
 **Uses:** `volume.ConversionFactors`, which returns a copy, and `NewUnitSet` to extend a predefined measure; `Quantity[kitchen]` with `ParseQuantity`, `Mul` and `ConvertTo`; `MustUnitOf`; `Density.MultiplyByVolume` for the weights.
 A custom measure that shares a predefined measure's base unit moves between the two through `ConvertToBaseUnits`, as the amounts do here on their way to `units.Volume`.
 The predefined volume measure is unchanged: `units.StringToVolume("2 cup")` still fails.
+
+## Car performance and a road trip
+
+A car app shows an engine's power from its torque curve, and plans a trip: the fuel it takes, its cost, and the time on the road.
+
+```go
+// The engine makes 350 N·m at 4000 rev/min.
+engine := units.NewTorque(350, torque.NewtonMeter).MultiplyByAngularVelocity(
+	units.NewAngularVelocity(4000, angularvelocity.RevolutionPerMinute))
+
+fmt.Printf("power:   %.0f = %.0f\n", engine.ConvertTo(power.Kilowatt), engine.ConvertTo(power.Horsepower))
+
+// A 620 km trip at 6.8 L/100km, with fuel at 1.85 a litre.
+trip := units.NewDistance(620, distance.Kilometer)
+consumption := units.NewFuelConsumption(6.8, fuelconsumption.LiterPer100Kilometers)
+fuel := consumption.MultiplyByDistance(trip).ConvertTo(volume.Liter)
+
+fmt.Printf("fuel:    %.1f, costing %.2f\n", fuel, fuel.Value()*1.85)
+
+// The same car, as an American driver would rate it.
+economy, err := consumption.Economy()
+if err != nil {
+	panic(err) // the consumption is zero
+}
+
+fmt.Printf("economy: %.1f\n", economy.ConvertTo(fueleconomy.MilePerGallon))
+
+// The time it takes at an average of 95 km/h.
+duration, err := trip.DivideByVelocity(units.NewVelocity(95, velocity.KilometerPerHour))
+if err != nil {
+	panic(err) // the speed is zero
+}
+
+d, err := duration.ToDuration()
+if err != nil {
+	panic(err) // beyond the range of time.Duration
+}
+
+fmt.Println("time:   ", d.Round(builtintime.Minute))
+```
+
+It prints:
+
+```text
+power:   147 kW = 197 hp
+fuel:    42.2 L, costing 78.00
+economy: 34.6 mpg
+time:    6h32m0s
+```
+
+**Uses:** `Torque.MultiplyByAngularVelocity` for the power; `FuelConsumption.MultiplyByDistance` and `Economy`, which turns L/100km into mpg; `Distance.DivideByVelocity` and `Time.ToDuration`.
+
+## Preparing a lab solution
+
+A laboratory notebook works out how much salt to weigh for a stock solution, what concentration a dilution gives, and how many ions a sample holds.
+
+```go
+// 500 mL of 0.15 M sodium chloride, NaCl (58.44 g/mol).
+stock := units.NewMolarity(0.15, molarity.Molar)
+salt := stock.MultiplyByVolume(units.NewVolume(500, volume.Milliliter))
+
+fmt.Printf("weigh out %.3f of NaCl (%.0f)\n",
+	salt.MultiplyByMolarMass(units.NewMolarMass(58.44, molarmass.GramPerMole)).ConvertTo(mass.Gram),
+	salt.ConvertTo(amount.Millimole))
+
+// Dilute 10 mL of the stock to 250 mL.
+aliquot := stock.MultiplyByVolume(units.NewVolume(10, volume.Milliliter))
+
+diluted, err := aliquot.DivideByVolume(units.NewVolume(250, volume.Milliliter))
+if err != nil {
+	panic(err) // the volume is zero
+}
+
+fmt.Printf("diluted: %.0f\n", diluted.ConvertTo(molarity.Millimolar))
+fmt.Printf("sodium ions in the aliquot: %.2e\n", aliquot.Entities())
+```
+
+It prints:
+
+```text
+weigh out 4.383 g of NaCl (75 mmol)
+diluted: 6 mM
+sodium ions in the aliquot: 9.03e+20
+```
+
+**Uses:** `Molarity.MultiplyByVolume`, `Amount.MultiplyByMolarMass`, `Amount.DivideByVolume` and `Amount.Entities`, with molar units (`M`, `mM`) as chemists write them.
+
+## Radiation on a long-haul flight
+
+A health app puts the cosmic-ray dose of a flight in perspective.
+
+```go
+// Cosmic rays give about 5 μSv/h at cruising altitude.
+cruise := units.NewDoseRate(5, doserate.MicrosievertPerHour)
+flight := units.NewTime(11, time.Hour)
+
+dose := cruise.MultiplyByTime(flight)
+
+fmt.Printf("one flight: %.0f\n", dose.ConvertTo(equivalentdose.Microsievert))
+
+// Compared with a year of natural background radiation.
+share, err := dose.Ratio(units.NewEquivalentDose(2.4, equivalentdose.Millisievert))
+if err != nil {
+	panic(err) // the background dose is zero
+}
+
+fmt.Printf("of a year's background: %.1f\n", share.ConvertTo(ratio.Percent))
+
+// The hours in the air that add up to 1 mSv.
+hours, err := units.NewEquivalentDose(1, equivalentdose.Millisievert).DivideByDoseRate(cruise)
+if err != nil {
+	panic(err) // the dose rate is zero
+}
+
+flights, err := hours.Ratio(flight)
+if err != nil {
+	panic(err) // the flight takes no time
+}
+
+fmt.Printf("1 mSv after %.0f, about %.0f such flights\n", hours.ConvertTo(time.Hour), flights.Fraction())
+```
+
+It prints:
+
+```text
+one flight: 55 μSv
+of a year's background: 2.3 %
+1 mSv after 200 h, about 18 such flights
+```
+
+**Uses:** `DoseRate.MultiplyByTime`, `EquivalentDose.DivideByDoseRate`, and `Ratio` for comparisons, as a percentage or a plain number.
+
+## Orbits and escape velocity
+
+A space-education app explains why the International Space Station circles the Earth every hour and a half, and how fast a rocket must go to leave for good.
+
+```go
+earth := units.NewMass(1, mass.EarthMass)
+radius := units.NewDistance(6371, distance.Kilometer)
+
+// The International Space Station flies about 420 km up.
+iss := radius.Add(units.NewDistance(420, distance.Kilometer))
+
+speed, err := physics.OrbitalVelocity(earth, iss)
+if err != nil {
+	panic(err) // the radius is zero
+}
+
+period, err := physics.OrbitalPeriod(earth, iss)
+if err != nil {
+	panic(err) // the mass is zero
+}
+
+fmt.Printf("ISS: %.2f, once every %.0f\n", speed.ConvertTo(velocity.KilometerPerSecond),
+	period.ConvertTo(time.Minute))
+
+escape, err := physics.EscapeVelocity(earth, radius)
+if err != nil {
+	panic(err) // the radius is zero
+}
+
+fmt.Printf("escape from the surface: %.1f\n", escape.ConvertTo(velocity.KilometerPerSecond))
+
+// The kinetic energy of 1 kg at the station's speed, as TNT.
+impact := units.NewMass(1, mass.Kilogram).KineticEnergy(speed)
+
+fmt.Printf("1 kg at that speed: %.1f, like %.1f kg of TNT\n", impact.ConvertTo(energy.Megajoule),
+	impact.ConvertTo(energy.GramOfTNT).Value()/1000)
+```
+
+It prints:
+
+```text
+ISS: 7.66 km/s, once every 93 min
+escape from the surface: 11.2 km/s
+1 kg at that speed: 29.3 MJ, like 7.0 kg of TNT
+```
+
+**Uses:** `physics.OrbitalVelocity`, `physics.OrbitalPeriod` and `physics.EscapeVelocity`, with G from CODATA 2022 and `mass.EarthMass`; `Mass.KineticEnergy` and the TNT units of energy.
 
 ## More
 

@@ -2,6 +2,7 @@ package units
 
 import (
 	"github.com/asaphin/go-physics-units/resistance"
+	"github.com/asaphin/go-physics-units/time"
 	"github.com/asaphin/go-physics-units/voltage"
 )
 
@@ -18,4 +19,9 @@ type Resistance struct {
 // MultiplyByCurrent returns the voltage r·i (V), by Ohm's law in voltage.BaseUnit.
 func (r Resistance) MultiplyByCurrent(i Current) Voltage {
 	return Voltage{value: r.baseValue() * i.baseValue(), unit: voltage.BaseUnit}
+}
+
+// MultiplyByCapacitance returns the time r·c (s) in time.BaseUnit: the time constant of an RC circuit.
+func (r Resistance) MultiplyByCapacitance(c Capacitance) Time {
+	return Time{value: r.baseValue() * c.baseValue(), unit: time.BaseUnit}
 }

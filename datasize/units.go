@@ -29,6 +29,8 @@ const (
 	Tebibyte             // TiB
 	Petabyte             // PB
 	Pebibyte             // PiB
+	Exabyte              // EB
+	Exbibyte             // EiB
 
 	unitCount // the number of units; keep it last
 )
@@ -57,4 +59,6 @@ var definitions = [unitCount]definition{
 	Tebibyte: {"TiB", 1 << 40},
 	Petabyte: {"PB", 1e15},
 	Pebibyte: {"PiB", 1 << 50},
+	Exabyte:  {"EB", 1e18},
+	Exbibyte: {"EiB", 1 << 60},
 }

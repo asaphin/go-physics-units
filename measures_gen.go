@@ -6,24 +6,46 @@ import (
 	"cmp"
 	"fmt"
 
+	"github.com/asaphin/go-physics-units/absorbeddose"
 	"github.com/asaphin/go-physics-units/acceleration"
+	"github.com/asaphin/go-physics-units/amount"
 	"github.com/asaphin/go-physics-units/angle"
 	"github.com/asaphin/go-physics-units/angularvelocity"
 	"github.com/asaphin/go-physics-units/area"
+	"github.com/asaphin/go-physics-units/capacitance"
 	"github.com/asaphin/go-physics-units/charge"
 	"github.com/asaphin/go-physics-units/current"
 	"github.com/asaphin/go-physics-units/datarate"
 	"github.com/asaphin/go-physics-units/datasize"
 	"github.com/asaphin/go-physics-units/density"
 	"github.com/asaphin/go-physics-units/distance"
+	"github.com/asaphin/go-physics-units/doserate"
 	"github.com/asaphin/go-physics-units/energy"
+	"github.com/asaphin/go-physics-units/energydensity"
+	"github.com/asaphin/go-physics-units/equivalentdose"
+	"github.com/asaphin/go-physics-units/flowrate"
 	"github.com/asaphin/go-physics-units/force"
 	"github.com/asaphin/go-physics-units/frequency"
+	"github.com/asaphin/go-physics-units/fuelconsumption"
+	"github.com/asaphin/go-physics-units/fueleconomy"
+	"github.com/asaphin/go-physics-units/illuminance"
+	"github.com/asaphin/go-physics-units/inductance"
+	"github.com/asaphin/go-physics-units/luminousflux"
+	"github.com/asaphin/go-physics-units/magneticfield"
 	"github.com/asaphin/go-physics-units/mass"
+	"github.com/asaphin/go-physics-units/massflowrate"
+	"github.com/asaphin/go-physics-units/molarity"
+	"github.com/asaphin/go-physics-units/molarmass"
+	"github.com/asaphin/go-physics-units/momentum"
+	"github.com/asaphin/go-physics-units/pace"
 	"github.com/asaphin/go-physics-units/power"
 	"github.com/asaphin/go-physics-units/pressure"
+	"github.com/asaphin/go-physics-units/radioactivity"
+	"github.com/asaphin/go-physics-units/ratio"
 	"github.com/asaphin/go-physics-units/resistance"
+	"github.com/asaphin/go-physics-units/specificenergy"
 	"github.com/asaphin/go-physics-units/time"
+	"github.com/asaphin/go-physics-units/torque"
 	"github.com/asaphin/go-physics-units/velocity"
 	"github.com/asaphin/go-physics-units/voltage"
 	"github.com/asaphin/go-physics-units/volume"
@@ -96,6 +118,72 @@ var (
 	angularvelocitySet = newPredefinedSet(MeasureAngularVelocity, angularvelocity.Units(), func(v float64, u angularvelocity.Unit) Measurement {
 		return AngularVelocity{value: v, unit: u}
 	})
+	torqueSet = newPredefinedSet(MeasureTorque, torque.Units(), func(v float64, u torque.Unit) Measurement {
+		return Torque{value: v, unit: u}
+	})
+	flowrateSet = newPredefinedSet(MeasureFlowRate, flowrate.Units(), func(v float64, u flowrate.Unit) Measurement {
+		return FlowRate{value: v, unit: u}
+	})
+	massflowrateSet = newPredefinedSet(MeasureMassFlowRate, massflowrate.Units(), func(v float64, u massflowrate.Unit) Measurement {
+		return MassFlowRate{value: v, unit: u}
+	})
+	momentumSet = newPredefinedSet(MeasureMomentum, momentum.Units(), func(v float64, u momentum.Unit) Measurement {
+		return Momentum{value: v, unit: u}
+	})
+	paceSet = newPredefinedSet(MeasurePace, pace.Units(), func(v float64, u pace.Unit) Measurement {
+		return Pace{value: v, unit: u}
+	})
+	fueleconomySet = newPredefinedSet(MeasureFuelEconomy, fueleconomy.Units(), func(v float64, u fueleconomy.Unit) Measurement {
+		return FuelEconomy{value: v, unit: u}
+	})
+	fuelconsumptionSet = newPredefinedSet(MeasureFuelConsumption, fuelconsumption.Units(), func(v float64, u fuelconsumption.Unit) Measurement {
+		return FuelConsumption{value: v, unit: u}
+	})
+	amountSet = newPredefinedSet(MeasureAmount, amount.Units(), func(v float64, u amount.Unit) Measurement {
+		return Amount{value: v, unit: u}
+	})
+	molarmassSet = newPredefinedSet(MeasureMolarMass, molarmass.Units(), func(v float64, u molarmass.Unit) Measurement {
+		return MolarMass{value: v, unit: u}
+	})
+	molaritySet = newPredefinedSet(MeasureMolarity, molarity.Units(), func(v float64, u molarity.Unit) Measurement {
+		return Molarity{value: v, unit: u}
+	})
+	radioactivitySet = newPredefinedSet(MeasureRadioactivity, radioactivity.Units(), func(v float64, u radioactivity.Unit) Measurement {
+		return Radioactivity{value: v, unit: u}
+	})
+	absorbeddoseSet = newPredefinedSet(MeasureAbsorbedDose, absorbeddose.Units(), func(v float64, u absorbeddose.Unit) Measurement {
+		return AbsorbedDose{value: v, unit: u}
+	})
+	equivalentdoseSet = newPredefinedSet(MeasureEquivalentDose, equivalentdose.Units(), func(v float64, u equivalentdose.Unit) Measurement {
+		return EquivalentDose{value: v, unit: u}
+	})
+	doserateSet = newPredefinedSet(MeasureDoseRate, doserate.Units(), func(v float64, u doserate.Unit) Measurement {
+		return DoseRate{value: v, unit: u}
+	})
+	capacitanceSet = newPredefinedSet(MeasureCapacitance, capacitance.Units(), func(v float64, u capacitance.Unit) Measurement {
+		return Capacitance{value: v, unit: u}
+	})
+	inductanceSet = newPredefinedSet(MeasureInductance, inductance.Units(), func(v float64, u inductance.Unit) Measurement {
+		return Inductance{value: v, unit: u}
+	})
+	magneticfieldSet = newPredefinedSet(MeasureMagneticField, magneticfield.Units(), func(v float64, u magneticfield.Unit) Measurement {
+		return MagneticField{value: v, unit: u}
+	})
+	illuminanceSet = newPredefinedSet(MeasureIlluminance, illuminance.Units(), func(v float64, u illuminance.Unit) Measurement {
+		return Illuminance{value: v, unit: u}
+	})
+	luminousfluxSet = newPredefinedSet(MeasureLuminousFlux, luminousflux.Units(), func(v float64, u luminousflux.Unit) Measurement {
+		return LuminousFlux{value: v, unit: u}
+	})
+	specificenergySet = newPredefinedSet(MeasureSpecificEnergy, specificenergy.Units(), func(v float64, u specificenergy.Unit) Measurement {
+		return SpecificEnergy{value: v, unit: u}
+	})
+	energydensitySet = newPredefinedSet(MeasureEnergyDensity, energydensity.Units(), func(v float64, u energydensity.Unit) Measurement {
+		return EnergyDensity{value: v, unit: u}
+	})
+	ratioSet = newPredefinedSet(MeasureRatio, ratio.Units(), func(v float64, u ratio.Unit) Measurement {
+		return Ratio{value: v, unit: u}
+	})
 )
 
 // predefinedSets lists the unit sets of the predefined measures.
@@ -121,6 +209,28 @@ var predefinedSets = [...]*unitSet{
 	chargeSet,
 	resistanceSet,
 	angularvelocitySet,
+	torqueSet,
+	flowrateSet,
+	massflowrateSet,
+	momentumSet,
+	paceSet,
+	fueleconomySet,
+	fuelconsumptionSet,
+	amountSet,
+	molarmassSet,
+	molaritySet,
+	radioactivitySet,
+	absorbeddoseSet,
+	equivalentdoseSet,
+	doserateSet,
+	capacitanceSet,
+	inductanceSet,
+	magneticfieldSet,
+	illuminanceSet,
+	luminousfluxSet,
+	specificenergySet,
+	energydensitySet,
+	ratioSet,
 }
 
 // NewDistance returns a distance of value in unit, such as
@@ -227,6 +337,18 @@ func (d Distance) EqualWithinRel(other Distance, tol float64) bool {
 	x, y := d.common(other)
 
 	return equalWithinRel(x, y, tol)
+}
+
+// Ratio returns d/other, the ratio of the distances, in ratio.BaseUnit:
+// convert it with ConvertTo(ratio.Percent) for a percentage. It fails with
+// ErrZeroDivision if other is zero.
+func (d Distance) Ratio(other Distance) (Ratio, error) {
+	x, y := d.common(other)
+	if y == 0 {
+		return Ratio{}, ErrZeroDivision
+	}
+
+	return Ratio{value: x / y, unit: ratio.BaseUnit}, nil
 }
 
 // common returns the values of the distances in a common unit: their own if
@@ -465,6 +587,18 @@ func (t Time) EqualWithinRel(other Time, tol float64) bool {
 	return equalWithinRel(x, y, tol)
 }
 
+// Ratio returns t/other, the ratio of the times, in ratio.BaseUnit:
+// convert it with ConvertTo(ratio.Percent) for a percentage. It fails with
+// ErrZeroDivision if other is zero.
+func (t Time) Ratio(other Time) (Ratio, error) {
+	x, y := t.common(other)
+	if y == 0 {
+		return Ratio{}, ErrZeroDivision
+	}
+
+	return Ratio{value: x / y, unit: ratio.BaseUnit}, nil
+}
+
 // common returns the values of the times in a common unit: their own if
 // they share it, otherwise the base unit. Either way the result doesn't depend
 // on the order of the operands, so comparisons are symmetric.
@@ -699,6 +833,18 @@ func (m Mass) EqualWithinRel(other Mass, tol float64) bool {
 	x, y := m.common(other)
 
 	return equalWithinRel(x, y, tol)
+}
+
+// Ratio returns m/other, the ratio of the masses, in ratio.BaseUnit:
+// convert it with ConvertTo(ratio.Percent) for a percentage. It fails with
+// ErrZeroDivision if other is zero.
+func (m Mass) Ratio(other Mass) (Ratio, error) {
+	x, y := m.common(other)
+	if y == 0 {
+		return Ratio{}, ErrZeroDivision
+	}
+
+	return Ratio{value: x / y, unit: ratio.BaseUnit}, nil
 }
 
 // common returns the values of the masses in a common unit: their own if
@@ -937,6 +1083,18 @@ func (v Velocity) EqualWithinRel(other Velocity, tol float64) bool {
 	return equalWithinRel(x, y, tol)
 }
 
+// Ratio returns v/other, the ratio of the velocities, in ratio.BaseUnit:
+// convert it with ConvertTo(ratio.Percent) for a percentage. It fails with
+// ErrZeroDivision if other is zero.
+func (v Velocity) Ratio(other Velocity) (Ratio, error) {
+	x, y := v.common(other)
+	if y == 0 {
+		return Ratio{}, ErrZeroDivision
+	}
+
+	return Ratio{value: x / y, unit: ratio.BaseUnit}, nil
+}
+
 // common returns the values of the velocities in a common unit: their own if
 // they share it, otherwise the base unit. Either way the result doesn't depend
 // on the order of the operands, so comparisons are symmetric.
@@ -1171,6 +1329,18 @@ func (a Area) EqualWithinRel(other Area, tol float64) bool {
 	x, y := a.common(other)
 
 	return equalWithinRel(x, y, tol)
+}
+
+// Ratio returns a/other, the ratio of the areas, in ratio.BaseUnit:
+// convert it with ConvertTo(ratio.Percent) for a percentage. It fails with
+// ErrZeroDivision if other is zero.
+func (a Area) Ratio(other Area) (Ratio, error) {
+	x, y := a.common(other)
+	if y == 0 {
+		return Ratio{}, ErrZeroDivision
+	}
+
+	return Ratio{value: x / y, unit: ratio.BaseUnit}, nil
 }
 
 // common returns the values of the areas in a common unit: their own if
@@ -1409,6 +1579,18 @@ func (v Volume) EqualWithinRel(other Volume, tol float64) bool {
 	return equalWithinRel(x, y, tol)
 }
 
+// Ratio returns v/other, the ratio of the volumes, in ratio.BaseUnit:
+// convert it with ConvertTo(ratio.Percent) for a percentage. It fails with
+// ErrZeroDivision if other is zero.
+func (v Volume) Ratio(other Volume) (Ratio, error) {
+	x, y := v.common(other)
+	if y == 0 {
+		return Ratio{}, ErrZeroDivision
+	}
+
+	return Ratio{value: x / y, unit: ratio.BaseUnit}, nil
+}
+
 // common returns the values of the volumes in a common unit: their own if
 // they share it, otherwise the base unit. Either way the result doesn't depend
 // on the order of the operands, so comparisons are symmetric.
@@ -1643,6 +1825,18 @@ func (a Acceleration) EqualWithinRel(other Acceleration, tol float64) bool {
 	x, y := a.common(other)
 
 	return equalWithinRel(x, y, tol)
+}
+
+// Ratio returns a/other, the ratio of the accelerations, in ratio.BaseUnit:
+// convert it with ConvertTo(ratio.Percent) for a percentage. It fails with
+// ErrZeroDivision if other is zero.
+func (a Acceleration) Ratio(other Acceleration) (Ratio, error) {
+	x, y := a.common(other)
+	if y == 0 {
+		return Ratio{}, ErrZeroDivision
+	}
+
+	return Ratio{value: x / y, unit: ratio.BaseUnit}, nil
 }
 
 // common returns the values of the accelerations in a common unit: their own if
@@ -1881,6 +2075,18 @@ func (f Force) EqualWithinRel(other Force, tol float64) bool {
 	return equalWithinRel(x, y, tol)
 }
 
+// Ratio returns f/other, the ratio of the forces, in ratio.BaseUnit:
+// convert it with ConvertTo(ratio.Percent) for a percentage. It fails with
+// ErrZeroDivision if other is zero.
+func (f Force) Ratio(other Force) (Ratio, error) {
+	x, y := f.common(other)
+	if y == 0 {
+		return Ratio{}, ErrZeroDivision
+	}
+
+	return Ratio{value: x / y, unit: ratio.BaseUnit}, nil
+}
+
 // common returns the values of the forces in a common unit: their own if
 // they share it, otherwise the base unit. Either way the result doesn't depend
 // on the order of the operands, so comparisons are symmetric.
@@ -2115,6 +2321,18 @@ func (e Energy) EqualWithinRel(other Energy, tol float64) bool {
 	x, y := e.common(other)
 
 	return equalWithinRel(x, y, tol)
+}
+
+// Ratio returns e/other, the ratio of the energies, in ratio.BaseUnit:
+// convert it with ConvertTo(ratio.Percent) for a percentage. It fails with
+// ErrZeroDivision if other is zero.
+func (e Energy) Ratio(other Energy) (Ratio, error) {
+	x, y := e.common(other)
+	if y == 0 {
+		return Ratio{}, ErrZeroDivision
+	}
+
+	return Ratio{value: x / y, unit: ratio.BaseUnit}, nil
 }
 
 // common returns the values of the energies in a common unit: their own if
@@ -2353,6 +2571,18 @@ func (p Power) EqualWithinRel(other Power, tol float64) bool {
 	return equalWithinRel(x, y, tol)
 }
 
+// Ratio returns p/other, the ratio of the powers, in ratio.BaseUnit:
+// convert it with ConvertTo(ratio.Percent) for a percentage. It fails with
+// ErrZeroDivision if other is zero.
+func (p Power) Ratio(other Power) (Ratio, error) {
+	x, y := p.common(other)
+	if y == 0 {
+		return Ratio{}, ErrZeroDivision
+	}
+
+	return Ratio{value: x / y, unit: ratio.BaseUnit}, nil
+}
+
 // common returns the values of the powers in a common unit: their own if
 // they share it, otherwise the base unit. Either way the result doesn't depend
 // on the order of the operands, so comparisons are symmetric.
@@ -2587,6 +2817,18 @@ func (p Pressure) EqualWithinRel(other Pressure, tol float64) bool {
 	x, y := p.common(other)
 
 	return equalWithinRel(x, y, tol)
+}
+
+// Ratio returns p/other, the ratio of the pressures, in ratio.BaseUnit:
+// convert it with ConvertTo(ratio.Percent) for a percentage. It fails with
+// ErrZeroDivision if other is zero.
+func (p Pressure) Ratio(other Pressure) (Ratio, error) {
+	x, y := p.common(other)
+	if y == 0 {
+		return Ratio{}, ErrZeroDivision
+	}
+
+	return Ratio{value: x / y, unit: ratio.BaseUnit}, nil
 }
 
 // common returns the values of the pressures in a common unit: their own if
@@ -2825,6 +3067,18 @@ func (f Frequency) EqualWithinRel(other Frequency, tol float64) bool {
 	return equalWithinRel(x, y, tol)
 }
 
+// Ratio returns f/other, the ratio of the frequencies, in ratio.BaseUnit:
+// convert it with ConvertTo(ratio.Percent) for a percentage. It fails with
+// ErrZeroDivision if other is zero.
+func (f Frequency) Ratio(other Frequency) (Ratio, error) {
+	x, y := f.common(other)
+	if y == 0 {
+		return Ratio{}, ErrZeroDivision
+	}
+
+	return Ratio{value: x / y, unit: ratio.BaseUnit}, nil
+}
+
 // common returns the values of the frequencies in a common unit: their own if
 // they share it, otherwise the base unit. Either way the result doesn't depend
 // on the order of the operands, so comparisons are symmetric.
@@ -3059,6 +3313,18 @@ func (a Angle) EqualWithinRel(other Angle, tol float64) bool {
 	x, y := a.common(other)
 
 	return equalWithinRel(x, y, tol)
+}
+
+// Ratio returns a/other, the ratio of the angles, in ratio.BaseUnit:
+// convert it with ConvertTo(ratio.Percent) for a percentage. It fails with
+// ErrZeroDivision if other is zero.
+func (a Angle) Ratio(other Angle) (Ratio, error) {
+	x, y := a.common(other)
+	if y == 0 {
+		return Ratio{}, ErrZeroDivision
+	}
+
+	return Ratio{value: x / y, unit: ratio.BaseUnit}, nil
 }
 
 // common returns the values of the angles in a common unit: their own if
@@ -3297,6 +3563,18 @@ func (s DataSize) EqualWithinRel(other DataSize, tol float64) bool {
 	return equalWithinRel(x, y, tol)
 }
 
+// Ratio returns s/other, the ratio of the data sizes, in ratio.BaseUnit:
+// convert it with ConvertTo(ratio.Percent) for a percentage. It fails with
+// ErrZeroDivision if other is zero.
+func (s DataSize) Ratio(other DataSize) (Ratio, error) {
+	x, y := s.common(other)
+	if y == 0 {
+		return Ratio{}, ErrZeroDivision
+	}
+
+	return Ratio{value: x / y, unit: ratio.BaseUnit}, nil
+}
+
 // common returns the values of the data sizes in a common unit: their own if
 // they share it, otherwise the base unit. Either way the result doesn't depend
 // on the order of the operands, so comparisons are symmetric.
@@ -3531,6 +3809,18 @@ func (d Density) EqualWithinRel(other Density, tol float64) bool {
 	x, y := d.common(other)
 
 	return equalWithinRel(x, y, tol)
+}
+
+// Ratio returns d/other, the ratio of the densities, in ratio.BaseUnit:
+// convert it with ConvertTo(ratio.Percent) for a percentage. It fails with
+// ErrZeroDivision if other is zero.
+func (d Density) Ratio(other Density) (Ratio, error) {
+	x, y := d.common(other)
+	if y == 0 {
+		return Ratio{}, ErrZeroDivision
+	}
+
+	return Ratio{value: x / y, unit: ratio.BaseUnit}, nil
 }
 
 // common returns the values of the densities in a common unit: their own if
@@ -3769,6 +4059,18 @@ func (r DataRate) EqualWithinRel(other DataRate, tol float64) bool {
 	return equalWithinRel(x, y, tol)
 }
 
+// Ratio returns r/other, the ratio of the data rates, in ratio.BaseUnit:
+// convert it with ConvertTo(ratio.Percent) for a percentage. It fails with
+// ErrZeroDivision if other is zero.
+func (r DataRate) Ratio(other DataRate) (Ratio, error) {
+	x, y := r.common(other)
+	if y == 0 {
+		return Ratio{}, ErrZeroDivision
+	}
+
+	return Ratio{value: x / y, unit: ratio.BaseUnit}, nil
+}
+
 // common returns the values of the data rates in a common unit: their own if
 // they share it, otherwise the base unit. Either way the result doesn't depend
 // on the order of the operands, so comparisons are symmetric.
@@ -4003,6 +4305,18 @@ func (i Current) EqualWithinRel(other Current, tol float64) bool {
 	x, y := i.common(other)
 
 	return equalWithinRel(x, y, tol)
+}
+
+// Ratio returns i/other, the ratio of the electric currents, in ratio.BaseUnit:
+// convert it with ConvertTo(ratio.Percent) for a percentage. It fails with
+// ErrZeroDivision if other is zero.
+func (i Current) Ratio(other Current) (Ratio, error) {
+	x, y := i.common(other)
+	if y == 0 {
+		return Ratio{}, ErrZeroDivision
+	}
+
+	return Ratio{value: x / y, unit: ratio.BaseUnit}, nil
 }
 
 // common returns the values of the electric currents in a common unit: their own if
@@ -4241,6 +4555,18 @@ func (v Voltage) EqualWithinRel(other Voltage, tol float64) bool {
 	return equalWithinRel(x, y, tol)
 }
 
+// Ratio returns v/other, the ratio of the voltages, in ratio.BaseUnit:
+// convert it with ConvertTo(ratio.Percent) for a percentage. It fails with
+// ErrZeroDivision if other is zero.
+func (v Voltage) Ratio(other Voltage) (Ratio, error) {
+	x, y := v.common(other)
+	if y == 0 {
+		return Ratio{}, ErrZeroDivision
+	}
+
+	return Ratio{value: x / y, unit: ratio.BaseUnit}, nil
+}
+
 // common returns the values of the voltages in a common unit: their own if
 // they share it, otherwise the base unit. Either way the result doesn't depend
 // on the order of the operands, so comparisons are symmetric.
@@ -4475,6 +4801,18 @@ func (q Charge) EqualWithinRel(other Charge, tol float64) bool {
 	x, y := q.common(other)
 
 	return equalWithinRel(x, y, tol)
+}
+
+// Ratio returns q/other, the ratio of the electric charges, in ratio.BaseUnit:
+// convert it with ConvertTo(ratio.Percent) for a percentage. It fails with
+// ErrZeroDivision if other is zero.
+func (q Charge) Ratio(other Charge) (Ratio, error) {
+	x, y := q.common(other)
+	if y == 0 {
+		return Ratio{}, ErrZeroDivision
+	}
+
+	return Ratio{value: x / y, unit: ratio.BaseUnit}, nil
 }
 
 // common returns the values of the electric charges in a common unit: their own if
@@ -4713,6 +5051,18 @@ func (r Resistance) EqualWithinRel(other Resistance, tol float64) bool {
 	return equalWithinRel(x, y, tol)
 }
 
+// Ratio returns r/other, the ratio of the resistances, in ratio.BaseUnit:
+// convert it with ConvertTo(ratio.Percent) for a percentage. It fails with
+// ErrZeroDivision if other is zero.
+func (r Resistance) Ratio(other Resistance) (Ratio, error) {
+	x, y := r.common(other)
+	if y == 0 {
+		return Ratio{}, ErrZeroDivision
+	}
+
+	return Ratio{value: x / y, unit: ratio.BaseUnit}, nil
+}
+
 // common returns the values of the resistances in a common unit: their own if
 // they share it, otherwise the base unit. Either way the result doesn't depend
 // on the order of the operands, so comparisons are symmetric.
@@ -4949,6 +5299,18 @@ func (w AngularVelocity) EqualWithinRel(other AngularVelocity, tol float64) bool
 	return equalWithinRel(x, y, tol)
 }
 
+// Ratio returns w/other, the ratio of the angular velocities, in ratio.BaseUnit:
+// convert it with ConvertTo(ratio.Percent) for a percentage. It fails with
+// ErrZeroDivision if other is zero.
+func (w AngularVelocity) Ratio(other AngularVelocity) (Ratio, error) {
+	x, y := w.common(other)
+	if y == 0 {
+		return Ratio{}, ErrZeroDivision
+	}
+
+	return Ratio{value: x / y, unit: ratio.BaseUnit}, nil
+}
+
 // common returns the values of the angular velocities in a common unit: their own if
 // they share it, otherwise the base unit. Either way the result doesn't depend
 // on the order of the operands, so comparisons are symmetric.
@@ -5075,6 +5437,5462 @@ func (w *AngularVelocity) UnmarshalText(text []byte) error {
 	}
 
 	*w = value
+
+	return nil
+}
+
+// NewTorque returns a torque of value in unit, such as
+// NewTorque(10, torque.BaseUnit).
+func NewTorque(value float64, unit torque.Unit) Torque {
+	return Torque{value: value, unit: unit}
+}
+
+// Value returns the numeric value, expressed in Unit.
+func (tq Torque) Value() float64 {
+	return tq.value
+}
+
+// Unit returns the unit of the value.
+func (tq Torque) Unit() torque.Unit {
+	return tq.unit
+}
+
+// Symbol returns the symbol of the unit, as Unit().String() does.
+func (tq Torque) Symbol() string {
+	return tq.unit.String()
+}
+
+// Type returns MeasureTorque.
+func (Torque) Type() MeasureType {
+	return MeasureTorque
+}
+
+// String formats the torque as "<value> <symbol>", such as "40 N·m", the form
+// StringToTorque and ParseString accept. The value is formatted like fmt's %v,
+// in the shortest form that parses back to the same float64.
+func (tq Torque) String() string {
+	return formatString(tq.value, tq.unit.String())
+}
+
+// Format implements fmt.Formatter: %.2f formats the value and appends the
+// symbol. See the package documentation for every verb.
+func (tq Torque) Format(state fmt.State, verb rune) {
+	formatMeasurement(state, verb, "Torque", tq.value, tq.unit.String())
+}
+
+// ConvertTo returns the torque expressed in unit.
+func (tq Torque) ConvertTo(unit torque.Unit) Torque {
+	return Torque{value: tq.value * torque.Rate(tq.unit, unit), unit: unit}
+}
+
+// MustConvertTo is ConvertTo.
+//
+// Deprecated: Use ConvertTo, which no longer fails.
+//
+//go:fix inline
+func (tq Torque) MustConvertTo(unit torque.Unit) Torque {
+	return tq.ConvertTo(unit)
+}
+
+// ConvertToBaseUnits returns the torque expressed in newton metres.
+func (tq Torque) ConvertToBaseUnits() Torque {
+	return Torque{value: tq.baseValue(), unit: torque.BaseUnit}
+}
+
+// baseValue returns the value in newton metres.
+func (tq Torque) baseValue() float64 {
+	return tq.value * tq.unit.Factor()
+}
+
+// Add returns the sum of the torques, expressed in the receiver's unit.
+func (tq Torque) Add(other Torque) Torque {
+	return Torque{value: tq.value + other.value*torque.Rate(other.unit, tq.unit), unit: tq.unit}
+}
+
+// Sub returns the difference of the torques, expressed in the receiver's unit.
+func (tq Torque) Sub(other Torque) Torque {
+	return Torque{value: tq.value - other.value*torque.Rate(other.unit, tq.unit), unit: tq.unit}
+}
+
+// Mul returns the torque multiplied by multiplier.
+func (tq Torque) Mul(multiplier float64) Torque {
+	return Torque{value: tq.value * multiplier, unit: tq.unit}
+}
+
+// Div returns the torque divided by divisor. It fails with ErrZeroDivision if
+// divisor is zero.
+func (tq Torque) Div(divisor float64) (Torque, error) {
+	if divisor == 0 {
+		return Torque{}, ErrZeroDivision
+	}
+
+	return Torque{value: tq.value / divisor, unit: tq.unit}, nil
+}
+
+// Compare compares the torques; see Comparer.
+func (tq Torque) Compare(other Torque) int {
+	return cmp.Compare(tq.common(other))
+}
+
+// Equal reports whether the torques are equal; see Comparer.
+func (tq Torque) Equal(other Torque) bool {
+	return tq.Compare(other) == 0
+}
+
+// EqualWithinRel reports whether the torques are equal within the relative
+// tolerance tol; see Comparer.
+func (tq Torque) EqualWithinRel(other Torque, tol float64) bool {
+	x, y := tq.common(other)
+
+	return equalWithinRel(x, y, tol)
+}
+
+// Ratio returns tq/other, the ratio of the torques, in ratio.BaseUnit:
+// convert it with ConvertTo(ratio.Percent) for a percentage. It fails with
+// ErrZeroDivision if other is zero.
+func (tq Torque) Ratio(other Torque) (Ratio, error) {
+	x, y := tq.common(other)
+	if y == 0 {
+		return Ratio{}, ErrZeroDivision
+	}
+
+	return Ratio{value: x / y, unit: ratio.BaseUnit}, nil
+}
+
+// common returns the values of the torques in a common unit: their own if
+// they share it, otherwise the base unit. Either way the result doesn't depend
+// on the order of the operands, so comparisons are symmetric.
+func (tq Torque) common(other Torque) (float64, float64) {
+	if tq.unit == other.unit {
+		return tq.value, other.value
+	}
+
+	return tq.baseValue(), other.baseValue()
+}
+
+// ConvertToMeasurement is ConvertTo for generic code: it takes a unit symbol.
+// It fails with ErrUnknownUnit if symbol isn't a torque unit.
+func (tq Torque) ConvertToMeasurement(symbol string) (Measurement, error) {
+	unit, ok := torque.ParseUnit(symbol)
+	if !ok {
+		return nil, unknownUnitError(MeasureTorque, symbol)
+	}
+
+	return tq.ConvertTo(unit), nil
+}
+
+// AddMeasurement is Add for generic code. It fails with
+// ErrIncompatibleMeasures if other isn't a torque.
+func (tq Torque) AddMeasurement(other Measurement) (Measurement, error) {
+	value, err := torqueSet.valueIn(other, uint16(tq.unit))
+	if err != nil {
+		return nil, err
+	}
+
+	return Torque{value: tq.value + value, unit: tq.unit}, nil
+}
+
+// SubMeasurement is Sub for generic code. It fails with
+// ErrIncompatibleMeasures if other isn't a torque.
+func (tq Torque) SubMeasurement(other Measurement) (Measurement, error) {
+	value, err := torqueSet.valueIn(other, uint16(tq.unit))
+	if err != nil {
+		return nil, err
+	}
+
+	return Torque{value: tq.value - value, unit: tq.unit}, nil
+}
+
+// MulMeasurement is Mul for generic code.
+func (tq Torque) MulMeasurement(multiplier float64) Measurement {
+	return tq.Mul(multiplier)
+}
+
+// DivMeasurement is Div for generic code.
+func (tq Torque) DivMeasurement(divisor float64) (Measurement, error) {
+	if divisor == 0 {
+		return nil, ErrZeroDivision
+	}
+
+	return Torque{value: tq.value / divisor, unit: tq.unit}, nil
+}
+
+// CompareMeasurement is Compare for generic code. It fails with
+// ErrIncompatibleMeasures if other isn't a torque.
+func (tq Torque) CompareMeasurement(other Measurement) (int, error) {
+	return torqueSet.compare(tq.value, uint16(tq.unit), other)
+}
+
+func (tq Torque) generic() genericValue {
+	return genericValue{value: tq.value, unit: uint16(tq.unit), set: torqueSet}
+}
+
+const errTorqueConversion incompatibleError = "not a torque measure"
+
+// ToTorque returns m as a Torque, for example a result of ParseString. It fails
+// with ErrIncompatibleMeasures if m isn't a torque.
+func ToTorque(m Measurement) (Torque, error) {
+	value, ok := m.(Torque)
+	if !ok {
+		return Torque{}, errTorqueConversion
+	}
+
+	return value, nil
+}
+
+// StringToTorque parses a torque from a string such as "40 N·m". It fails with
+// ErrInvalidFormat unless the string has the form "<value> <symbol>" with a
+// finite value, and with ErrUnknownUnit if the symbol isn't a torque unit.
+func StringToTorque(s string) (Torque, error) {
+	value, symbol, err := parseValueAndUnit(s)
+	if err != nil {
+		return Torque{}, err
+	}
+
+	unit, ok := torque.ParseUnit(symbol)
+	if !ok {
+		return Torque{}, unknownUnitError(MeasureTorque, symbol)
+	}
+
+	return Torque{value: value, unit: unit}, nil
+}
+
+// AppendText implements encoding.TextAppender: it appends the String form,
+// such as "40 N·m". It fails with ErrOutOfRange if the value isn't finite, and
+// with ErrUnknownUnit if the unit isn't valid, so that the text always parses
+// back.
+func (tq Torque) AppendText(b []byte) ([]byte, error) {
+	if !tq.unit.Valid() {
+		return b, unknownUnitError(MeasureTorque, tq.unit.String())
+	}
+
+	return appendText(b, tq.value, tq.unit.String())
+}
+
+// MarshalText implements encoding.TextMarshaler, so torque values encode in
+// JSON as strings such as "40 N·m". It fails like AppendText.
+func (tq Torque) MarshalText() ([]byte, error) {
+	return tq.AppendText(nil)
+}
+
+// UnmarshalText implements encoding.TextUnmarshaler: it parses text as
+// StringToTorque does and stores the result in tq. Unmarshalling needs a
+// pointer receiver; it changes only the value it is called on.
+func (tq *Torque) UnmarshalText(text []byte) error {
+	value, err := StringToTorque(string(text))
+	if err != nil {
+		return err
+	}
+
+	*tq = value
+
+	return nil
+}
+
+// NewFlowRate returns a flow rate of value in unit, such as
+// NewFlowRate(10, flowrate.BaseUnit).
+func NewFlowRate(value float64, unit flowrate.Unit) FlowRate {
+	return FlowRate{value: value, unit: unit}
+}
+
+// Value returns the numeric value, expressed in Unit.
+func (q FlowRate) Value() float64 {
+	return q.value
+}
+
+// Unit returns the unit of the value.
+func (q FlowRate) Unit() flowrate.Unit {
+	return q.unit
+}
+
+// Symbol returns the symbol of the unit, as Unit().String() does.
+func (q FlowRate) Symbol() string {
+	return q.unit.String()
+}
+
+// Type returns MeasureFlowRate.
+func (FlowRate) Type() MeasureType {
+	return MeasureFlowRate
+}
+
+// String formats the flow rate as "<value> <symbol>", such as "12 L/min", the form
+// StringToFlowRate and ParseString accept. The value is formatted like fmt's %v,
+// in the shortest form that parses back to the same float64.
+func (q FlowRate) String() string {
+	return formatString(q.value, q.unit.String())
+}
+
+// Format implements fmt.Formatter: %.2f formats the value and appends the
+// symbol. See the package documentation for every verb.
+func (q FlowRate) Format(state fmt.State, verb rune) {
+	formatMeasurement(state, verb, "FlowRate", q.value, q.unit.String())
+}
+
+// ConvertTo returns the flow rate expressed in unit.
+func (q FlowRate) ConvertTo(unit flowrate.Unit) FlowRate {
+	return FlowRate{value: q.value * flowrate.Rate(q.unit, unit), unit: unit}
+}
+
+// MustConvertTo is ConvertTo.
+//
+// Deprecated: Use ConvertTo, which no longer fails.
+//
+//go:fix inline
+func (q FlowRate) MustConvertTo(unit flowrate.Unit) FlowRate {
+	return q.ConvertTo(unit)
+}
+
+// ConvertToBaseUnits returns the flow rate expressed in cubic metres per second.
+func (q FlowRate) ConvertToBaseUnits() FlowRate {
+	return FlowRate{value: q.baseValue(), unit: flowrate.BaseUnit}
+}
+
+// baseValue returns the value in cubic metres per second.
+func (q FlowRate) baseValue() float64 {
+	return q.value * q.unit.Factor()
+}
+
+// Add returns the sum of the flow rates, expressed in the receiver's unit.
+func (q FlowRate) Add(other FlowRate) FlowRate {
+	return FlowRate{value: q.value + other.value*flowrate.Rate(other.unit, q.unit), unit: q.unit}
+}
+
+// Sub returns the difference of the flow rates, expressed in the receiver's unit.
+func (q FlowRate) Sub(other FlowRate) FlowRate {
+	return FlowRate{value: q.value - other.value*flowrate.Rate(other.unit, q.unit), unit: q.unit}
+}
+
+// Mul returns the flow rate multiplied by multiplier.
+func (q FlowRate) Mul(multiplier float64) FlowRate {
+	return FlowRate{value: q.value * multiplier, unit: q.unit}
+}
+
+// Div returns the flow rate divided by divisor. It fails with ErrZeroDivision if
+// divisor is zero.
+func (q FlowRate) Div(divisor float64) (FlowRate, error) {
+	if divisor == 0 {
+		return FlowRate{}, ErrZeroDivision
+	}
+
+	return FlowRate{value: q.value / divisor, unit: q.unit}, nil
+}
+
+// Compare compares the flow rates; see Comparer.
+func (q FlowRate) Compare(other FlowRate) int {
+	return cmp.Compare(q.common(other))
+}
+
+// Equal reports whether the flow rates are equal; see Comparer.
+func (q FlowRate) Equal(other FlowRate) bool {
+	return q.Compare(other) == 0
+}
+
+// EqualWithinRel reports whether the flow rates are equal within the relative
+// tolerance tol; see Comparer.
+func (q FlowRate) EqualWithinRel(other FlowRate, tol float64) bool {
+	x, y := q.common(other)
+
+	return equalWithinRel(x, y, tol)
+}
+
+// Ratio returns q/other, the ratio of the flow rates, in ratio.BaseUnit:
+// convert it with ConvertTo(ratio.Percent) for a percentage. It fails with
+// ErrZeroDivision if other is zero.
+func (q FlowRate) Ratio(other FlowRate) (Ratio, error) {
+	x, y := q.common(other)
+	if y == 0 {
+		return Ratio{}, ErrZeroDivision
+	}
+
+	return Ratio{value: x / y, unit: ratio.BaseUnit}, nil
+}
+
+// common returns the values of the flow rates in a common unit: their own if
+// they share it, otherwise the base unit. Either way the result doesn't depend
+// on the order of the operands, so comparisons are symmetric.
+func (q FlowRate) common(other FlowRate) (float64, float64) {
+	if q.unit == other.unit {
+		return q.value, other.value
+	}
+
+	return q.baseValue(), other.baseValue()
+}
+
+// ConvertToMeasurement is ConvertTo for generic code: it takes a unit symbol.
+// It fails with ErrUnknownUnit if symbol isn't a flow rate unit.
+func (q FlowRate) ConvertToMeasurement(symbol string) (Measurement, error) {
+	unit, ok := flowrate.ParseUnit(symbol)
+	if !ok {
+		return nil, unknownUnitError(MeasureFlowRate, symbol)
+	}
+
+	return q.ConvertTo(unit), nil
+}
+
+// AddMeasurement is Add for generic code. It fails with
+// ErrIncompatibleMeasures if other isn't a flow rate.
+func (q FlowRate) AddMeasurement(other Measurement) (Measurement, error) {
+	value, err := flowrateSet.valueIn(other, uint16(q.unit))
+	if err != nil {
+		return nil, err
+	}
+
+	return FlowRate{value: q.value + value, unit: q.unit}, nil
+}
+
+// SubMeasurement is Sub for generic code. It fails with
+// ErrIncompatibleMeasures if other isn't a flow rate.
+func (q FlowRate) SubMeasurement(other Measurement) (Measurement, error) {
+	value, err := flowrateSet.valueIn(other, uint16(q.unit))
+	if err != nil {
+		return nil, err
+	}
+
+	return FlowRate{value: q.value - value, unit: q.unit}, nil
+}
+
+// MulMeasurement is Mul for generic code.
+func (q FlowRate) MulMeasurement(multiplier float64) Measurement {
+	return q.Mul(multiplier)
+}
+
+// DivMeasurement is Div for generic code.
+func (q FlowRate) DivMeasurement(divisor float64) (Measurement, error) {
+	if divisor == 0 {
+		return nil, ErrZeroDivision
+	}
+
+	return FlowRate{value: q.value / divisor, unit: q.unit}, nil
+}
+
+// CompareMeasurement is Compare for generic code. It fails with
+// ErrIncompatibleMeasures if other isn't a flow rate.
+func (q FlowRate) CompareMeasurement(other Measurement) (int, error) {
+	return flowrateSet.compare(q.value, uint16(q.unit), other)
+}
+
+func (q FlowRate) generic() genericValue {
+	return genericValue{value: q.value, unit: uint16(q.unit), set: flowrateSet}
+}
+
+const errFlowRateConversion incompatibleError = "not a flow rate measure"
+
+// ToFlowRate returns m as a FlowRate, for example a result of ParseString. It fails
+// with ErrIncompatibleMeasures if m isn't a flow rate.
+func ToFlowRate(m Measurement) (FlowRate, error) {
+	value, ok := m.(FlowRate)
+	if !ok {
+		return FlowRate{}, errFlowRateConversion
+	}
+
+	return value, nil
+}
+
+// StringToFlowRate parses a flow rate from a string such as "12 L/min". It fails with
+// ErrInvalidFormat unless the string has the form "<value> <symbol>" with a
+// finite value, and with ErrUnknownUnit if the symbol isn't a flow rate unit.
+func StringToFlowRate(s string) (FlowRate, error) {
+	value, symbol, err := parseValueAndUnit(s)
+	if err != nil {
+		return FlowRate{}, err
+	}
+
+	unit, ok := flowrate.ParseUnit(symbol)
+	if !ok {
+		return FlowRate{}, unknownUnitError(MeasureFlowRate, symbol)
+	}
+
+	return FlowRate{value: value, unit: unit}, nil
+}
+
+// AppendText implements encoding.TextAppender: it appends the String form,
+// such as "12 L/min". It fails with ErrOutOfRange if the value isn't finite, and
+// with ErrUnknownUnit if the unit isn't valid, so that the text always parses
+// back.
+func (q FlowRate) AppendText(b []byte) ([]byte, error) {
+	if !q.unit.Valid() {
+		return b, unknownUnitError(MeasureFlowRate, q.unit.String())
+	}
+
+	return appendText(b, q.value, q.unit.String())
+}
+
+// MarshalText implements encoding.TextMarshaler, so flow rate values encode in
+// JSON as strings such as "12 L/min". It fails like AppendText.
+func (q FlowRate) MarshalText() ([]byte, error) {
+	return q.AppendText(nil)
+}
+
+// UnmarshalText implements encoding.TextUnmarshaler: it parses text as
+// StringToFlowRate does and stores the result in q. Unmarshalling needs a
+// pointer receiver; it changes only the value it is called on.
+func (q *FlowRate) UnmarshalText(text []byte) error {
+	value, err := StringToFlowRate(string(text))
+	if err != nil {
+		return err
+	}
+
+	*q = value
+
+	return nil
+}
+
+// NewMassFlowRate returns a mass flow rate of value in unit, such as
+// NewMassFlowRate(10, massflowrate.BaseUnit).
+func NewMassFlowRate(value float64, unit massflowrate.Unit) MassFlowRate {
+	return MassFlowRate{value: value, unit: unit}
+}
+
+// Value returns the numeric value, expressed in Unit.
+func (mr MassFlowRate) Value() float64 {
+	return mr.value
+}
+
+// Unit returns the unit of the value.
+func (mr MassFlowRate) Unit() massflowrate.Unit {
+	return mr.unit
+}
+
+// Symbol returns the symbol of the unit, as Unit().String() does.
+func (mr MassFlowRate) Symbol() string {
+	return mr.unit.String()
+}
+
+// Type returns MeasureMassFlowRate.
+func (MassFlowRate) Type() MeasureType {
+	return MeasureMassFlowRate
+}
+
+// String formats the mass flow rate as "<value> <symbol>", such as "250 kg/h", the form
+// StringToMassFlowRate and ParseString accept. The value is formatted like fmt's %v,
+// in the shortest form that parses back to the same float64.
+func (mr MassFlowRate) String() string {
+	return formatString(mr.value, mr.unit.String())
+}
+
+// Format implements fmt.Formatter: %.2f formats the value and appends the
+// symbol. See the package documentation for every verb.
+func (mr MassFlowRate) Format(state fmt.State, verb rune) {
+	formatMeasurement(state, verb, "MassFlowRate", mr.value, mr.unit.String())
+}
+
+// ConvertTo returns the mass flow rate expressed in unit.
+func (mr MassFlowRate) ConvertTo(unit massflowrate.Unit) MassFlowRate {
+	return MassFlowRate{value: mr.value * massflowrate.Rate(mr.unit, unit), unit: unit}
+}
+
+// MustConvertTo is ConvertTo.
+//
+// Deprecated: Use ConvertTo, which no longer fails.
+//
+//go:fix inline
+func (mr MassFlowRate) MustConvertTo(unit massflowrate.Unit) MassFlowRate {
+	return mr.ConvertTo(unit)
+}
+
+// ConvertToBaseUnits returns the mass flow rate expressed in kilograms per second.
+func (mr MassFlowRate) ConvertToBaseUnits() MassFlowRate {
+	return MassFlowRate{value: mr.baseValue(), unit: massflowrate.BaseUnit}
+}
+
+// baseValue returns the value in kilograms per second.
+func (mr MassFlowRate) baseValue() float64 {
+	return mr.value * mr.unit.Factor()
+}
+
+// Add returns the sum of the mass flow rates, expressed in the receiver's unit.
+func (mr MassFlowRate) Add(other MassFlowRate) MassFlowRate {
+	return MassFlowRate{value: mr.value + other.value*massflowrate.Rate(other.unit, mr.unit), unit: mr.unit}
+}
+
+// Sub returns the difference of the mass flow rates, expressed in the receiver's unit.
+func (mr MassFlowRate) Sub(other MassFlowRate) MassFlowRate {
+	return MassFlowRate{value: mr.value - other.value*massflowrate.Rate(other.unit, mr.unit), unit: mr.unit}
+}
+
+// Mul returns the mass flow rate multiplied by multiplier.
+func (mr MassFlowRate) Mul(multiplier float64) MassFlowRate {
+	return MassFlowRate{value: mr.value * multiplier, unit: mr.unit}
+}
+
+// Div returns the mass flow rate divided by divisor. It fails with ErrZeroDivision if
+// divisor is zero.
+func (mr MassFlowRate) Div(divisor float64) (MassFlowRate, error) {
+	if divisor == 0 {
+		return MassFlowRate{}, ErrZeroDivision
+	}
+
+	return MassFlowRate{value: mr.value / divisor, unit: mr.unit}, nil
+}
+
+// Compare compares the mass flow rates; see Comparer.
+func (mr MassFlowRate) Compare(other MassFlowRate) int {
+	return cmp.Compare(mr.common(other))
+}
+
+// Equal reports whether the mass flow rates are equal; see Comparer.
+func (mr MassFlowRate) Equal(other MassFlowRate) bool {
+	return mr.Compare(other) == 0
+}
+
+// EqualWithinRel reports whether the mass flow rates are equal within the relative
+// tolerance tol; see Comparer.
+func (mr MassFlowRate) EqualWithinRel(other MassFlowRate, tol float64) bool {
+	x, y := mr.common(other)
+
+	return equalWithinRel(x, y, tol)
+}
+
+// Ratio returns mr/other, the ratio of the mass flow rates, in ratio.BaseUnit:
+// convert it with ConvertTo(ratio.Percent) for a percentage. It fails with
+// ErrZeroDivision if other is zero.
+func (mr MassFlowRate) Ratio(other MassFlowRate) (Ratio, error) {
+	x, y := mr.common(other)
+	if y == 0 {
+		return Ratio{}, ErrZeroDivision
+	}
+
+	return Ratio{value: x / y, unit: ratio.BaseUnit}, nil
+}
+
+// common returns the values of the mass flow rates in a common unit: their own if
+// they share it, otherwise the base unit. Either way the result doesn't depend
+// on the order of the operands, so comparisons are symmetric.
+func (mr MassFlowRate) common(other MassFlowRate) (float64, float64) {
+	if mr.unit == other.unit {
+		return mr.value, other.value
+	}
+
+	return mr.baseValue(), other.baseValue()
+}
+
+// ConvertToMeasurement is ConvertTo for generic code: it takes a unit symbol.
+// It fails with ErrUnknownUnit if symbol isn't a mass flow rate unit.
+func (mr MassFlowRate) ConvertToMeasurement(symbol string) (Measurement, error) {
+	unit, ok := massflowrate.ParseUnit(symbol)
+	if !ok {
+		return nil, unknownUnitError(MeasureMassFlowRate, symbol)
+	}
+
+	return mr.ConvertTo(unit), nil
+}
+
+// AddMeasurement is Add for generic code. It fails with
+// ErrIncompatibleMeasures if other isn't a mass flow rate.
+func (mr MassFlowRate) AddMeasurement(other Measurement) (Measurement, error) {
+	value, err := massflowrateSet.valueIn(other, uint16(mr.unit))
+	if err != nil {
+		return nil, err
+	}
+
+	return MassFlowRate{value: mr.value + value, unit: mr.unit}, nil
+}
+
+// SubMeasurement is Sub for generic code. It fails with
+// ErrIncompatibleMeasures if other isn't a mass flow rate.
+func (mr MassFlowRate) SubMeasurement(other Measurement) (Measurement, error) {
+	value, err := massflowrateSet.valueIn(other, uint16(mr.unit))
+	if err != nil {
+		return nil, err
+	}
+
+	return MassFlowRate{value: mr.value - value, unit: mr.unit}, nil
+}
+
+// MulMeasurement is Mul for generic code.
+func (mr MassFlowRate) MulMeasurement(multiplier float64) Measurement {
+	return mr.Mul(multiplier)
+}
+
+// DivMeasurement is Div for generic code.
+func (mr MassFlowRate) DivMeasurement(divisor float64) (Measurement, error) {
+	if divisor == 0 {
+		return nil, ErrZeroDivision
+	}
+
+	return MassFlowRate{value: mr.value / divisor, unit: mr.unit}, nil
+}
+
+// CompareMeasurement is Compare for generic code. It fails with
+// ErrIncompatibleMeasures if other isn't a mass flow rate.
+func (mr MassFlowRate) CompareMeasurement(other Measurement) (int, error) {
+	return massflowrateSet.compare(mr.value, uint16(mr.unit), other)
+}
+
+func (mr MassFlowRate) generic() genericValue {
+	return genericValue{value: mr.value, unit: uint16(mr.unit), set: massflowrateSet}
+}
+
+const errMassFlowRateConversion incompatibleError = "not a mass flow rate measure"
+
+// ToMassFlowRate returns m as a MassFlowRate, for example a result of ParseString. It fails
+// with ErrIncompatibleMeasures if m isn't a mass flow rate.
+func ToMassFlowRate(m Measurement) (MassFlowRate, error) {
+	value, ok := m.(MassFlowRate)
+	if !ok {
+		return MassFlowRate{}, errMassFlowRateConversion
+	}
+
+	return value, nil
+}
+
+// StringToMassFlowRate parses a mass flow rate from a string such as "250 kg/h". It fails with
+// ErrInvalidFormat unless the string has the form "<value> <symbol>" with a
+// finite value, and with ErrUnknownUnit if the symbol isn't a mass flow rate unit.
+func StringToMassFlowRate(s string) (MassFlowRate, error) {
+	value, symbol, err := parseValueAndUnit(s)
+	if err != nil {
+		return MassFlowRate{}, err
+	}
+
+	unit, ok := massflowrate.ParseUnit(symbol)
+	if !ok {
+		return MassFlowRate{}, unknownUnitError(MeasureMassFlowRate, symbol)
+	}
+
+	return MassFlowRate{value: value, unit: unit}, nil
+}
+
+// AppendText implements encoding.TextAppender: it appends the String form,
+// such as "250 kg/h". It fails with ErrOutOfRange if the value isn't finite, and
+// with ErrUnknownUnit if the unit isn't valid, so that the text always parses
+// back.
+func (mr MassFlowRate) AppendText(b []byte) ([]byte, error) {
+	if !mr.unit.Valid() {
+		return b, unknownUnitError(MeasureMassFlowRate, mr.unit.String())
+	}
+
+	return appendText(b, mr.value, mr.unit.String())
+}
+
+// MarshalText implements encoding.TextMarshaler, so mass flow rate values encode in
+// JSON as strings such as "250 kg/h". It fails like AppendText.
+func (mr MassFlowRate) MarshalText() ([]byte, error) {
+	return mr.AppendText(nil)
+}
+
+// UnmarshalText implements encoding.TextUnmarshaler: it parses text as
+// StringToMassFlowRate does and stores the result in mr. Unmarshalling needs a
+// pointer receiver; it changes only the value it is called on.
+func (mr *MassFlowRate) UnmarshalText(text []byte) error {
+	value, err := StringToMassFlowRate(string(text))
+	if err != nil {
+		return err
+	}
+
+	*mr = value
+
+	return nil
+}
+
+// NewMomentum returns a momentum of value in unit, such as
+// NewMomentum(10, momentum.BaseUnit).
+func NewMomentum(value float64, unit momentum.Unit) Momentum {
+	return Momentum{value: value, unit: unit}
+}
+
+// Value returns the numeric value, expressed in Unit.
+func (p Momentum) Value() float64 {
+	return p.value
+}
+
+// Unit returns the unit of the value.
+func (p Momentum) Unit() momentum.Unit {
+	return p.unit
+}
+
+// Symbol returns the symbol of the unit, as Unit().String() does.
+func (p Momentum) Symbol() string {
+	return p.unit.String()
+}
+
+// Type returns MeasureMomentum.
+func (Momentum) Type() MeasureType {
+	return MeasureMomentum
+}
+
+// String formats the momentum as "<value> <symbol>", such as "10 N·s", the form
+// StringToMomentum and ParseString accept. The value is formatted like fmt's %v,
+// in the shortest form that parses back to the same float64.
+func (p Momentum) String() string {
+	return formatString(p.value, p.unit.String())
+}
+
+// Format implements fmt.Formatter: %.2f formats the value and appends the
+// symbol. See the package documentation for every verb.
+func (p Momentum) Format(state fmt.State, verb rune) {
+	formatMeasurement(state, verb, "Momentum", p.value, p.unit.String())
+}
+
+// ConvertTo returns the momentum expressed in unit.
+func (p Momentum) ConvertTo(unit momentum.Unit) Momentum {
+	return Momentum{value: p.value * momentum.Rate(p.unit, unit), unit: unit}
+}
+
+// MustConvertTo is ConvertTo.
+//
+// Deprecated: Use ConvertTo, which no longer fails.
+//
+//go:fix inline
+func (p Momentum) MustConvertTo(unit momentum.Unit) Momentum {
+	return p.ConvertTo(unit)
+}
+
+// ConvertToBaseUnits returns the momentum expressed in kilogram metres per second.
+func (p Momentum) ConvertToBaseUnits() Momentum {
+	return Momentum{value: p.baseValue(), unit: momentum.BaseUnit}
+}
+
+// baseValue returns the value in kilogram metres per second.
+func (p Momentum) baseValue() float64 {
+	return p.value * p.unit.Factor()
+}
+
+// Add returns the sum of the momenta, expressed in the receiver's unit.
+func (p Momentum) Add(other Momentum) Momentum {
+	return Momentum{value: p.value + other.value*momentum.Rate(other.unit, p.unit), unit: p.unit}
+}
+
+// Sub returns the difference of the momenta, expressed in the receiver's unit.
+func (p Momentum) Sub(other Momentum) Momentum {
+	return Momentum{value: p.value - other.value*momentum.Rate(other.unit, p.unit), unit: p.unit}
+}
+
+// Mul returns the momentum multiplied by multiplier.
+func (p Momentum) Mul(multiplier float64) Momentum {
+	return Momentum{value: p.value * multiplier, unit: p.unit}
+}
+
+// Div returns the momentum divided by divisor. It fails with ErrZeroDivision if
+// divisor is zero.
+func (p Momentum) Div(divisor float64) (Momentum, error) {
+	if divisor == 0 {
+		return Momentum{}, ErrZeroDivision
+	}
+
+	return Momentum{value: p.value / divisor, unit: p.unit}, nil
+}
+
+// Compare compares the momenta; see Comparer.
+func (p Momentum) Compare(other Momentum) int {
+	return cmp.Compare(p.common(other))
+}
+
+// Equal reports whether the momenta are equal; see Comparer.
+func (p Momentum) Equal(other Momentum) bool {
+	return p.Compare(other) == 0
+}
+
+// EqualWithinRel reports whether the momenta are equal within the relative
+// tolerance tol; see Comparer.
+func (p Momentum) EqualWithinRel(other Momentum, tol float64) bool {
+	x, y := p.common(other)
+
+	return equalWithinRel(x, y, tol)
+}
+
+// Ratio returns p/other, the ratio of the momenta, in ratio.BaseUnit:
+// convert it with ConvertTo(ratio.Percent) for a percentage. It fails with
+// ErrZeroDivision if other is zero.
+func (p Momentum) Ratio(other Momentum) (Ratio, error) {
+	x, y := p.common(other)
+	if y == 0 {
+		return Ratio{}, ErrZeroDivision
+	}
+
+	return Ratio{value: x / y, unit: ratio.BaseUnit}, nil
+}
+
+// common returns the values of the momenta in a common unit: their own if
+// they share it, otherwise the base unit. Either way the result doesn't depend
+// on the order of the operands, so comparisons are symmetric.
+func (p Momentum) common(other Momentum) (float64, float64) {
+	if p.unit == other.unit {
+		return p.value, other.value
+	}
+
+	return p.baseValue(), other.baseValue()
+}
+
+// ConvertToMeasurement is ConvertTo for generic code: it takes a unit symbol.
+// It fails with ErrUnknownUnit if symbol isn't a momentum unit.
+func (p Momentum) ConvertToMeasurement(symbol string) (Measurement, error) {
+	unit, ok := momentum.ParseUnit(symbol)
+	if !ok {
+		return nil, unknownUnitError(MeasureMomentum, symbol)
+	}
+
+	return p.ConvertTo(unit), nil
+}
+
+// AddMeasurement is Add for generic code. It fails with
+// ErrIncompatibleMeasures if other isn't a momentum.
+func (p Momentum) AddMeasurement(other Measurement) (Measurement, error) {
+	value, err := momentumSet.valueIn(other, uint16(p.unit))
+	if err != nil {
+		return nil, err
+	}
+
+	return Momentum{value: p.value + value, unit: p.unit}, nil
+}
+
+// SubMeasurement is Sub for generic code. It fails with
+// ErrIncompatibleMeasures if other isn't a momentum.
+func (p Momentum) SubMeasurement(other Measurement) (Measurement, error) {
+	value, err := momentumSet.valueIn(other, uint16(p.unit))
+	if err != nil {
+		return nil, err
+	}
+
+	return Momentum{value: p.value - value, unit: p.unit}, nil
+}
+
+// MulMeasurement is Mul for generic code.
+func (p Momentum) MulMeasurement(multiplier float64) Measurement {
+	return p.Mul(multiplier)
+}
+
+// DivMeasurement is Div for generic code.
+func (p Momentum) DivMeasurement(divisor float64) (Measurement, error) {
+	if divisor == 0 {
+		return nil, ErrZeroDivision
+	}
+
+	return Momentum{value: p.value / divisor, unit: p.unit}, nil
+}
+
+// CompareMeasurement is Compare for generic code. It fails with
+// ErrIncompatibleMeasures if other isn't a momentum.
+func (p Momentum) CompareMeasurement(other Measurement) (int, error) {
+	return momentumSet.compare(p.value, uint16(p.unit), other)
+}
+
+func (p Momentum) generic() genericValue {
+	return genericValue{value: p.value, unit: uint16(p.unit), set: momentumSet}
+}
+
+const errMomentumConversion incompatibleError = "not a momentum measure"
+
+// ToMomentum returns m as a Momentum, for example a result of ParseString. It fails
+// with ErrIncompatibleMeasures if m isn't a momentum.
+func ToMomentum(m Measurement) (Momentum, error) {
+	value, ok := m.(Momentum)
+	if !ok {
+		return Momentum{}, errMomentumConversion
+	}
+
+	return value, nil
+}
+
+// StringToMomentum parses a momentum from a string such as "10 N·s". It fails with
+// ErrInvalidFormat unless the string has the form "<value> <symbol>" with a
+// finite value, and with ErrUnknownUnit if the symbol isn't a momentum unit.
+func StringToMomentum(s string) (Momentum, error) {
+	value, symbol, err := parseValueAndUnit(s)
+	if err != nil {
+		return Momentum{}, err
+	}
+
+	unit, ok := momentum.ParseUnit(symbol)
+	if !ok {
+		return Momentum{}, unknownUnitError(MeasureMomentum, symbol)
+	}
+
+	return Momentum{value: value, unit: unit}, nil
+}
+
+// AppendText implements encoding.TextAppender: it appends the String form,
+// such as "10 N·s". It fails with ErrOutOfRange if the value isn't finite, and
+// with ErrUnknownUnit if the unit isn't valid, so that the text always parses
+// back.
+func (p Momentum) AppendText(b []byte) ([]byte, error) {
+	if !p.unit.Valid() {
+		return b, unknownUnitError(MeasureMomentum, p.unit.String())
+	}
+
+	return appendText(b, p.value, p.unit.String())
+}
+
+// MarshalText implements encoding.TextMarshaler, so momentum values encode in
+// JSON as strings such as "10 N·s". It fails like AppendText.
+func (p Momentum) MarshalText() ([]byte, error) {
+	return p.AppendText(nil)
+}
+
+// UnmarshalText implements encoding.TextUnmarshaler: it parses text as
+// StringToMomentum does and stores the result in p. Unmarshalling needs a
+// pointer receiver; it changes only the value it is called on.
+func (p *Momentum) UnmarshalText(text []byte) error {
+	value, err := StringToMomentum(string(text))
+	if err != nil {
+		return err
+	}
+
+	*p = value
+
+	return nil
+}
+
+// NewPace returns a pace of value in unit, such as
+// NewPace(10, pace.BaseUnit).
+func NewPace(value float64, unit pace.Unit) Pace {
+	return Pace{value: value, unit: unit}
+}
+
+// Value returns the numeric value, expressed in Unit.
+func (p Pace) Value() float64 {
+	return p.value
+}
+
+// Unit returns the unit of the value.
+func (p Pace) Unit() pace.Unit {
+	return p.unit
+}
+
+// Symbol returns the symbol of the unit, as Unit().String() does.
+func (p Pace) Symbol() string {
+	return p.unit.String()
+}
+
+// Type returns MeasurePace.
+func (Pace) Type() MeasureType {
+	return MeasurePace
+}
+
+// String formats the pace as "<value> <symbol>", such as "5 min/km", the form
+// StringToPace and ParseString accept. The value is formatted like fmt's %v,
+// in the shortest form that parses back to the same float64.
+func (p Pace) String() string {
+	return formatString(p.value, p.unit.String())
+}
+
+// Format implements fmt.Formatter: %.2f formats the value and appends the
+// symbol. See the package documentation for every verb.
+func (p Pace) Format(state fmt.State, verb rune) {
+	formatMeasurement(state, verb, "Pace", p.value, p.unit.String())
+}
+
+// ConvertTo returns the pace expressed in unit.
+func (p Pace) ConvertTo(unit pace.Unit) Pace {
+	return Pace{value: p.value * pace.Rate(p.unit, unit), unit: unit}
+}
+
+// MustConvertTo is ConvertTo.
+//
+// Deprecated: Use ConvertTo, which no longer fails.
+//
+//go:fix inline
+func (p Pace) MustConvertTo(unit pace.Unit) Pace {
+	return p.ConvertTo(unit)
+}
+
+// ConvertToBaseUnits returns the pace expressed in seconds per metre.
+func (p Pace) ConvertToBaseUnits() Pace {
+	return Pace{value: p.baseValue(), unit: pace.BaseUnit}
+}
+
+// baseValue returns the value in seconds per metre.
+func (p Pace) baseValue() float64 {
+	return p.value * p.unit.Factor()
+}
+
+// Add returns the sum of the paces, expressed in the receiver's unit.
+func (p Pace) Add(other Pace) Pace {
+	return Pace{value: p.value + other.value*pace.Rate(other.unit, p.unit), unit: p.unit}
+}
+
+// Sub returns the difference of the paces, expressed in the receiver's unit.
+func (p Pace) Sub(other Pace) Pace {
+	return Pace{value: p.value - other.value*pace.Rate(other.unit, p.unit), unit: p.unit}
+}
+
+// Mul returns the pace multiplied by multiplier.
+func (p Pace) Mul(multiplier float64) Pace {
+	return Pace{value: p.value * multiplier, unit: p.unit}
+}
+
+// Div returns the pace divided by divisor. It fails with ErrZeroDivision if
+// divisor is zero.
+func (p Pace) Div(divisor float64) (Pace, error) {
+	if divisor == 0 {
+		return Pace{}, ErrZeroDivision
+	}
+
+	return Pace{value: p.value / divisor, unit: p.unit}, nil
+}
+
+// Compare compares the paces; see Comparer.
+func (p Pace) Compare(other Pace) int {
+	return cmp.Compare(p.common(other))
+}
+
+// Equal reports whether the paces are equal; see Comparer.
+func (p Pace) Equal(other Pace) bool {
+	return p.Compare(other) == 0
+}
+
+// EqualWithinRel reports whether the paces are equal within the relative
+// tolerance tol; see Comparer.
+func (p Pace) EqualWithinRel(other Pace, tol float64) bool {
+	x, y := p.common(other)
+
+	return equalWithinRel(x, y, tol)
+}
+
+// Ratio returns p/other, the ratio of the paces, in ratio.BaseUnit:
+// convert it with ConvertTo(ratio.Percent) for a percentage. It fails with
+// ErrZeroDivision if other is zero.
+func (p Pace) Ratio(other Pace) (Ratio, error) {
+	x, y := p.common(other)
+	if y == 0 {
+		return Ratio{}, ErrZeroDivision
+	}
+
+	return Ratio{value: x / y, unit: ratio.BaseUnit}, nil
+}
+
+// common returns the values of the paces in a common unit: their own if
+// they share it, otherwise the base unit. Either way the result doesn't depend
+// on the order of the operands, so comparisons are symmetric.
+func (p Pace) common(other Pace) (float64, float64) {
+	if p.unit == other.unit {
+		return p.value, other.value
+	}
+
+	return p.baseValue(), other.baseValue()
+}
+
+// ConvertToMeasurement is ConvertTo for generic code: it takes a unit symbol.
+// It fails with ErrUnknownUnit if symbol isn't a pace unit.
+func (p Pace) ConvertToMeasurement(symbol string) (Measurement, error) {
+	unit, ok := pace.ParseUnit(symbol)
+	if !ok {
+		return nil, unknownUnitError(MeasurePace, symbol)
+	}
+
+	return p.ConvertTo(unit), nil
+}
+
+// AddMeasurement is Add for generic code. It fails with
+// ErrIncompatibleMeasures if other isn't a pace.
+func (p Pace) AddMeasurement(other Measurement) (Measurement, error) {
+	value, err := paceSet.valueIn(other, uint16(p.unit))
+	if err != nil {
+		return nil, err
+	}
+
+	return Pace{value: p.value + value, unit: p.unit}, nil
+}
+
+// SubMeasurement is Sub for generic code. It fails with
+// ErrIncompatibleMeasures if other isn't a pace.
+func (p Pace) SubMeasurement(other Measurement) (Measurement, error) {
+	value, err := paceSet.valueIn(other, uint16(p.unit))
+	if err != nil {
+		return nil, err
+	}
+
+	return Pace{value: p.value - value, unit: p.unit}, nil
+}
+
+// MulMeasurement is Mul for generic code.
+func (p Pace) MulMeasurement(multiplier float64) Measurement {
+	return p.Mul(multiplier)
+}
+
+// DivMeasurement is Div for generic code.
+func (p Pace) DivMeasurement(divisor float64) (Measurement, error) {
+	if divisor == 0 {
+		return nil, ErrZeroDivision
+	}
+
+	return Pace{value: p.value / divisor, unit: p.unit}, nil
+}
+
+// CompareMeasurement is Compare for generic code. It fails with
+// ErrIncompatibleMeasures if other isn't a pace.
+func (p Pace) CompareMeasurement(other Measurement) (int, error) {
+	return paceSet.compare(p.value, uint16(p.unit), other)
+}
+
+func (p Pace) generic() genericValue {
+	return genericValue{value: p.value, unit: uint16(p.unit), set: paceSet}
+}
+
+const errPaceConversion incompatibleError = "not a pace measure"
+
+// ToPace returns m as a Pace, for example a result of ParseString. It fails
+// with ErrIncompatibleMeasures if m isn't a pace.
+func ToPace(m Measurement) (Pace, error) {
+	value, ok := m.(Pace)
+	if !ok {
+		return Pace{}, errPaceConversion
+	}
+
+	return value, nil
+}
+
+// StringToPace parses a pace from a string such as "5 min/km". It fails with
+// ErrInvalidFormat unless the string has the form "<value> <symbol>" with a
+// finite value, and with ErrUnknownUnit if the symbol isn't a pace unit.
+func StringToPace(s string) (Pace, error) {
+	value, symbol, err := parseValueAndUnit(s)
+	if err != nil {
+		return Pace{}, err
+	}
+
+	unit, ok := pace.ParseUnit(symbol)
+	if !ok {
+		return Pace{}, unknownUnitError(MeasurePace, symbol)
+	}
+
+	return Pace{value: value, unit: unit}, nil
+}
+
+// AppendText implements encoding.TextAppender: it appends the String form,
+// such as "5 min/km". It fails with ErrOutOfRange if the value isn't finite, and
+// with ErrUnknownUnit if the unit isn't valid, so that the text always parses
+// back.
+func (p Pace) AppendText(b []byte) ([]byte, error) {
+	if !p.unit.Valid() {
+		return b, unknownUnitError(MeasurePace, p.unit.String())
+	}
+
+	return appendText(b, p.value, p.unit.String())
+}
+
+// MarshalText implements encoding.TextMarshaler, so pace values encode in
+// JSON as strings such as "5 min/km". It fails like AppendText.
+func (p Pace) MarshalText() ([]byte, error) {
+	return p.AppendText(nil)
+}
+
+// UnmarshalText implements encoding.TextUnmarshaler: it parses text as
+// StringToPace does and stores the result in p. Unmarshalling needs a
+// pointer receiver; it changes only the value it is called on.
+func (p *Pace) UnmarshalText(text []byte) error {
+	value, err := StringToPace(string(text))
+	if err != nil {
+		return err
+	}
+
+	*p = value
+
+	return nil
+}
+
+// NewFuelEconomy returns a fuel economy of value in unit, such as
+// NewFuelEconomy(10, fueleconomy.BaseUnit).
+func NewFuelEconomy(value float64, unit fueleconomy.Unit) FuelEconomy {
+	return FuelEconomy{value: value, unit: unit}
+}
+
+// Value returns the numeric value, expressed in Unit.
+func (fe FuelEconomy) Value() float64 {
+	return fe.value
+}
+
+// Unit returns the unit of the value.
+func (fe FuelEconomy) Unit() fueleconomy.Unit {
+	return fe.unit
+}
+
+// Symbol returns the symbol of the unit, as Unit().String() does.
+func (fe FuelEconomy) Symbol() string {
+	return fe.unit.String()
+}
+
+// Type returns MeasureFuelEconomy.
+func (FuelEconomy) Type() MeasureType {
+	return MeasureFuelEconomy
+}
+
+// String formats the fuel economy as "<value> <symbol>", such as "15 km/L", the form
+// StringToFuelEconomy and ParseString accept. The value is formatted like fmt's %v,
+// in the shortest form that parses back to the same float64.
+func (fe FuelEconomy) String() string {
+	return formatString(fe.value, fe.unit.String())
+}
+
+// Format implements fmt.Formatter: %.2f formats the value and appends the
+// symbol. See the package documentation for every verb.
+func (fe FuelEconomy) Format(state fmt.State, verb rune) {
+	formatMeasurement(state, verb, "FuelEconomy", fe.value, fe.unit.String())
+}
+
+// ConvertTo returns the fuel economy expressed in unit.
+func (fe FuelEconomy) ConvertTo(unit fueleconomy.Unit) FuelEconomy {
+	return FuelEconomy{value: fe.value * fueleconomy.Rate(fe.unit, unit), unit: unit}
+}
+
+// MustConvertTo is ConvertTo.
+//
+// Deprecated: Use ConvertTo, which no longer fails.
+//
+//go:fix inline
+func (fe FuelEconomy) MustConvertTo(unit fueleconomy.Unit) FuelEconomy {
+	return fe.ConvertTo(unit)
+}
+
+// ConvertToBaseUnits returns the fuel economy expressed in metres per cubic metre.
+func (fe FuelEconomy) ConvertToBaseUnits() FuelEconomy {
+	return FuelEconomy{value: fe.baseValue(), unit: fueleconomy.BaseUnit}
+}
+
+// baseValue returns the value in metres per cubic metre.
+func (fe FuelEconomy) baseValue() float64 {
+	return fe.value * fe.unit.Factor()
+}
+
+// Add returns the sum of the fuel economies, expressed in the receiver's unit.
+func (fe FuelEconomy) Add(other FuelEconomy) FuelEconomy {
+	return FuelEconomy{value: fe.value + other.value*fueleconomy.Rate(other.unit, fe.unit), unit: fe.unit}
+}
+
+// Sub returns the difference of the fuel economies, expressed in the receiver's unit.
+func (fe FuelEconomy) Sub(other FuelEconomy) FuelEconomy {
+	return FuelEconomy{value: fe.value - other.value*fueleconomy.Rate(other.unit, fe.unit), unit: fe.unit}
+}
+
+// Mul returns the fuel economy multiplied by multiplier.
+func (fe FuelEconomy) Mul(multiplier float64) FuelEconomy {
+	return FuelEconomy{value: fe.value * multiplier, unit: fe.unit}
+}
+
+// Div returns the fuel economy divided by divisor. It fails with ErrZeroDivision if
+// divisor is zero.
+func (fe FuelEconomy) Div(divisor float64) (FuelEconomy, error) {
+	if divisor == 0 {
+		return FuelEconomy{}, ErrZeroDivision
+	}
+
+	return FuelEconomy{value: fe.value / divisor, unit: fe.unit}, nil
+}
+
+// Compare compares the fuel economies; see Comparer.
+func (fe FuelEconomy) Compare(other FuelEconomy) int {
+	return cmp.Compare(fe.common(other))
+}
+
+// Equal reports whether the fuel economies are equal; see Comparer.
+func (fe FuelEconomy) Equal(other FuelEconomy) bool {
+	return fe.Compare(other) == 0
+}
+
+// EqualWithinRel reports whether the fuel economies are equal within the relative
+// tolerance tol; see Comparer.
+func (fe FuelEconomy) EqualWithinRel(other FuelEconomy, tol float64) bool {
+	x, y := fe.common(other)
+
+	return equalWithinRel(x, y, tol)
+}
+
+// Ratio returns fe/other, the ratio of the fuel economies, in ratio.BaseUnit:
+// convert it with ConvertTo(ratio.Percent) for a percentage. It fails with
+// ErrZeroDivision if other is zero.
+func (fe FuelEconomy) Ratio(other FuelEconomy) (Ratio, error) {
+	x, y := fe.common(other)
+	if y == 0 {
+		return Ratio{}, ErrZeroDivision
+	}
+
+	return Ratio{value: x / y, unit: ratio.BaseUnit}, nil
+}
+
+// common returns the values of the fuel economies in a common unit: their own if
+// they share it, otherwise the base unit. Either way the result doesn't depend
+// on the order of the operands, so comparisons are symmetric.
+func (fe FuelEconomy) common(other FuelEconomy) (float64, float64) {
+	if fe.unit == other.unit {
+		return fe.value, other.value
+	}
+
+	return fe.baseValue(), other.baseValue()
+}
+
+// ConvertToMeasurement is ConvertTo for generic code: it takes a unit symbol.
+// It fails with ErrUnknownUnit if symbol isn't a fuel economy unit.
+func (fe FuelEconomy) ConvertToMeasurement(symbol string) (Measurement, error) {
+	unit, ok := fueleconomy.ParseUnit(symbol)
+	if !ok {
+		return nil, unknownUnitError(MeasureFuelEconomy, symbol)
+	}
+
+	return fe.ConvertTo(unit), nil
+}
+
+// AddMeasurement is Add for generic code. It fails with
+// ErrIncompatibleMeasures if other isn't a fuel economy.
+func (fe FuelEconomy) AddMeasurement(other Measurement) (Measurement, error) {
+	value, err := fueleconomySet.valueIn(other, uint16(fe.unit))
+	if err != nil {
+		return nil, err
+	}
+
+	return FuelEconomy{value: fe.value + value, unit: fe.unit}, nil
+}
+
+// SubMeasurement is Sub for generic code. It fails with
+// ErrIncompatibleMeasures if other isn't a fuel economy.
+func (fe FuelEconomy) SubMeasurement(other Measurement) (Measurement, error) {
+	value, err := fueleconomySet.valueIn(other, uint16(fe.unit))
+	if err != nil {
+		return nil, err
+	}
+
+	return FuelEconomy{value: fe.value - value, unit: fe.unit}, nil
+}
+
+// MulMeasurement is Mul for generic code.
+func (fe FuelEconomy) MulMeasurement(multiplier float64) Measurement {
+	return fe.Mul(multiplier)
+}
+
+// DivMeasurement is Div for generic code.
+func (fe FuelEconomy) DivMeasurement(divisor float64) (Measurement, error) {
+	if divisor == 0 {
+		return nil, ErrZeroDivision
+	}
+
+	return FuelEconomy{value: fe.value / divisor, unit: fe.unit}, nil
+}
+
+// CompareMeasurement is Compare for generic code. It fails with
+// ErrIncompatibleMeasures if other isn't a fuel economy.
+func (fe FuelEconomy) CompareMeasurement(other Measurement) (int, error) {
+	return fueleconomySet.compare(fe.value, uint16(fe.unit), other)
+}
+
+func (fe FuelEconomy) generic() genericValue {
+	return genericValue{value: fe.value, unit: uint16(fe.unit), set: fueleconomySet}
+}
+
+const errFuelEconomyConversion incompatibleError = "not a fuel economy measure"
+
+// ToFuelEconomy returns m as a FuelEconomy, for example a result of ParseString. It fails
+// with ErrIncompatibleMeasures if m isn't a fuel economy.
+func ToFuelEconomy(m Measurement) (FuelEconomy, error) {
+	value, ok := m.(FuelEconomy)
+	if !ok {
+		return FuelEconomy{}, errFuelEconomyConversion
+	}
+
+	return value, nil
+}
+
+// StringToFuelEconomy parses a fuel economy from a string such as "15 km/L". It fails with
+// ErrInvalidFormat unless the string has the form "<value> <symbol>" with a
+// finite value, and with ErrUnknownUnit if the symbol isn't a fuel economy unit.
+func StringToFuelEconomy(s string) (FuelEconomy, error) {
+	value, symbol, err := parseValueAndUnit(s)
+	if err != nil {
+		return FuelEconomy{}, err
+	}
+
+	unit, ok := fueleconomy.ParseUnit(symbol)
+	if !ok {
+		return FuelEconomy{}, unknownUnitError(MeasureFuelEconomy, symbol)
+	}
+
+	return FuelEconomy{value: value, unit: unit}, nil
+}
+
+// AppendText implements encoding.TextAppender: it appends the String form,
+// such as "15 km/L". It fails with ErrOutOfRange if the value isn't finite, and
+// with ErrUnknownUnit if the unit isn't valid, so that the text always parses
+// back.
+func (fe FuelEconomy) AppendText(b []byte) ([]byte, error) {
+	if !fe.unit.Valid() {
+		return b, unknownUnitError(MeasureFuelEconomy, fe.unit.String())
+	}
+
+	return appendText(b, fe.value, fe.unit.String())
+}
+
+// MarshalText implements encoding.TextMarshaler, so fuel economy values encode in
+// JSON as strings such as "15 km/L". It fails like AppendText.
+func (fe FuelEconomy) MarshalText() ([]byte, error) {
+	return fe.AppendText(nil)
+}
+
+// UnmarshalText implements encoding.TextUnmarshaler: it parses text as
+// StringToFuelEconomy does and stores the result in fe. Unmarshalling needs a
+// pointer receiver; it changes only the value it is called on.
+func (fe *FuelEconomy) UnmarshalText(text []byte) error {
+	value, err := StringToFuelEconomy(string(text))
+	if err != nil {
+		return err
+	}
+
+	*fe = value
+
+	return nil
+}
+
+// NewFuelConsumption returns a fuel consumption of value in unit, such as
+// NewFuelConsumption(10, fuelconsumption.BaseUnit).
+func NewFuelConsumption(value float64, unit fuelconsumption.Unit) FuelConsumption {
+	return FuelConsumption{value: value, unit: unit}
+}
+
+// Value returns the numeric value, expressed in Unit.
+func (fc FuelConsumption) Value() float64 {
+	return fc.value
+}
+
+// Unit returns the unit of the value.
+func (fc FuelConsumption) Unit() fuelconsumption.Unit {
+	return fc.unit
+}
+
+// Symbol returns the symbol of the unit, as Unit().String() does.
+func (fc FuelConsumption) Symbol() string {
+	return fc.unit.String()
+}
+
+// Type returns MeasureFuelConsumption.
+func (FuelConsumption) Type() MeasureType {
+	return MeasureFuelConsumption
+}
+
+// String formats the fuel consumption as "<value> <symbol>", such as "6.5 L/100km", the form
+// StringToFuelConsumption and ParseString accept. The value is formatted like fmt's %v,
+// in the shortest form that parses back to the same float64.
+func (fc FuelConsumption) String() string {
+	return formatString(fc.value, fc.unit.String())
+}
+
+// Format implements fmt.Formatter: %.2f formats the value and appends the
+// symbol. See the package documentation for every verb.
+func (fc FuelConsumption) Format(state fmt.State, verb rune) {
+	formatMeasurement(state, verb, "FuelConsumption", fc.value, fc.unit.String())
+}
+
+// ConvertTo returns the fuel consumption expressed in unit.
+func (fc FuelConsumption) ConvertTo(unit fuelconsumption.Unit) FuelConsumption {
+	return FuelConsumption{value: fc.value * fuelconsumption.Rate(fc.unit, unit), unit: unit}
+}
+
+// MustConvertTo is ConvertTo.
+//
+// Deprecated: Use ConvertTo, which no longer fails.
+//
+//go:fix inline
+func (fc FuelConsumption) MustConvertTo(unit fuelconsumption.Unit) FuelConsumption {
+	return fc.ConvertTo(unit)
+}
+
+// ConvertToBaseUnits returns the fuel consumption expressed in cubic metres per metre.
+func (fc FuelConsumption) ConvertToBaseUnits() FuelConsumption {
+	return FuelConsumption{value: fc.baseValue(), unit: fuelconsumption.BaseUnit}
+}
+
+// baseValue returns the value in cubic metres per metre.
+func (fc FuelConsumption) baseValue() float64 {
+	return fc.value * fc.unit.Factor()
+}
+
+// Add returns the sum of the fuel consumptions, expressed in the receiver's unit.
+func (fc FuelConsumption) Add(other FuelConsumption) FuelConsumption {
+	return FuelConsumption{value: fc.value + other.value*fuelconsumption.Rate(other.unit, fc.unit), unit: fc.unit}
+}
+
+// Sub returns the difference of the fuel consumptions, expressed in the receiver's unit.
+func (fc FuelConsumption) Sub(other FuelConsumption) FuelConsumption {
+	return FuelConsumption{value: fc.value - other.value*fuelconsumption.Rate(other.unit, fc.unit), unit: fc.unit}
+}
+
+// Mul returns the fuel consumption multiplied by multiplier.
+func (fc FuelConsumption) Mul(multiplier float64) FuelConsumption {
+	return FuelConsumption{value: fc.value * multiplier, unit: fc.unit}
+}
+
+// Div returns the fuel consumption divided by divisor. It fails with ErrZeroDivision if
+// divisor is zero.
+func (fc FuelConsumption) Div(divisor float64) (FuelConsumption, error) {
+	if divisor == 0 {
+		return FuelConsumption{}, ErrZeroDivision
+	}
+
+	return FuelConsumption{value: fc.value / divisor, unit: fc.unit}, nil
+}
+
+// Compare compares the fuel consumptions; see Comparer.
+func (fc FuelConsumption) Compare(other FuelConsumption) int {
+	return cmp.Compare(fc.common(other))
+}
+
+// Equal reports whether the fuel consumptions are equal; see Comparer.
+func (fc FuelConsumption) Equal(other FuelConsumption) bool {
+	return fc.Compare(other) == 0
+}
+
+// EqualWithinRel reports whether the fuel consumptions are equal within the relative
+// tolerance tol; see Comparer.
+func (fc FuelConsumption) EqualWithinRel(other FuelConsumption, tol float64) bool {
+	x, y := fc.common(other)
+
+	return equalWithinRel(x, y, tol)
+}
+
+// Ratio returns fc/other, the ratio of the fuel consumptions, in ratio.BaseUnit:
+// convert it with ConvertTo(ratio.Percent) for a percentage. It fails with
+// ErrZeroDivision if other is zero.
+func (fc FuelConsumption) Ratio(other FuelConsumption) (Ratio, error) {
+	x, y := fc.common(other)
+	if y == 0 {
+		return Ratio{}, ErrZeroDivision
+	}
+
+	return Ratio{value: x / y, unit: ratio.BaseUnit}, nil
+}
+
+// common returns the values of the fuel consumptions in a common unit: their own if
+// they share it, otherwise the base unit. Either way the result doesn't depend
+// on the order of the operands, so comparisons are symmetric.
+func (fc FuelConsumption) common(other FuelConsumption) (float64, float64) {
+	if fc.unit == other.unit {
+		return fc.value, other.value
+	}
+
+	return fc.baseValue(), other.baseValue()
+}
+
+// ConvertToMeasurement is ConvertTo for generic code: it takes a unit symbol.
+// It fails with ErrUnknownUnit if symbol isn't a fuel consumption unit.
+func (fc FuelConsumption) ConvertToMeasurement(symbol string) (Measurement, error) {
+	unit, ok := fuelconsumption.ParseUnit(symbol)
+	if !ok {
+		return nil, unknownUnitError(MeasureFuelConsumption, symbol)
+	}
+
+	return fc.ConvertTo(unit), nil
+}
+
+// AddMeasurement is Add for generic code. It fails with
+// ErrIncompatibleMeasures if other isn't a fuel consumption.
+func (fc FuelConsumption) AddMeasurement(other Measurement) (Measurement, error) {
+	value, err := fuelconsumptionSet.valueIn(other, uint16(fc.unit))
+	if err != nil {
+		return nil, err
+	}
+
+	return FuelConsumption{value: fc.value + value, unit: fc.unit}, nil
+}
+
+// SubMeasurement is Sub for generic code. It fails with
+// ErrIncompatibleMeasures if other isn't a fuel consumption.
+func (fc FuelConsumption) SubMeasurement(other Measurement) (Measurement, error) {
+	value, err := fuelconsumptionSet.valueIn(other, uint16(fc.unit))
+	if err != nil {
+		return nil, err
+	}
+
+	return FuelConsumption{value: fc.value - value, unit: fc.unit}, nil
+}
+
+// MulMeasurement is Mul for generic code.
+func (fc FuelConsumption) MulMeasurement(multiplier float64) Measurement {
+	return fc.Mul(multiplier)
+}
+
+// DivMeasurement is Div for generic code.
+func (fc FuelConsumption) DivMeasurement(divisor float64) (Measurement, error) {
+	if divisor == 0 {
+		return nil, ErrZeroDivision
+	}
+
+	return FuelConsumption{value: fc.value / divisor, unit: fc.unit}, nil
+}
+
+// CompareMeasurement is Compare for generic code. It fails with
+// ErrIncompatibleMeasures if other isn't a fuel consumption.
+func (fc FuelConsumption) CompareMeasurement(other Measurement) (int, error) {
+	return fuelconsumptionSet.compare(fc.value, uint16(fc.unit), other)
+}
+
+func (fc FuelConsumption) generic() genericValue {
+	return genericValue{value: fc.value, unit: uint16(fc.unit), set: fuelconsumptionSet}
+}
+
+const errFuelConsumptionConversion incompatibleError = "not a fuel consumption measure"
+
+// ToFuelConsumption returns m as a FuelConsumption, for example a result of ParseString. It fails
+// with ErrIncompatibleMeasures if m isn't a fuel consumption.
+func ToFuelConsumption(m Measurement) (FuelConsumption, error) {
+	value, ok := m.(FuelConsumption)
+	if !ok {
+		return FuelConsumption{}, errFuelConsumptionConversion
+	}
+
+	return value, nil
+}
+
+// StringToFuelConsumption parses a fuel consumption from a string such as "6.5 L/100km". It fails with
+// ErrInvalidFormat unless the string has the form "<value> <symbol>" with a
+// finite value, and with ErrUnknownUnit if the symbol isn't a fuel consumption unit.
+func StringToFuelConsumption(s string) (FuelConsumption, error) {
+	value, symbol, err := parseValueAndUnit(s)
+	if err != nil {
+		return FuelConsumption{}, err
+	}
+
+	unit, ok := fuelconsumption.ParseUnit(symbol)
+	if !ok {
+		return FuelConsumption{}, unknownUnitError(MeasureFuelConsumption, symbol)
+	}
+
+	return FuelConsumption{value: value, unit: unit}, nil
+}
+
+// AppendText implements encoding.TextAppender: it appends the String form,
+// such as "6.5 L/100km". It fails with ErrOutOfRange if the value isn't finite, and
+// with ErrUnknownUnit if the unit isn't valid, so that the text always parses
+// back.
+func (fc FuelConsumption) AppendText(b []byte) ([]byte, error) {
+	if !fc.unit.Valid() {
+		return b, unknownUnitError(MeasureFuelConsumption, fc.unit.String())
+	}
+
+	return appendText(b, fc.value, fc.unit.String())
+}
+
+// MarshalText implements encoding.TextMarshaler, so fuel consumption values encode in
+// JSON as strings such as "6.5 L/100km". It fails like AppendText.
+func (fc FuelConsumption) MarshalText() ([]byte, error) {
+	return fc.AppendText(nil)
+}
+
+// UnmarshalText implements encoding.TextUnmarshaler: it parses text as
+// StringToFuelConsumption does and stores the result in fc. Unmarshalling needs a
+// pointer receiver; it changes only the value it is called on.
+func (fc *FuelConsumption) UnmarshalText(text []byte) error {
+	value, err := StringToFuelConsumption(string(text))
+	if err != nil {
+		return err
+	}
+
+	*fc = value
+
+	return nil
+}
+
+// NewAmount returns an amount of substance of value in unit, such as
+// NewAmount(10, amount.BaseUnit).
+func NewAmount(value float64, unit amount.Unit) Amount {
+	return Amount{value: value, unit: unit}
+}
+
+// Value returns the numeric value, expressed in Unit.
+func (n Amount) Value() float64 {
+	return n.value
+}
+
+// Unit returns the unit of the value.
+func (n Amount) Unit() amount.Unit {
+	return n.unit
+}
+
+// Symbol returns the symbol of the unit, as Unit().String() does.
+func (n Amount) Symbol() string {
+	return n.unit.String()
+}
+
+// Type returns MeasureAmount.
+func (Amount) Type() MeasureType {
+	return MeasureAmount
+}
+
+// String formats the amount of substance as "<value> <symbol>", such as "2.5 mmol", the form
+// StringToAmount and ParseString accept. The value is formatted like fmt's %v,
+// in the shortest form that parses back to the same float64.
+func (n Amount) String() string {
+	return formatString(n.value, n.unit.String())
+}
+
+// Format implements fmt.Formatter: %.2f formats the value and appends the
+// symbol. See the package documentation for every verb.
+func (n Amount) Format(state fmt.State, verb rune) {
+	formatMeasurement(state, verb, "Amount", n.value, n.unit.String())
+}
+
+// ConvertTo returns the amount of substance expressed in unit.
+func (n Amount) ConvertTo(unit amount.Unit) Amount {
+	return Amount{value: n.value * amount.Rate(n.unit, unit), unit: unit}
+}
+
+// MustConvertTo is ConvertTo.
+//
+// Deprecated: Use ConvertTo, which no longer fails.
+//
+//go:fix inline
+func (n Amount) MustConvertTo(unit amount.Unit) Amount {
+	return n.ConvertTo(unit)
+}
+
+// ConvertToBaseUnits returns the amount of substance expressed in moles.
+func (n Amount) ConvertToBaseUnits() Amount {
+	return Amount{value: n.baseValue(), unit: amount.BaseUnit}
+}
+
+// baseValue returns the value in moles.
+func (n Amount) baseValue() float64 {
+	return n.value * n.unit.Factor()
+}
+
+// Add returns the sum of the amounts of substance, expressed in the receiver's unit.
+func (n Amount) Add(other Amount) Amount {
+	return Amount{value: n.value + other.value*amount.Rate(other.unit, n.unit), unit: n.unit}
+}
+
+// Sub returns the difference of the amounts of substance, expressed in the receiver's unit.
+func (n Amount) Sub(other Amount) Amount {
+	return Amount{value: n.value - other.value*amount.Rate(other.unit, n.unit), unit: n.unit}
+}
+
+// Mul returns the amount of substance multiplied by multiplier.
+func (n Amount) Mul(multiplier float64) Amount {
+	return Amount{value: n.value * multiplier, unit: n.unit}
+}
+
+// Div returns the amount of substance divided by divisor. It fails with ErrZeroDivision if
+// divisor is zero.
+func (n Amount) Div(divisor float64) (Amount, error) {
+	if divisor == 0 {
+		return Amount{}, ErrZeroDivision
+	}
+
+	return Amount{value: n.value / divisor, unit: n.unit}, nil
+}
+
+// Compare compares the amounts of substance; see Comparer.
+func (n Amount) Compare(other Amount) int {
+	return cmp.Compare(n.common(other))
+}
+
+// Equal reports whether the amounts of substance are equal; see Comparer.
+func (n Amount) Equal(other Amount) bool {
+	return n.Compare(other) == 0
+}
+
+// EqualWithinRel reports whether the amounts of substance are equal within the relative
+// tolerance tol; see Comparer.
+func (n Amount) EqualWithinRel(other Amount, tol float64) bool {
+	x, y := n.common(other)
+
+	return equalWithinRel(x, y, tol)
+}
+
+// Ratio returns n/other, the ratio of the amounts of substance, in ratio.BaseUnit:
+// convert it with ConvertTo(ratio.Percent) for a percentage. It fails with
+// ErrZeroDivision if other is zero.
+func (n Amount) Ratio(other Amount) (Ratio, error) {
+	x, y := n.common(other)
+	if y == 0 {
+		return Ratio{}, ErrZeroDivision
+	}
+
+	return Ratio{value: x / y, unit: ratio.BaseUnit}, nil
+}
+
+// common returns the values of the amounts of substance in a common unit: their own if
+// they share it, otherwise the base unit. Either way the result doesn't depend
+// on the order of the operands, so comparisons are symmetric.
+func (n Amount) common(other Amount) (float64, float64) {
+	if n.unit == other.unit {
+		return n.value, other.value
+	}
+
+	return n.baseValue(), other.baseValue()
+}
+
+// ConvertToMeasurement is ConvertTo for generic code: it takes a unit symbol.
+// It fails with ErrUnknownUnit if symbol isn't an amount of substance unit.
+func (n Amount) ConvertToMeasurement(symbol string) (Measurement, error) {
+	unit, ok := amount.ParseUnit(symbol)
+	if !ok {
+		return nil, unknownUnitError(MeasureAmount, symbol)
+	}
+
+	return n.ConvertTo(unit), nil
+}
+
+// AddMeasurement is Add for generic code. It fails with
+// ErrIncompatibleMeasures if other isn't an amount of substance.
+func (n Amount) AddMeasurement(other Measurement) (Measurement, error) {
+	value, err := amountSet.valueIn(other, uint16(n.unit))
+	if err != nil {
+		return nil, err
+	}
+
+	return Amount{value: n.value + value, unit: n.unit}, nil
+}
+
+// SubMeasurement is Sub for generic code. It fails with
+// ErrIncompatibleMeasures if other isn't an amount of substance.
+func (n Amount) SubMeasurement(other Measurement) (Measurement, error) {
+	value, err := amountSet.valueIn(other, uint16(n.unit))
+	if err != nil {
+		return nil, err
+	}
+
+	return Amount{value: n.value - value, unit: n.unit}, nil
+}
+
+// MulMeasurement is Mul for generic code.
+func (n Amount) MulMeasurement(multiplier float64) Measurement {
+	return n.Mul(multiplier)
+}
+
+// DivMeasurement is Div for generic code.
+func (n Amount) DivMeasurement(divisor float64) (Measurement, error) {
+	if divisor == 0 {
+		return nil, ErrZeroDivision
+	}
+
+	return Amount{value: n.value / divisor, unit: n.unit}, nil
+}
+
+// CompareMeasurement is Compare for generic code. It fails with
+// ErrIncompatibleMeasures if other isn't an amount of substance.
+func (n Amount) CompareMeasurement(other Measurement) (int, error) {
+	return amountSet.compare(n.value, uint16(n.unit), other)
+}
+
+func (n Amount) generic() genericValue {
+	return genericValue{value: n.value, unit: uint16(n.unit), set: amountSet}
+}
+
+const errAmountConversion incompatibleError = "not an amount of substance measure"
+
+// ToAmount returns m as a Amount, for example a result of ParseString. It fails
+// with ErrIncompatibleMeasures if m isn't an amount of substance.
+func ToAmount(m Measurement) (Amount, error) {
+	value, ok := m.(Amount)
+	if !ok {
+		return Amount{}, errAmountConversion
+	}
+
+	return value, nil
+}
+
+// StringToAmount parses an amount of substance from a string such as "2.5 mmol". It fails with
+// ErrInvalidFormat unless the string has the form "<value> <symbol>" with a
+// finite value, and with ErrUnknownUnit if the symbol isn't an amount of substance unit.
+func StringToAmount(s string) (Amount, error) {
+	value, symbol, err := parseValueAndUnit(s)
+	if err != nil {
+		return Amount{}, err
+	}
+
+	unit, ok := amount.ParseUnit(symbol)
+	if !ok {
+		return Amount{}, unknownUnitError(MeasureAmount, symbol)
+	}
+
+	return Amount{value: value, unit: unit}, nil
+}
+
+// AppendText implements encoding.TextAppender: it appends the String form,
+// such as "2.5 mmol". It fails with ErrOutOfRange if the value isn't finite, and
+// with ErrUnknownUnit if the unit isn't valid, so that the text always parses
+// back.
+func (n Amount) AppendText(b []byte) ([]byte, error) {
+	if !n.unit.Valid() {
+		return b, unknownUnitError(MeasureAmount, n.unit.String())
+	}
+
+	return appendText(b, n.value, n.unit.String())
+}
+
+// MarshalText implements encoding.TextMarshaler, so amount of substance values encode in
+// JSON as strings such as "2.5 mmol". It fails like AppendText.
+func (n Amount) MarshalText() ([]byte, error) {
+	return n.AppendText(nil)
+}
+
+// UnmarshalText implements encoding.TextUnmarshaler: it parses text as
+// StringToAmount does and stores the result in n. Unmarshalling needs a
+// pointer receiver; it changes only the value it is called on.
+func (n *Amount) UnmarshalText(text []byte) error {
+	value, err := StringToAmount(string(text))
+	if err != nil {
+		return err
+	}
+
+	*n = value
+
+	return nil
+}
+
+// NewMolarMass returns a molar mass of value in unit, such as
+// NewMolarMass(10, molarmass.BaseUnit).
+func NewMolarMass(value float64, unit molarmass.Unit) MolarMass {
+	return MolarMass{value: value, unit: unit}
+}
+
+// Value returns the numeric value, expressed in Unit.
+func (mm MolarMass) Value() float64 {
+	return mm.value
+}
+
+// Unit returns the unit of the value.
+func (mm MolarMass) Unit() molarmass.Unit {
+	return mm.unit
+}
+
+// Symbol returns the symbol of the unit, as Unit().String() does.
+func (mm MolarMass) Symbol() string {
+	return mm.unit.String()
+}
+
+// Type returns MeasureMolarMass.
+func (MolarMass) Type() MeasureType {
+	return MeasureMolarMass
+}
+
+// String formats the molar mass as "<value> <symbol>", such as "18.015 g/mol", the form
+// StringToMolarMass and ParseString accept. The value is formatted like fmt's %v,
+// in the shortest form that parses back to the same float64.
+func (mm MolarMass) String() string {
+	return formatString(mm.value, mm.unit.String())
+}
+
+// Format implements fmt.Formatter: %.2f formats the value and appends the
+// symbol. See the package documentation for every verb.
+func (mm MolarMass) Format(state fmt.State, verb rune) {
+	formatMeasurement(state, verb, "MolarMass", mm.value, mm.unit.String())
+}
+
+// ConvertTo returns the molar mass expressed in unit.
+func (mm MolarMass) ConvertTo(unit molarmass.Unit) MolarMass {
+	return MolarMass{value: mm.value * molarmass.Rate(mm.unit, unit), unit: unit}
+}
+
+// MustConvertTo is ConvertTo.
+//
+// Deprecated: Use ConvertTo, which no longer fails.
+//
+//go:fix inline
+func (mm MolarMass) MustConvertTo(unit molarmass.Unit) MolarMass {
+	return mm.ConvertTo(unit)
+}
+
+// ConvertToBaseUnits returns the molar mass expressed in kilograms per mole.
+func (mm MolarMass) ConvertToBaseUnits() MolarMass {
+	return MolarMass{value: mm.baseValue(), unit: molarmass.BaseUnit}
+}
+
+// baseValue returns the value in kilograms per mole.
+func (mm MolarMass) baseValue() float64 {
+	return mm.value * mm.unit.Factor()
+}
+
+// Add returns the sum of the molar masses, expressed in the receiver's unit.
+func (mm MolarMass) Add(other MolarMass) MolarMass {
+	return MolarMass{value: mm.value + other.value*molarmass.Rate(other.unit, mm.unit), unit: mm.unit}
+}
+
+// Sub returns the difference of the molar masses, expressed in the receiver's unit.
+func (mm MolarMass) Sub(other MolarMass) MolarMass {
+	return MolarMass{value: mm.value - other.value*molarmass.Rate(other.unit, mm.unit), unit: mm.unit}
+}
+
+// Mul returns the molar mass multiplied by multiplier.
+func (mm MolarMass) Mul(multiplier float64) MolarMass {
+	return MolarMass{value: mm.value * multiplier, unit: mm.unit}
+}
+
+// Div returns the molar mass divided by divisor. It fails with ErrZeroDivision if
+// divisor is zero.
+func (mm MolarMass) Div(divisor float64) (MolarMass, error) {
+	if divisor == 0 {
+		return MolarMass{}, ErrZeroDivision
+	}
+
+	return MolarMass{value: mm.value / divisor, unit: mm.unit}, nil
+}
+
+// Compare compares the molar masses; see Comparer.
+func (mm MolarMass) Compare(other MolarMass) int {
+	return cmp.Compare(mm.common(other))
+}
+
+// Equal reports whether the molar masses are equal; see Comparer.
+func (mm MolarMass) Equal(other MolarMass) bool {
+	return mm.Compare(other) == 0
+}
+
+// EqualWithinRel reports whether the molar masses are equal within the relative
+// tolerance tol; see Comparer.
+func (mm MolarMass) EqualWithinRel(other MolarMass, tol float64) bool {
+	x, y := mm.common(other)
+
+	return equalWithinRel(x, y, tol)
+}
+
+// Ratio returns mm/other, the ratio of the molar masses, in ratio.BaseUnit:
+// convert it with ConvertTo(ratio.Percent) for a percentage. It fails with
+// ErrZeroDivision if other is zero.
+func (mm MolarMass) Ratio(other MolarMass) (Ratio, error) {
+	x, y := mm.common(other)
+	if y == 0 {
+		return Ratio{}, ErrZeroDivision
+	}
+
+	return Ratio{value: x / y, unit: ratio.BaseUnit}, nil
+}
+
+// common returns the values of the molar masses in a common unit: their own if
+// they share it, otherwise the base unit. Either way the result doesn't depend
+// on the order of the operands, so comparisons are symmetric.
+func (mm MolarMass) common(other MolarMass) (float64, float64) {
+	if mm.unit == other.unit {
+		return mm.value, other.value
+	}
+
+	return mm.baseValue(), other.baseValue()
+}
+
+// ConvertToMeasurement is ConvertTo for generic code: it takes a unit symbol.
+// It fails with ErrUnknownUnit if symbol isn't a molar mass unit.
+func (mm MolarMass) ConvertToMeasurement(symbol string) (Measurement, error) {
+	unit, ok := molarmass.ParseUnit(symbol)
+	if !ok {
+		return nil, unknownUnitError(MeasureMolarMass, symbol)
+	}
+
+	return mm.ConvertTo(unit), nil
+}
+
+// AddMeasurement is Add for generic code. It fails with
+// ErrIncompatibleMeasures if other isn't a molar mass.
+func (mm MolarMass) AddMeasurement(other Measurement) (Measurement, error) {
+	value, err := molarmassSet.valueIn(other, uint16(mm.unit))
+	if err != nil {
+		return nil, err
+	}
+
+	return MolarMass{value: mm.value + value, unit: mm.unit}, nil
+}
+
+// SubMeasurement is Sub for generic code. It fails with
+// ErrIncompatibleMeasures if other isn't a molar mass.
+func (mm MolarMass) SubMeasurement(other Measurement) (Measurement, error) {
+	value, err := molarmassSet.valueIn(other, uint16(mm.unit))
+	if err != nil {
+		return nil, err
+	}
+
+	return MolarMass{value: mm.value - value, unit: mm.unit}, nil
+}
+
+// MulMeasurement is Mul for generic code.
+func (mm MolarMass) MulMeasurement(multiplier float64) Measurement {
+	return mm.Mul(multiplier)
+}
+
+// DivMeasurement is Div for generic code.
+func (mm MolarMass) DivMeasurement(divisor float64) (Measurement, error) {
+	if divisor == 0 {
+		return nil, ErrZeroDivision
+	}
+
+	return MolarMass{value: mm.value / divisor, unit: mm.unit}, nil
+}
+
+// CompareMeasurement is Compare for generic code. It fails with
+// ErrIncompatibleMeasures if other isn't a molar mass.
+func (mm MolarMass) CompareMeasurement(other Measurement) (int, error) {
+	return molarmassSet.compare(mm.value, uint16(mm.unit), other)
+}
+
+func (mm MolarMass) generic() genericValue {
+	return genericValue{value: mm.value, unit: uint16(mm.unit), set: molarmassSet}
+}
+
+const errMolarMassConversion incompatibleError = "not a molar mass measure"
+
+// ToMolarMass returns m as a MolarMass, for example a result of ParseString. It fails
+// with ErrIncompatibleMeasures if m isn't a molar mass.
+func ToMolarMass(m Measurement) (MolarMass, error) {
+	value, ok := m.(MolarMass)
+	if !ok {
+		return MolarMass{}, errMolarMassConversion
+	}
+
+	return value, nil
+}
+
+// StringToMolarMass parses a molar mass from a string such as "18.015 g/mol". It fails with
+// ErrInvalidFormat unless the string has the form "<value> <symbol>" with a
+// finite value, and with ErrUnknownUnit if the symbol isn't a molar mass unit.
+func StringToMolarMass(s string) (MolarMass, error) {
+	value, symbol, err := parseValueAndUnit(s)
+	if err != nil {
+		return MolarMass{}, err
+	}
+
+	unit, ok := molarmass.ParseUnit(symbol)
+	if !ok {
+		return MolarMass{}, unknownUnitError(MeasureMolarMass, symbol)
+	}
+
+	return MolarMass{value: value, unit: unit}, nil
+}
+
+// AppendText implements encoding.TextAppender: it appends the String form,
+// such as "18.015 g/mol". It fails with ErrOutOfRange if the value isn't finite, and
+// with ErrUnknownUnit if the unit isn't valid, so that the text always parses
+// back.
+func (mm MolarMass) AppendText(b []byte) ([]byte, error) {
+	if !mm.unit.Valid() {
+		return b, unknownUnitError(MeasureMolarMass, mm.unit.String())
+	}
+
+	return appendText(b, mm.value, mm.unit.String())
+}
+
+// MarshalText implements encoding.TextMarshaler, so molar mass values encode in
+// JSON as strings such as "18.015 g/mol". It fails like AppendText.
+func (mm MolarMass) MarshalText() ([]byte, error) {
+	return mm.AppendText(nil)
+}
+
+// UnmarshalText implements encoding.TextUnmarshaler: it parses text as
+// StringToMolarMass does and stores the result in mm. Unmarshalling needs a
+// pointer receiver; it changes only the value it is called on.
+func (mm *MolarMass) UnmarshalText(text []byte) error {
+	value, err := StringToMolarMass(string(text))
+	if err != nil {
+		return err
+	}
+
+	*mm = value
+
+	return nil
+}
+
+// NewMolarity returns a molar concentration of value in unit, such as
+// NewMolarity(10, molarity.BaseUnit).
+func NewMolarity(value float64, unit molarity.Unit) Molarity {
+	return Molarity{value: value, unit: unit}
+}
+
+// Value returns the numeric value, expressed in Unit.
+func (c Molarity) Value() float64 {
+	return c.value
+}
+
+// Unit returns the unit of the value.
+func (c Molarity) Unit() molarity.Unit {
+	return c.unit
+}
+
+// Symbol returns the symbol of the unit, as Unit().String() does.
+func (c Molarity) Symbol() string {
+	return c.unit.String()
+}
+
+// Type returns MeasureMolarity.
+func (Molarity) Type() MeasureType {
+	return MeasureMolarity
+}
+
+// String formats the molar concentration as "<value> <symbol>", such as "150 mM", the form
+// StringToMolarity and ParseString accept. The value is formatted like fmt's %v,
+// in the shortest form that parses back to the same float64.
+func (c Molarity) String() string {
+	return formatString(c.value, c.unit.String())
+}
+
+// Format implements fmt.Formatter: %.2f formats the value and appends the
+// symbol. See the package documentation for every verb.
+func (c Molarity) Format(state fmt.State, verb rune) {
+	formatMeasurement(state, verb, "Molarity", c.value, c.unit.String())
+}
+
+// ConvertTo returns the molar concentration expressed in unit.
+func (c Molarity) ConvertTo(unit molarity.Unit) Molarity {
+	return Molarity{value: c.value * molarity.Rate(c.unit, unit), unit: unit}
+}
+
+// MustConvertTo is ConvertTo.
+//
+// Deprecated: Use ConvertTo, which no longer fails.
+//
+//go:fix inline
+func (c Molarity) MustConvertTo(unit molarity.Unit) Molarity {
+	return c.ConvertTo(unit)
+}
+
+// ConvertToBaseUnits returns the molar concentration expressed in moles per cubic metre.
+func (c Molarity) ConvertToBaseUnits() Molarity {
+	return Molarity{value: c.baseValue(), unit: molarity.BaseUnit}
+}
+
+// baseValue returns the value in moles per cubic metre.
+func (c Molarity) baseValue() float64 {
+	return c.value * c.unit.Factor()
+}
+
+// Add returns the sum of the molar concentrations, expressed in the receiver's unit.
+func (c Molarity) Add(other Molarity) Molarity {
+	return Molarity{value: c.value + other.value*molarity.Rate(other.unit, c.unit), unit: c.unit}
+}
+
+// Sub returns the difference of the molar concentrations, expressed in the receiver's unit.
+func (c Molarity) Sub(other Molarity) Molarity {
+	return Molarity{value: c.value - other.value*molarity.Rate(other.unit, c.unit), unit: c.unit}
+}
+
+// Mul returns the molar concentration multiplied by multiplier.
+func (c Molarity) Mul(multiplier float64) Molarity {
+	return Molarity{value: c.value * multiplier, unit: c.unit}
+}
+
+// Div returns the molar concentration divided by divisor. It fails with ErrZeroDivision if
+// divisor is zero.
+func (c Molarity) Div(divisor float64) (Molarity, error) {
+	if divisor == 0 {
+		return Molarity{}, ErrZeroDivision
+	}
+
+	return Molarity{value: c.value / divisor, unit: c.unit}, nil
+}
+
+// Compare compares the molar concentrations; see Comparer.
+func (c Molarity) Compare(other Molarity) int {
+	return cmp.Compare(c.common(other))
+}
+
+// Equal reports whether the molar concentrations are equal; see Comparer.
+func (c Molarity) Equal(other Molarity) bool {
+	return c.Compare(other) == 0
+}
+
+// EqualWithinRel reports whether the molar concentrations are equal within the relative
+// tolerance tol; see Comparer.
+func (c Molarity) EqualWithinRel(other Molarity, tol float64) bool {
+	x, y := c.common(other)
+
+	return equalWithinRel(x, y, tol)
+}
+
+// Ratio returns c/other, the ratio of the molar concentrations, in ratio.BaseUnit:
+// convert it with ConvertTo(ratio.Percent) for a percentage. It fails with
+// ErrZeroDivision if other is zero.
+func (c Molarity) Ratio(other Molarity) (Ratio, error) {
+	x, y := c.common(other)
+	if y == 0 {
+		return Ratio{}, ErrZeroDivision
+	}
+
+	return Ratio{value: x / y, unit: ratio.BaseUnit}, nil
+}
+
+// common returns the values of the molar concentrations in a common unit: their own if
+// they share it, otherwise the base unit. Either way the result doesn't depend
+// on the order of the operands, so comparisons are symmetric.
+func (c Molarity) common(other Molarity) (float64, float64) {
+	if c.unit == other.unit {
+		return c.value, other.value
+	}
+
+	return c.baseValue(), other.baseValue()
+}
+
+// ConvertToMeasurement is ConvertTo for generic code: it takes a unit symbol.
+// It fails with ErrUnknownUnit if symbol isn't a molar concentration unit.
+func (c Molarity) ConvertToMeasurement(symbol string) (Measurement, error) {
+	unit, ok := molarity.ParseUnit(symbol)
+	if !ok {
+		return nil, unknownUnitError(MeasureMolarity, symbol)
+	}
+
+	return c.ConvertTo(unit), nil
+}
+
+// AddMeasurement is Add for generic code. It fails with
+// ErrIncompatibleMeasures if other isn't a molar concentration.
+func (c Molarity) AddMeasurement(other Measurement) (Measurement, error) {
+	value, err := molaritySet.valueIn(other, uint16(c.unit))
+	if err != nil {
+		return nil, err
+	}
+
+	return Molarity{value: c.value + value, unit: c.unit}, nil
+}
+
+// SubMeasurement is Sub for generic code. It fails with
+// ErrIncompatibleMeasures if other isn't a molar concentration.
+func (c Molarity) SubMeasurement(other Measurement) (Measurement, error) {
+	value, err := molaritySet.valueIn(other, uint16(c.unit))
+	if err != nil {
+		return nil, err
+	}
+
+	return Molarity{value: c.value - value, unit: c.unit}, nil
+}
+
+// MulMeasurement is Mul for generic code.
+func (c Molarity) MulMeasurement(multiplier float64) Measurement {
+	return c.Mul(multiplier)
+}
+
+// DivMeasurement is Div for generic code.
+func (c Molarity) DivMeasurement(divisor float64) (Measurement, error) {
+	if divisor == 0 {
+		return nil, ErrZeroDivision
+	}
+
+	return Molarity{value: c.value / divisor, unit: c.unit}, nil
+}
+
+// CompareMeasurement is Compare for generic code. It fails with
+// ErrIncompatibleMeasures if other isn't a molar concentration.
+func (c Molarity) CompareMeasurement(other Measurement) (int, error) {
+	return molaritySet.compare(c.value, uint16(c.unit), other)
+}
+
+func (c Molarity) generic() genericValue {
+	return genericValue{value: c.value, unit: uint16(c.unit), set: molaritySet}
+}
+
+const errMolarityConversion incompatibleError = "not a molar concentration measure"
+
+// ToMolarity returns m as a Molarity, for example a result of ParseString. It fails
+// with ErrIncompatibleMeasures if m isn't a molar concentration.
+func ToMolarity(m Measurement) (Molarity, error) {
+	value, ok := m.(Molarity)
+	if !ok {
+		return Molarity{}, errMolarityConversion
+	}
+
+	return value, nil
+}
+
+// StringToMolarity parses a molar concentration from a string such as "150 mM". It fails with
+// ErrInvalidFormat unless the string has the form "<value> <symbol>" with a
+// finite value, and with ErrUnknownUnit if the symbol isn't a molar concentration unit.
+func StringToMolarity(s string) (Molarity, error) {
+	value, symbol, err := parseValueAndUnit(s)
+	if err != nil {
+		return Molarity{}, err
+	}
+
+	unit, ok := molarity.ParseUnit(symbol)
+	if !ok {
+		return Molarity{}, unknownUnitError(MeasureMolarity, symbol)
+	}
+
+	return Molarity{value: value, unit: unit}, nil
+}
+
+// AppendText implements encoding.TextAppender: it appends the String form,
+// such as "150 mM". It fails with ErrOutOfRange if the value isn't finite, and
+// with ErrUnknownUnit if the unit isn't valid, so that the text always parses
+// back.
+func (c Molarity) AppendText(b []byte) ([]byte, error) {
+	if !c.unit.Valid() {
+		return b, unknownUnitError(MeasureMolarity, c.unit.String())
+	}
+
+	return appendText(b, c.value, c.unit.String())
+}
+
+// MarshalText implements encoding.TextMarshaler, so molar concentration values encode in
+// JSON as strings such as "150 mM". It fails like AppendText.
+func (c Molarity) MarshalText() ([]byte, error) {
+	return c.AppendText(nil)
+}
+
+// UnmarshalText implements encoding.TextUnmarshaler: it parses text as
+// StringToMolarity does and stores the result in c. Unmarshalling needs a
+// pointer receiver; it changes only the value it is called on.
+func (c *Molarity) UnmarshalText(text []byte) error {
+	value, err := StringToMolarity(string(text))
+	if err != nil {
+		return err
+	}
+
+	*c = value
+
+	return nil
+}
+
+// NewRadioactivity returns a radioactivity of value in unit, such as
+// NewRadioactivity(10, radioactivity.BaseUnit).
+func NewRadioactivity(value float64, unit radioactivity.Unit) Radioactivity {
+	return Radioactivity{value: value, unit: unit}
+}
+
+// Value returns the numeric value, expressed in Unit.
+func (a Radioactivity) Value() float64 {
+	return a.value
+}
+
+// Unit returns the unit of the value.
+func (a Radioactivity) Unit() radioactivity.Unit {
+	return a.unit
+}
+
+// Symbol returns the symbol of the unit, as Unit().String() does.
+func (a Radioactivity) Symbol() string {
+	return a.unit.String()
+}
+
+// Type returns MeasureRadioactivity.
+func (Radioactivity) Type() MeasureType {
+	return MeasureRadioactivity
+}
+
+// String formats the radioactivity as "<value> <symbol>", such as "3.7 GBq", the form
+// StringToRadioactivity and ParseString accept. The value is formatted like fmt's %v,
+// in the shortest form that parses back to the same float64.
+func (a Radioactivity) String() string {
+	return formatString(a.value, a.unit.String())
+}
+
+// Format implements fmt.Formatter: %.2f formats the value and appends the
+// symbol. See the package documentation for every verb.
+func (a Radioactivity) Format(state fmt.State, verb rune) {
+	formatMeasurement(state, verb, "Radioactivity", a.value, a.unit.String())
+}
+
+// ConvertTo returns the radioactivity expressed in unit.
+func (a Radioactivity) ConvertTo(unit radioactivity.Unit) Radioactivity {
+	return Radioactivity{value: a.value * radioactivity.Rate(a.unit, unit), unit: unit}
+}
+
+// MustConvertTo is ConvertTo.
+//
+// Deprecated: Use ConvertTo, which no longer fails.
+//
+//go:fix inline
+func (a Radioactivity) MustConvertTo(unit radioactivity.Unit) Radioactivity {
+	return a.ConvertTo(unit)
+}
+
+// ConvertToBaseUnits returns the radioactivity expressed in becquerels.
+func (a Radioactivity) ConvertToBaseUnits() Radioactivity {
+	return Radioactivity{value: a.baseValue(), unit: radioactivity.BaseUnit}
+}
+
+// baseValue returns the value in becquerels.
+func (a Radioactivity) baseValue() float64 {
+	return a.value * a.unit.Factor()
+}
+
+// Add returns the sum of the radioactivities, expressed in the receiver's unit.
+func (a Radioactivity) Add(other Radioactivity) Radioactivity {
+	return Radioactivity{value: a.value + other.value*radioactivity.Rate(other.unit, a.unit), unit: a.unit}
+}
+
+// Sub returns the difference of the radioactivities, expressed in the receiver's unit.
+func (a Radioactivity) Sub(other Radioactivity) Radioactivity {
+	return Radioactivity{value: a.value - other.value*radioactivity.Rate(other.unit, a.unit), unit: a.unit}
+}
+
+// Mul returns the radioactivity multiplied by multiplier.
+func (a Radioactivity) Mul(multiplier float64) Radioactivity {
+	return Radioactivity{value: a.value * multiplier, unit: a.unit}
+}
+
+// Div returns the radioactivity divided by divisor. It fails with ErrZeroDivision if
+// divisor is zero.
+func (a Radioactivity) Div(divisor float64) (Radioactivity, error) {
+	if divisor == 0 {
+		return Radioactivity{}, ErrZeroDivision
+	}
+
+	return Radioactivity{value: a.value / divisor, unit: a.unit}, nil
+}
+
+// Compare compares the radioactivities; see Comparer.
+func (a Radioactivity) Compare(other Radioactivity) int {
+	return cmp.Compare(a.common(other))
+}
+
+// Equal reports whether the radioactivities are equal; see Comparer.
+func (a Radioactivity) Equal(other Radioactivity) bool {
+	return a.Compare(other) == 0
+}
+
+// EqualWithinRel reports whether the radioactivities are equal within the relative
+// tolerance tol; see Comparer.
+func (a Radioactivity) EqualWithinRel(other Radioactivity, tol float64) bool {
+	x, y := a.common(other)
+
+	return equalWithinRel(x, y, tol)
+}
+
+// Ratio returns a/other, the ratio of the radioactivities, in ratio.BaseUnit:
+// convert it with ConvertTo(ratio.Percent) for a percentage. It fails with
+// ErrZeroDivision if other is zero.
+func (a Radioactivity) Ratio(other Radioactivity) (Ratio, error) {
+	x, y := a.common(other)
+	if y == 0 {
+		return Ratio{}, ErrZeroDivision
+	}
+
+	return Ratio{value: x / y, unit: ratio.BaseUnit}, nil
+}
+
+// common returns the values of the radioactivities in a common unit: their own if
+// they share it, otherwise the base unit. Either way the result doesn't depend
+// on the order of the operands, so comparisons are symmetric.
+func (a Radioactivity) common(other Radioactivity) (float64, float64) {
+	if a.unit == other.unit {
+		return a.value, other.value
+	}
+
+	return a.baseValue(), other.baseValue()
+}
+
+// ConvertToMeasurement is ConvertTo for generic code: it takes a unit symbol.
+// It fails with ErrUnknownUnit if symbol isn't a radioactivity unit.
+func (a Radioactivity) ConvertToMeasurement(symbol string) (Measurement, error) {
+	unit, ok := radioactivity.ParseUnit(symbol)
+	if !ok {
+		return nil, unknownUnitError(MeasureRadioactivity, symbol)
+	}
+
+	return a.ConvertTo(unit), nil
+}
+
+// AddMeasurement is Add for generic code. It fails with
+// ErrIncompatibleMeasures if other isn't a radioactivity.
+func (a Radioactivity) AddMeasurement(other Measurement) (Measurement, error) {
+	value, err := radioactivitySet.valueIn(other, uint16(a.unit))
+	if err != nil {
+		return nil, err
+	}
+
+	return Radioactivity{value: a.value + value, unit: a.unit}, nil
+}
+
+// SubMeasurement is Sub for generic code. It fails with
+// ErrIncompatibleMeasures if other isn't a radioactivity.
+func (a Radioactivity) SubMeasurement(other Measurement) (Measurement, error) {
+	value, err := radioactivitySet.valueIn(other, uint16(a.unit))
+	if err != nil {
+		return nil, err
+	}
+
+	return Radioactivity{value: a.value - value, unit: a.unit}, nil
+}
+
+// MulMeasurement is Mul for generic code.
+func (a Radioactivity) MulMeasurement(multiplier float64) Measurement {
+	return a.Mul(multiplier)
+}
+
+// DivMeasurement is Div for generic code.
+func (a Radioactivity) DivMeasurement(divisor float64) (Measurement, error) {
+	if divisor == 0 {
+		return nil, ErrZeroDivision
+	}
+
+	return Radioactivity{value: a.value / divisor, unit: a.unit}, nil
+}
+
+// CompareMeasurement is Compare for generic code. It fails with
+// ErrIncompatibleMeasures if other isn't a radioactivity.
+func (a Radioactivity) CompareMeasurement(other Measurement) (int, error) {
+	return radioactivitySet.compare(a.value, uint16(a.unit), other)
+}
+
+func (a Radioactivity) generic() genericValue {
+	return genericValue{value: a.value, unit: uint16(a.unit), set: radioactivitySet}
+}
+
+const errRadioactivityConversion incompatibleError = "not a radioactivity measure"
+
+// ToRadioactivity returns m as a Radioactivity, for example a result of ParseString. It fails
+// with ErrIncompatibleMeasures if m isn't a radioactivity.
+func ToRadioactivity(m Measurement) (Radioactivity, error) {
+	value, ok := m.(Radioactivity)
+	if !ok {
+		return Radioactivity{}, errRadioactivityConversion
+	}
+
+	return value, nil
+}
+
+// StringToRadioactivity parses a radioactivity from a string such as "3.7 GBq". It fails with
+// ErrInvalidFormat unless the string has the form "<value> <symbol>" with a
+// finite value, and with ErrUnknownUnit if the symbol isn't a radioactivity unit.
+func StringToRadioactivity(s string) (Radioactivity, error) {
+	value, symbol, err := parseValueAndUnit(s)
+	if err != nil {
+		return Radioactivity{}, err
+	}
+
+	unit, ok := radioactivity.ParseUnit(symbol)
+	if !ok {
+		return Radioactivity{}, unknownUnitError(MeasureRadioactivity, symbol)
+	}
+
+	return Radioactivity{value: value, unit: unit}, nil
+}
+
+// AppendText implements encoding.TextAppender: it appends the String form,
+// such as "3.7 GBq". It fails with ErrOutOfRange if the value isn't finite, and
+// with ErrUnknownUnit if the unit isn't valid, so that the text always parses
+// back.
+func (a Radioactivity) AppendText(b []byte) ([]byte, error) {
+	if !a.unit.Valid() {
+		return b, unknownUnitError(MeasureRadioactivity, a.unit.String())
+	}
+
+	return appendText(b, a.value, a.unit.String())
+}
+
+// MarshalText implements encoding.TextMarshaler, so radioactivity values encode in
+// JSON as strings such as "3.7 GBq". It fails like AppendText.
+func (a Radioactivity) MarshalText() ([]byte, error) {
+	return a.AppendText(nil)
+}
+
+// UnmarshalText implements encoding.TextUnmarshaler: it parses text as
+// StringToRadioactivity does and stores the result in a. Unmarshalling needs a
+// pointer receiver; it changes only the value it is called on.
+func (a *Radioactivity) UnmarshalText(text []byte) error {
+	value, err := StringToRadioactivity(string(text))
+	if err != nil {
+		return err
+	}
+
+	*a = value
+
+	return nil
+}
+
+// NewAbsorbedDose returns an absorbed dose of value in unit, such as
+// NewAbsorbedDose(10, absorbeddose.BaseUnit).
+func NewAbsorbedDose(value float64, unit absorbeddose.Unit) AbsorbedDose {
+	return AbsorbedDose{value: value, unit: unit}
+}
+
+// Value returns the numeric value, expressed in Unit.
+func (d AbsorbedDose) Value() float64 {
+	return d.value
+}
+
+// Unit returns the unit of the value.
+func (d AbsorbedDose) Unit() absorbeddose.Unit {
+	return d.unit
+}
+
+// Symbol returns the symbol of the unit, as Unit().String() does.
+func (d AbsorbedDose) Symbol() string {
+	return d.unit.String()
+}
+
+// Type returns MeasureAbsorbedDose.
+func (AbsorbedDose) Type() MeasureType {
+	return MeasureAbsorbedDose
+}
+
+// String formats the absorbed dose as "<value> <symbol>", such as "2 Gy", the form
+// StringToAbsorbedDose and ParseString accept. The value is formatted like fmt's %v,
+// in the shortest form that parses back to the same float64.
+func (d AbsorbedDose) String() string {
+	return formatString(d.value, d.unit.String())
+}
+
+// Format implements fmt.Formatter: %.2f formats the value and appends the
+// symbol. See the package documentation for every verb.
+func (d AbsorbedDose) Format(state fmt.State, verb rune) {
+	formatMeasurement(state, verb, "AbsorbedDose", d.value, d.unit.String())
+}
+
+// ConvertTo returns the absorbed dose expressed in unit.
+func (d AbsorbedDose) ConvertTo(unit absorbeddose.Unit) AbsorbedDose {
+	return AbsorbedDose{value: d.value * absorbeddose.Rate(d.unit, unit), unit: unit}
+}
+
+// MustConvertTo is ConvertTo.
+//
+// Deprecated: Use ConvertTo, which no longer fails.
+//
+//go:fix inline
+func (d AbsorbedDose) MustConvertTo(unit absorbeddose.Unit) AbsorbedDose {
+	return d.ConvertTo(unit)
+}
+
+// ConvertToBaseUnits returns the absorbed dose expressed in grays.
+func (d AbsorbedDose) ConvertToBaseUnits() AbsorbedDose {
+	return AbsorbedDose{value: d.baseValue(), unit: absorbeddose.BaseUnit}
+}
+
+// baseValue returns the value in grays.
+func (d AbsorbedDose) baseValue() float64 {
+	return d.value * d.unit.Factor()
+}
+
+// Add returns the sum of the absorbed doses, expressed in the receiver's unit.
+func (d AbsorbedDose) Add(other AbsorbedDose) AbsorbedDose {
+	return AbsorbedDose{value: d.value + other.value*absorbeddose.Rate(other.unit, d.unit), unit: d.unit}
+}
+
+// Sub returns the difference of the absorbed doses, expressed in the receiver's unit.
+func (d AbsorbedDose) Sub(other AbsorbedDose) AbsorbedDose {
+	return AbsorbedDose{value: d.value - other.value*absorbeddose.Rate(other.unit, d.unit), unit: d.unit}
+}
+
+// Mul returns the absorbed dose multiplied by multiplier.
+func (d AbsorbedDose) Mul(multiplier float64) AbsorbedDose {
+	return AbsorbedDose{value: d.value * multiplier, unit: d.unit}
+}
+
+// Div returns the absorbed dose divided by divisor. It fails with ErrZeroDivision if
+// divisor is zero.
+func (d AbsorbedDose) Div(divisor float64) (AbsorbedDose, error) {
+	if divisor == 0 {
+		return AbsorbedDose{}, ErrZeroDivision
+	}
+
+	return AbsorbedDose{value: d.value / divisor, unit: d.unit}, nil
+}
+
+// Compare compares the absorbed doses; see Comparer.
+func (d AbsorbedDose) Compare(other AbsorbedDose) int {
+	return cmp.Compare(d.common(other))
+}
+
+// Equal reports whether the absorbed doses are equal; see Comparer.
+func (d AbsorbedDose) Equal(other AbsorbedDose) bool {
+	return d.Compare(other) == 0
+}
+
+// EqualWithinRel reports whether the absorbed doses are equal within the relative
+// tolerance tol; see Comparer.
+func (d AbsorbedDose) EqualWithinRel(other AbsorbedDose, tol float64) bool {
+	x, y := d.common(other)
+
+	return equalWithinRel(x, y, tol)
+}
+
+// Ratio returns d/other, the ratio of the absorbed doses, in ratio.BaseUnit:
+// convert it with ConvertTo(ratio.Percent) for a percentage. It fails with
+// ErrZeroDivision if other is zero.
+func (d AbsorbedDose) Ratio(other AbsorbedDose) (Ratio, error) {
+	x, y := d.common(other)
+	if y == 0 {
+		return Ratio{}, ErrZeroDivision
+	}
+
+	return Ratio{value: x / y, unit: ratio.BaseUnit}, nil
+}
+
+// common returns the values of the absorbed doses in a common unit: their own if
+// they share it, otherwise the base unit. Either way the result doesn't depend
+// on the order of the operands, so comparisons are symmetric.
+func (d AbsorbedDose) common(other AbsorbedDose) (float64, float64) {
+	if d.unit == other.unit {
+		return d.value, other.value
+	}
+
+	return d.baseValue(), other.baseValue()
+}
+
+// ConvertToMeasurement is ConvertTo for generic code: it takes a unit symbol.
+// It fails with ErrUnknownUnit if symbol isn't an absorbed dose unit.
+func (d AbsorbedDose) ConvertToMeasurement(symbol string) (Measurement, error) {
+	unit, ok := absorbeddose.ParseUnit(symbol)
+	if !ok {
+		return nil, unknownUnitError(MeasureAbsorbedDose, symbol)
+	}
+
+	return d.ConvertTo(unit), nil
+}
+
+// AddMeasurement is Add for generic code. It fails with
+// ErrIncompatibleMeasures if other isn't an absorbed dose.
+func (d AbsorbedDose) AddMeasurement(other Measurement) (Measurement, error) {
+	value, err := absorbeddoseSet.valueIn(other, uint16(d.unit))
+	if err != nil {
+		return nil, err
+	}
+
+	return AbsorbedDose{value: d.value + value, unit: d.unit}, nil
+}
+
+// SubMeasurement is Sub for generic code. It fails with
+// ErrIncompatibleMeasures if other isn't an absorbed dose.
+func (d AbsorbedDose) SubMeasurement(other Measurement) (Measurement, error) {
+	value, err := absorbeddoseSet.valueIn(other, uint16(d.unit))
+	if err != nil {
+		return nil, err
+	}
+
+	return AbsorbedDose{value: d.value - value, unit: d.unit}, nil
+}
+
+// MulMeasurement is Mul for generic code.
+func (d AbsorbedDose) MulMeasurement(multiplier float64) Measurement {
+	return d.Mul(multiplier)
+}
+
+// DivMeasurement is Div for generic code.
+func (d AbsorbedDose) DivMeasurement(divisor float64) (Measurement, error) {
+	if divisor == 0 {
+		return nil, ErrZeroDivision
+	}
+
+	return AbsorbedDose{value: d.value / divisor, unit: d.unit}, nil
+}
+
+// CompareMeasurement is Compare for generic code. It fails with
+// ErrIncompatibleMeasures if other isn't an absorbed dose.
+func (d AbsorbedDose) CompareMeasurement(other Measurement) (int, error) {
+	return absorbeddoseSet.compare(d.value, uint16(d.unit), other)
+}
+
+func (d AbsorbedDose) generic() genericValue {
+	return genericValue{value: d.value, unit: uint16(d.unit), set: absorbeddoseSet}
+}
+
+const errAbsorbedDoseConversion incompatibleError = "not an absorbed dose measure"
+
+// ToAbsorbedDose returns m as a AbsorbedDose, for example a result of ParseString. It fails
+// with ErrIncompatibleMeasures if m isn't an absorbed dose.
+func ToAbsorbedDose(m Measurement) (AbsorbedDose, error) {
+	value, ok := m.(AbsorbedDose)
+	if !ok {
+		return AbsorbedDose{}, errAbsorbedDoseConversion
+	}
+
+	return value, nil
+}
+
+// StringToAbsorbedDose parses an absorbed dose from a string such as "2 Gy". It fails with
+// ErrInvalidFormat unless the string has the form "<value> <symbol>" with a
+// finite value, and with ErrUnknownUnit if the symbol isn't an absorbed dose unit.
+func StringToAbsorbedDose(s string) (AbsorbedDose, error) {
+	value, symbol, err := parseValueAndUnit(s)
+	if err != nil {
+		return AbsorbedDose{}, err
+	}
+
+	unit, ok := absorbeddose.ParseUnit(symbol)
+	if !ok {
+		return AbsorbedDose{}, unknownUnitError(MeasureAbsorbedDose, symbol)
+	}
+
+	return AbsorbedDose{value: value, unit: unit}, nil
+}
+
+// AppendText implements encoding.TextAppender: it appends the String form,
+// such as "2 Gy". It fails with ErrOutOfRange if the value isn't finite, and
+// with ErrUnknownUnit if the unit isn't valid, so that the text always parses
+// back.
+func (d AbsorbedDose) AppendText(b []byte) ([]byte, error) {
+	if !d.unit.Valid() {
+		return b, unknownUnitError(MeasureAbsorbedDose, d.unit.String())
+	}
+
+	return appendText(b, d.value, d.unit.String())
+}
+
+// MarshalText implements encoding.TextMarshaler, so absorbed dose values encode in
+// JSON as strings such as "2 Gy". It fails like AppendText.
+func (d AbsorbedDose) MarshalText() ([]byte, error) {
+	return d.AppendText(nil)
+}
+
+// UnmarshalText implements encoding.TextUnmarshaler: it parses text as
+// StringToAbsorbedDose does and stores the result in d. Unmarshalling needs a
+// pointer receiver; it changes only the value it is called on.
+func (d *AbsorbedDose) UnmarshalText(text []byte) error {
+	value, err := StringToAbsorbedDose(string(text))
+	if err != nil {
+		return err
+	}
+
+	*d = value
+
+	return nil
+}
+
+// NewEquivalentDose returns an equivalent dose of value in unit, such as
+// NewEquivalentDose(10, equivalentdose.BaseUnit).
+func NewEquivalentDose(value float64, unit equivalentdose.Unit) EquivalentDose {
+	return EquivalentDose{value: value, unit: unit}
+}
+
+// Value returns the numeric value, expressed in Unit.
+func (h EquivalentDose) Value() float64 {
+	return h.value
+}
+
+// Unit returns the unit of the value.
+func (h EquivalentDose) Unit() equivalentdose.Unit {
+	return h.unit
+}
+
+// Symbol returns the symbol of the unit, as Unit().String() does.
+func (h EquivalentDose) Symbol() string {
+	return h.unit.String()
+}
+
+// Type returns MeasureEquivalentDose.
+func (EquivalentDose) Type() MeasureType {
+	return MeasureEquivalentDose
+}
+
+// String formats the equivalent dose as "<value> <symbol>", such as "2.4 mSv", the form
+// StringToEquivalentDose and ParseString accept. The value is formatted like fmt's %v,
+// in the shortest form that parses back to the same float64.
+func (h EquivalentDose) String() string {
+	return formatString(h.value, h.unit.String())
+}
+
+// Format implements fmt.Formatter: %.2f formats the value and appends the
+// symbol. See the package documentation for every verb.
+func (h EquivalentDose) Format(state fmt.State, verb rune) {
+	formatMeasurement(state, verb, "EquivalentDose", h.value, h.unit.String())
+}
+
+// ConvertTo returns the equivalent dose expressed in unit.
+func (h EquivalentDose) ConvertTo(unit equivalentdose.Unit) EquivalentDose {
+	return EquivalentDose{value: h.value * equivalentdose.Rate(h.unit, unit), unit: unit}
+}
+
+// MustConvertTo is ConvertTo.
+//
+// Deprecated: Use ConvertTo, which no longer fails.
+//
+//go:fix inline
+func (h EquivalentDose) MustConvertTo(unit equivalentdose.Unit) EquivalentDose {
+	return h.ConvertTo(unit)
+}
+
+// ConvertToBaseUnits returns the equivalent dose expressed in sieverts.
+func (h EquivalentDose) ConvertToBaseUnits() EquivalentDose {
+	return EquivalentDose{value: h.baseValue(), unit: equivalentdose.BaseUnit}
+}
+
+// baseValue returns the value in sieverts.
+func (h EquivalentDose) baseValue() float64 {
+	return h.value * h.unit.Factor()
+}
+
+// Add returns the sum of the equivalent doses, expressed in the receiver's unit.
+func (h EquivalentDose) Add(other EquivalentDose) EquivalentDose {
+	return EquivalentDose{value: h.value + other.value*equivalentdose.Rate(other.unit, h.unit), unit: h.unit}
+}
+
+// Sub returns the difference of the equivalent doses, expressed in the receiver's unit.
+func (h EquivalentDose) Sub(other EquivalentDose) EquivalentDose {
+	return EquivalentDose{value: h.value - other.value*equivalentdose.Rate(other.unit, h.unit), unit: h.unit}
+}
+
+// Mul returns the equivalent dose multiplied by multiplier.
+func (h EquivalentDose) Mul(multiplier float64) EquivalentDose {
+	return EquivalentDose{value: h.value * multiplier, unit: h.unit}
+}
+
+// Div returns the equivalent dose divided by divisor. It fails with ErrZeroDivision if
+// divisor is zero.
+func (h EquivalentDose) Div(divisor float64) (EquivalentDose, error) {
+	if divisor == 0 {
+		return EquivalentDose{}, ErrZeroDivision
+	}
+
+	return EquivalentDose{value: h.value / divisor, unit: h.unit}, nil
+}
+
+// Compare compares the equivalent doses; see Comparer.
+func (h EquivalentDose) Compare(other EquivalentDose) int {
+	return cmp.Compare(h.common(other))
+}
+
+// Equal reports whether the equivalent doses are equal; see Comparer.
+func (h EquivalentDose) Equal(other EquivalentDose) bool {
+	return h.Compare(other) == 0
+}
+
+// EqualWithinRel reports whether the equivalent doses are equal within the relative
+// tolerance tol; see Comparer.
+func (h EquivalentDose) EqualWithinRel(other EquivalentDose, tol float64) bool {
+	x, y := h.common(other)
+
+	return equalWithinRel(x, y, tol)
+}
+
+// Ratio returns h/other, the ratio of the equivalent doses, in ratio.BaseUnit:
+// convert it with ConvertTo(ratio.Percent) for a percentage. It fails with
+// ErrZeroDivision if other is zero.
+func (h EquivalentDose) Ratio(other EquivalentDose) (Ratio, error) {
+	x, y := h.common(other)
+	if y == 0 {
+		return Ratio{}, ErrZeroDivision
+	}
+
+	return Ratio{value: x / y, unit: ratio.BaseUnit}, nil
+}
+
+// common returns the values of the equivalent doses in a common unit: their own if
+// they share it, otherwise the base unit. Either way the result doesn't depend
+// on the order of the operands, so comparisons are symmetric.
+func (h EquivalentDose) common(other EquivalentDose) (float64, float64) {
+	if h.unit == other.unit {
+		return h.value, other.value
+	}
+
+	return h.baseValue(), other.baseValue()
+}
+
+// ConvertToMeasurement is ConvertTo for generic code: it takes a unit symbol.
+// It fails with ErrUnknownUnit if symbol isn't an equivalent dose unit.
+func (h EquivalentDose) ConvertToMeasurement(symbol string) (Measurement, error) {
+	unit, ok := equivalentdose.ParseUnit(symbol)
+	if !ok {
+		return nil, unknownUnitError(MeasureEquivalentDose, symbol)
+	}
+
+	return h.ConvertTo(unit), nil
+}
+
+// AddMeasurement is Add for generic code. It fails with
+// ErrIncompatibleMeasures if other isn't an equivalent dose.
+func (h EquivalentDose) AddMeasurement(other Measurement) (Measurement, error) {
+	value, err := equivalentdoseSet.valueIn(other, uint16(h.unit))
+	if err != nil {
+		return nil, err
+	}
+
+	return EquivalentDose{value: h.value + value, unit: h.unit}, nil
+}
+
+// SubMeasurement is Sub for generic code. It fails with
+// ErrIncompatibleMeasures if other isn't an equivalent dose.
+func (h EquivalentDose) SubMeasurement(other Measurement) (Measurement, error) {
+	value, err := equivalentdoseSet.valueIn(other, uint16(h.unit))
+	if err != nil {
+		return nil, err
+	}
+
+	return EquivalentDose{value: h.value - value, unit: h.unit}, nil
+}
+
+// MulMeasurement is Mul for generic code.
+func (h EquivalentDose) MulMeasurement(multiplier float64) Measurement {
+	return h.Mul(multiplier)
+}
+
+// DivMeasurement is Div for generic code.
+func (h EquivalentDose) DivMeasurement(divisor float64) (Measurement, error) {
+	if divisor == 0 {
+		return nil, ErrZeroDivision
+	}
+
+	return EquivalentDose{value: h.value / divisor, unit: h.unit}, nil
+}
+
+// CompareMeasurement is Compare for generic code. It fails with
+// ErrIncompatibleMeasures if other isn't an equivalent dose.
+func (h EquivalentDose) CompareMeasurement(other Measurement) (int, error) {
+	return equivalentdoseSet.compare(h.value, uint16(h.unit), other)
+}
+
+func (h EquivalentDose) generic() genericValue {
+	return genericValue{value: h.value, unit: uint16(h.unit), set: equivalentdoseSet}
+}
+
+const errEquivalentDoseConversion incompatibleError = "not an equivalent dose measure"
+
+// ToEquivalentDose returns m as a EquivalentDose, for example a result of ParseString. It fails
+// with ErrIncompatibleMeasures if m isn't an equivalent dose.
+func ToEquivalentDose(m Measurement) (EquivalentDose, error) {
+	value, ok := m.(EquivalentDose)
+	if !ok {
+		return EquivalentDose{}, errEquivalentDoseConversion
+	}
+
+	return value, nil
+}
+
+// StringToEquivalentDose parses an equivalent dose from a string such as "2.4 mSv". It fails with
+// ErrInvalidFormat unless the string has the form "<value> <symbol>" with a
+// finite value, and with ErrUnknownUnit if the symbol isn't an equivalent dose unit.
+func StringToEquivalentDose(s string) (EquivalentDose, error) {
+	value, symbol, err := parseValueAndUnit(s)
+	if err != nil {
+		return EquivalentDose{}, err
+	}
+
+	unit, ok := equivalentdose.ParseUnit(symbol)
+	if !ok {
+		return EquivalentDose{}, unknownUnitError(MeasureEquivalentDose, symbol)
+	}
+
+	return EquivalentDose{value: value, unit: unit}, nil
+}
+
+// AppendText implements encoding.TextAppender: it appends the String form,
+// such as "2.4 mSv". It fails with ErrOutOfRange if the value isn't finite, and
+// with ErrUnknownUnit if the unit isn't valid, so that the text always parses
+// back.
+func (h EquivalentDose) AppendText(b []byte) ([]byte, error) {
+	if !h.unit.Valid() {
+		return b, unknownUnitError(MeasureEquivalentDose, h.unit.String())
+	}
+
+	return appendText(b, h.value, h.unit.String())
+}
+
+// MarshalText implements encoding.TextMarshaler, so equivalent dose values encode in
+// JSON as strings such as "2.4 mSv". It fails like AppendText.
+func (h EquivalentDose) MarshalText() ([]byte, error) {
+	return h.AppendText(nil)
+}
+
+// UnmarshalText implements encoding.TextUnmarshaler: it parses text as
+// StringToEquivalentDose does and stores the result in h. Unmarshalling needs a
+// pointer receiver; it changes only the value it is called on.
+func (h *EquivalentDose) UnmarshalText(text []byte) error {
+	value, err := StringToEquivalentDose(string(text))
+	if err != nil {
+		return err
+	}
+
+	*h = value
+
+	return nil
+}
+
+// NewDoseRate returns a dose rate of value in unit, such as
+// NewDoseRate(10, doserate.BaseUnit).
+func NewDoseRate(value float64, unit doserate.Unit) DoseRate {
+	return DoseRate{value: value, unit: unit}
+}
+
+// Value returns the numeric value, expressed in Unit.
+func (r DoseRate) Value() float64 {
+	return r.value
+}
+
+// Unit returns the unit of the value.
+func (r DoseRate) Unit() doserate.Unit {
+	return r.unit
+}
+
+// Symbol returns the symbol of the unit, as Unit().String() does.
+func (r DoseRate) Symbol() string {
+	return r.unit.String()
+}
+
+// Type returns MeasureDoseRate.
+func (DoseRate) Type() MeasureType {
+	return MeasureDoseRate
+}
+
+// String formats the dose rate as "<value> <symbol>", such as "0.12 μSv/h", the form
+// StringToDoseRate and ParseString accept. The value is formatted like fmt's %v,
+// in the shortest form that parses back to the same float64.
+func (r DoseRate) String() string {
+	return formatString(r.value, r.unit.String())
+}
+
+// Format implements fmt.Formatter: %.2f formats the value and appends the
+// symbol. See the package documentation for every verb.
+func (r DoseRate) Format(state fmt.State, verb rune) {
+	formatMeasurement(state, verb, "DoseRate", r.value, r.unit.String())
+}
+
+// ConvertTo returns the dose rate expressed in unit.
+func (r DoseRate) ConvertTo(unit doserate.Unit) DoseRate {
+	return DoseRate{value: r.value * doserate.Rate(r.unit, unit), unit: unit}
+}
+
+// MustConvertTo is ConvertTo.
+//
+// Deprecated: Use ConvertTo, which no longer fails.
+//
+//go:fix inline
+func (r DoseRate) MustConvertTo(unit doserate.Unit) DoseRate {
+	return r.ConvertTo(unit)
+}
+
+// ConvertToBaseUnits returns the dose rate expressed in sieverts per second.
+func (r DoseRate) ConvertToBaseUnits() DoseRate {
+	return DoseRate{value: r.baseValue(), unit: doserate.BaseUnit}
+}
+
+// baseValue returns the value in sieverts per second.
+func (r DoseRate) baseValue() float64 {
+	return r.value * r.unit.Factor()
+}
+
+// Add returns the sum of the dose rates, expressed in the receiver's unit.
+func (r DoseRate) Add(other DoseRate) DoseRate {
+	return DoseRate{value: r.value + other.value*doserate.Rate(other.unit, r.unit), unit: r.unit}
+}
+
+// Sub returns the difference of the dose rates, expressed in the receiver's unit.
+func (r DoseRate) Sub(other DoseRate) DoseRate {
+	return DoseRate{value: r.value - other.value*doserate.Rate(other.unit, r.unit), unit: r.unit}
+}
+
+// Mul returns the dose rate multiplied by multiplier.
+func (r DoseRate) Mul(multiplier float64) DoseRate {
+	return DoseRate{value: r.value * multiplier, unit: r.unit}
+}
+
+// Div returns the dose rate divided by divisor. It fails with ErrZeroDivision if
+// divisor is zero.
+func (r DoseRate) Div(divisor float64) (DoseRate, error) {
+	if divisor == 0 {
+		return DoseRate{}, ErrZeroDivision
+	}
+
+	return DoseRate{value: r.value / divisor, unit: r.unit}, nil
+}
+
+// Compare compares the dose rates; see Comparer.
+func (r DoseRate) Compare(other DoseRate) int {
+	return cmp.Compare(r.common(other))
+}
+
+// Equal reports whether the dose rates are equal; see Comparer.
+func (r DoseRate) Equal(other DoseRate) bool {
+	return r.Compare(other) == 0
+}
+
+// EqualWithinRel reports whether the dose rates are equal within the relative
+// tolerance tol; see Comparer.
+func (r DoseRate) EqualWithinRel(other DoseRate, tol float64) bool {
+	x, y := r.common(other)
+
+	return equalWithinRel(x, y, tol)
+}
+
+// Ratio returns r/other, the ratio of the dose rates, in ratio.BaseUnit:
+// convert it with ConvertTo(ratio.Percent) for a percentage. It fails with
+// ErrZeroDivision if other is zero.
+func (r DoseRate) Ratio(other DoseRate) (Ratio, error) {
+	x, y := r.common(other)
+	if y == 0 {
+		return Ratio{}, ErrZeroDivision
+	}
+
+	return Ratio{value: x / y, unit: ratio.BaseUnit}, nil
+}
+
+// common returns the values of the dose rates in a common unit: their own if
+// they share it, otherwise the base unit. Either way the result doesn't depend
+// on the order of the operands, so comparisons are symmetric.
+func (r DoseRate) common(other DoseRate) (float64, float64) {
+	if r.unit == other.unit {
+		return r.value, other.value
+	}
+
+	return r.baseValue(), other.baseValue()
+}
+
+// ConvertToMeasurement is ConvertTo for generic code: it takes a unit symbol.
+// It fails with ErrUnknownUnit if symbol isn't a dose rate unit.
+func (r DoseRate) ConvertToMeasurement(symbol string) (Measurement, error) {
+	unit, ok := doserate.ParseUnit(symbol)
+	if !ok {
+		return nil, unknownUnitError(MeasureDoseRate, symbol)
+	}
+
+	return r.ConvertTo(unit), nil
+}
+
+// AddMeasurement is Add for generic code. It fails with
+// ErrIncompatibleMeasures if other isn't a dose rate.
+func (r DoseRate) AddMeasurement(other Measurement) (Measurement, error) {
+	value, err := doserateSet.valueIn(other, uint16(r.unit))
+	if err != nil {
+		return nil, err
+	}
+
+	return DoseRate{value: r.value + value, unit: r.unit}, nil
+}
+
+// SubMeasurement is Sub for generic code. It fails with
+// ErrIncompatibleMeasures if other isn't a dose rate.
+func (r DoseRate) SubMeasurement(other Measurement) (Measurement, error) {
+	value, err := doserateSet.valueIn(other, uint16(r.unit))
+	if err != nil {
+		return nil, err
+	}
+
+	return DoseRate{value: r.value - value, unit: r.unit}, nil
+}
+
+// MulMeasurement is Mul for generic code.
+func (r DoseRate) MulMeasurement(multiplier float64) Measurement {
+	return r.Mul(multiplier)
+}
+
+// DivMeasurement is Div for generic code.
+func (r DoseRate) DivMeasurement(divisor float64) (Measurement, error) {
+	if divisor == 0 {
+		return nil, ErrZeroDivision
+	}
+
+	return DoseRate{value: r.value / divisor, unit: r.unit}, nil
+}
+
+// CompareMeasurement is Compare for generic code. It fails with
+// ErrIncompatibleMeasures if other isn't a dose rate.
+func (r DoseRate) CompareMeasurement(other Measurement) (int, error) {
+	return doserateSet.compare(r.value, uint16(r.unit), other)
+}
+
+func (r DoseRate) generic() genericValue {
+	return genericValue{value: r.value, unit: uint16(r.unit), set: doserateSet}
+}
+
+const errDoseRateConversion incompatibleError = "not a dose rate measure"
+
+// ToDoseRate returns m as a DoseRate, for example a result of ParseString. It fails
+// with ErrIncompatibleMeasures if m isn't a dose rate.
+func ToDoseRate(m Measurement) (DoseRate, error) {
+	value, ok := m.(DoseRate)
+	if !ok {
+		return DoseRate{}, errDoseRateConversion
+	}
+
+	return value, nil
+}
+
+// StringToDoseRate parses a dose rate from a string such as "0.12 μSv/h". It fails with
+// ErrInvalidFormat unless the string has the form "<value> <symbol>" with a
+// finite value, and with ErrUnknownUnit if the symbol isn't a dose rate unit.
+func StringToDoseRate(s string) (DoseRate, error) {
+	value, symbol, err := parseValueAndUnit(s)
+	if err != nil {
+		return DoseRate{}, err
+	}
+
+	unit, ok := doserate.ParseUnit(symbol)
+	if !ok {
+		return DoseRate{}, unknownUnitError(MeasureDoseRate, symbol)
+	}
+
+	return DoseRate{value: value, unit: unit}, nil
+}
+
+// AppendText implements encoding.TextAppender: it appends the String form,
+// such as "0.12 μSv/h". It fails with ErrOutOfRange if the value isn't finite, and
+// with ErrUnknownUnit if the unit isn't valid, so that the text always parses
+// back.
+func (r DoseRate) AppendText(b []byte) ([]byte, error) {
+	if !r.unit.Valid() {
+		return b, unknownUnitError(MeasureDoseRate, r.unit.String())
+	}
+
+	return appendText(b, r.value, r.unit.String())
+}
+
+// MarshalText implements encoding.TextMarshaler, so dose rate values encode in
+// JSON as strings such as "0.12 μSv/h". It fails like AppendText.
+func (r DoseRate) MarshalText() ([]byte, error) {
+	return r.AppendText(nil)
+}
+
+// UnmarshalText implements encoding.TextUnmarshaler: it parses text as
+// StringToDoseRate does and stores the result in r. Unmarshalling needs a
+// pointer receiver; it changes only the value it is called on.
+func (r *DoseRate) UnmarshalText(text []byte) error {
+	value, err := StringToDoseRate(string(text))
+	if err != nil {
+		return err
+	}
+
+	*r = value
+
+	return nil
+}
+
+// NewCapacitance returns a capacitance of value in unit, such as
+// NewCapacitance(10, capacitance.BaseUnit).
+func NewCapacitance(value float64, unit capacitance.Unit) Capacitance {
+	return Capacitance{value: value, unit: unit}
+}
+
+// Value returns the numeric value, expressed in Unit.
+func (c Capacitance) Value() float64 {
+	return c.value
+}
+
+// Unit returns the unit of the value.
+func (c Capacitance) Unit() capacitance.Unit {
+	return c.unit
+}
+
+// Symbol returns the symbol of the unit, as Unit().String() does.
+func (c Capacitance) Symbol() string {
+	return c.unit.String()
+}
+
+// Type returns MeasureCapacitance.
+func (Capacitance) Type() MeasureType {
+	return MeasureCapacitance
+}
+
+// String formats the capacitance as "<value> <symbol>", such as "100 μF", the form
+// StringToCapacitance and ParseString accept. The value is formatted like fmt's %v,
+// in the shortest form that parses back to the same float64.
+func (c Capacitance) String() string {
+	return formatString(c.value, c.unit.String())
+}
+
+// Format implements fmt.Formatter: %.2f formats the value and appends the
+// symbol. See the package documentation for every verb.
+func (c Capacitance) Format(state fmt.State, verb rune) {
+	formatMeasurement(state, verb, "Capacitance", c.value, c.unit.String())
+}
+
+// ConvertTo returns the capacitance expressed in unit.
+func (c Capacitance) ConvertTo(unit capacitance.Unit) Capacitance {
+	return Capacitance{value: c.value * capacitance.Rate(c.unit, unit), unit: unit}
+}
+
+// MustConvertTo is ConvertTo.
+//
+// Deprecated: Use ConvertTo, which no longer fails.
+//
+//go:fix inline
+func (c Capacitance) MustConvertTo(unit capacitance.Unit) Capacitance {
+	return c.ConvertTo(unit)
+}
+
+// ConvertToBaseUnits returns the capacitance expressed in farads.
+func (c Capacitance) ConvertToBaseUnits() Capacitance {
+	return Capacitance{value: c.baseValue(), unit: capacitance.BaseUnit}
+}
+
+// baseValue returns the value in farads.
+func (c Capacitance) baseValue() float64 {
+	return c.value * c.unit.Factor()
+}
+
+// Add returns the sum of the capacitances, expressed in the receiver's unit.
+func (c Capacitance) Add(other Capacitance) Capacitance {
+	return Capacitance{value: c.value + other.value*capacitance.Rate(other.unit, c.unit), unit: c.unit}
+}
+
+// Sub returns the difference of the capacitances, expressed in the receiver's unit.
+func (c Capacitance) Sub(other Capacitance) Capacitance {
+	return Capacitance{value: c.value - other.value*capacitance.Rate(other.unit, c.unit), unit: c.unit}
+}
+
+// Mul returns the capacitance multiplied by multiplier.
+func (c Capacitance) Mul(multiplier float64) Capacitance {
+	return Capacitance{value: c.value * multiplier, unit: c.unit}
+}
+
+// Div returns the capacitance divided by divisor. It fails with ErrZeroDivision if
+// divisor is zero.
+func (c Capacitance) Div(divisor float64) (Capacitance, error) {
+	if divisor == 0 {
+		return Capacitance{}, ErrZeroDivision
+	}
+
+	return Capacitance{value: c.value / divisor, unit: c.unit}, nil
+}
+
+// Compare compares the capacitances; see Comparer.
+func (c Capacitance) Compare(other Capacitance) int {
+	return cmp.Compare(c.common(other))
+}
+
+// Equal reports whether the capacitances are equal; see Comparer.
+func (c Capacitance) Equal(other Capacitance) bool {
+	return c.Compare(other) == 0
+}
+
+// EqualWithinRel reports whether the capacitances are equal within the relative
+// tolerance tol; see Comparer.
+func (c Capacitance) EqualWithinRel(other Capacitance, tol float64) bool {
+	x, y := c.common(other)
+
+	return equalWithinRel(x, y, tol)
+}
+
+// Ratio returns c/other, the ratio of the capacitances, in ratio.BaseUnit:
+// convert it with ConvertTo(ratio.Percent) for a percentage. It fails with
+// ErrZeroDivision if other is zero.
+func (c Capacitance) Ratio(other Capacitance) (Ratio, error) {
+	x, y := c.common(other)
+	if y == 0 {
+		return Ratio{}, ErrZeroDivision
+	}
+
+	return Ratio{value: x / y, unit: ratio.BaseUnit}, nil
+}
+
+// common returns the values of the capacitances in a common unit: their own if
+// they share it, otherwise the base unit. Either way the result doesn't depend
+// on the order of the operands, so comparisons are symmetric.
+func (c Capacitance) common(other Capacitance) (float64, float64) {
+	if c.unit == other.unit {
+		return c.value, other.value
+	}
+
+	return c.baseValue(), other.baseValue()
+}
+
+// ConvertToMeasurement is ConvertTo for generic code: it takes a unit symbol.
+// It fails with ErrUnknownUnit if symbol isn't a capacitance unit.
+func (c Capacitance) ConvertToMeasurement(symbol string) (Measurement, error) {
+	unit, ok := capacitance.ParseUnit(symbol)
+	if !ok {
+		return nil, unknownUnitError(MeasureCapacitance, symbol)
+	}
+
+	return c.ConvertTo(unit), nil
+}
+
+// AddMeasurement is Add for generic code. It fails with
+// ErrIncompatibleMeasures if other isn't a capacitance.
+func (c Capacitance) AddMeasurement(other Measurement) (Measurement, error) {
+	value, err := capacitanceSet.valueIn(other, uint16(c.unit))
+	if err != nil {
+		return nil, err
+	}
+
+	return Capacitance{value: c.value + value, unit: c.unit}, nil
+}
+
+// SubMeasurement is Sub for generic code. It fails with
+// ErrIncompatibleMeasures if other isn't a capacitance.
+func (c Capacitance) SubMeasurement(other Measurement) (Measurement, error) {
+	value, err := capacitanceSet.valueIn(other, uint16(c.unit))
+	if err != nil {
+		return nil, err
+	}
+
+	return Capacitance{value: c.value - value, unit: c.unit}, nil
+}
+
+// MulMeasurement is Mul for generic code.
+func (c Capacitance) MulMeasurement(multiplier float64) Measurement {
+	return c.Mul(multiplier)
+}
+
+// DivMeasurement is Div for generic code.
+func (c Capacitance) DivMeasurement(divisor float64) (Measurement, error) {
+	if divisor == 0 {
+		return nil, ErrZeroDivision
+	}
+
+	return Capacitance{value: c.value / divisor, unit: c.unit}, nil
+}
+
+// CompareMeasurement is Compare for generic code. It fails with
+// ErrIncompatibleMeasures if other isn't a capacitance.
+func (c Capacitance) CompareMeasurement(other Measurement) (int, error) {
+	return capacitanceSet.compare(c.value, uint16(c.unit), other)
+}
+
+func (c Capacitance) generic() genericValue {
+	return genericValue{value: c.value, unit: uint16(c.unit), set: capacitanceSet}
+}
+
+const errCapacitanceConversion incompatibleError = "not a capacitance measure"
+
+// ToCapacitance returns m as a Capacitance, for example a result of ParseString. It fails
+// with ErrIncompatibleMeasures if m isn't a capacitance.
+func ToCapacitance(m Measurement) (Capacitance, error) {
+	value, ok := m.(Capacitance)
+	if !ok {
+		return Capacitance{}, errCapacitanceConversion
+	}
+
+	return value, nil
+}
+
+// StringToCapacitance parses a capacitance from a string such as "100 μF". It fails with
+// ErrInvalidFormat unless the string has the form "<value> <symbol>" with a
+// finite value, and with ErrUnknownUnit if the symbol isn't a capacitance unit.
+func StringToCapacitance(s string) (Capacitance, error) {
+	value, symbol, err := parseValueAndUnit(s)
+	if err != nil {
+		return Capacitance{}, err
+	}
+
+	unit, ok := capacitance.ParseUnit(symbol)
+	if !ok {
+		return Capacitance{}, unknownUnitError(MeasureCapacitance, symbol)
+	}
+
+	return Capacitance{value: value, unit: unit}, nil
+}
+
+// AppendText implements encoding.TextAppender: it appends the String form,
+// such as "100 μF". It fails with ErrOutOfRange if the value isn't finite, and
+// with ErrUnknownUnit if the unit isn't valid, so that the text always parses
+// back.
+func (c Capacitance) AppendText(b []byte) ([]byte, error) {
+	if !c.unit.Valid() {
+		return b, unknownUnitError(MeasureCapacitance, c.unit.String())
+	}
+
+	return appendText(b, c.value, c.unit.String())
+}
+
+// MarshalText implements encoding.TextMarshaler, so capacitance values encode in
+// JSON as strings such as "100 μF". It fails like AppendText.
+func (c Capacitance) MarshalText() ([]byte, error) {
+	return c.AppendText(nil)
+}
+
+// UnmarshalText implements encoding.TextUnmarshaler: it parses text as
+// StringToCapacitance does and stores the result in c. Unmarshalling needs a
+// pointer receiver; it changes only the value it is called on.
+func (c *Capacitance) UnmarshalText(text []byte) error {
+	value, err := StringToCapacitance(string(text))
+	if err != nil {
+		return err
+	}
+
+	*c = value
+
+	return nil
+}
+
+// NewInductance returns an inductance of value in unit, such as
+// NewInductance(10, inductance.BaseUnit).
+func NewInductance(value float64, unit inductance.Unit) Inductance {
+	return Inductance{value: value, unit: unit}
+}
+
+// Value returns the numeric value, expressed in Unit.
+func (l Inductance) Value() float64 {
+	return l.value
+}
+
+// Unit returns the unit of the value.
+func (l Inductance) Unit() inductance.Unit {
+	return l.unit
+}
+
+// Symbol returns the symbol of the unit, as Unit().String() does.
+func (l Inductance) Symbol() string {
+	return l.unit.String()
+}
+
+// Type returns MeasureInductance.
+func (Inductance) Type() MeasureType {
+	return MeasureInductance
+}
+
+// String formats the inductance as "<value> <symbol>", such as "10 mH", the form
+// StringToInductance and ParseString accept. The value is formatted like fmt's %v,
+// in the shortest form that parses back to the same float64.
+func (l Inductance) String() string {
+	return formatString(l.value, l.unit.String())
+}
+
+// Format implements fmt.Formatter: %.2f formats the value and appends the
+// symbol. See the package documentation for every verb.
+func (l Inductance) Format(state fmt.State, verb rune) {
+	formatMeasurement(state, verb, "Inductance", l.value, l.unit.String())
+}
+
+// ConvertTo returns the inductance expressed in unit.
+func (l Inductance) ConvertTo(unit inductance.Unit) Inductance {
+	return Inductance{value: l.value * inductance.Rate(l.unit, unit), unit: unit}
+}
+
+// MustConvertTo is ConvertTo.
+//
+// Deprecated: Use ConvertTo, which no longer fails.
+//
+//go:fix inline
+func (l Inductance) MustConvertTo(unit inductance.Unit) Inductance {
+	return l.ConvertTo(unit)
+}
+
+// ConvertToBaseUnits returns the inductance expressed in henries.
+func (l Inductance) ConvertToBaseUnits() Inductance {
+	return Inductance{value: l.baseValue(), unit: inductance.BaseUnit}
+}
+
+// baseValue returns the value in henries.
+func (l Inductance) baseValue() float64 {
+	return l.value * l.unit.Factor()
+}
+
+// Add returns the sum of the inductances, expressed in the receiver's unit.
+func (l Inductance) Add(other Inductance) Inductance {
+	return Inductance{value: l.value + other.value*inductance.Rate(other.unit, l.unit), unit: l.unit}
+}
+
+// Sub returns the difference of the inductances, expressed in the receiver's unit.
+func (l Inductance) Sub(other Inductance) Inductance {
+	return Inductance{value: l.value - other.value*inductance.Rate(other.unit, l.unit), unit: l.unit}
+}
+
+// Mul returns the inductance multiplied by multiplier.
+func (l Inductance) Mul(multiplier float64) Inductance {
+	return Inductance{value: l.value * multiplier, unit: l.unit}
+}
+
+// Div returns the inductance divided by divisor. It fails with ErrZeroDivision if
+// divisor is zero.
+func (l Inductance) Div(divisor float64) (Inductance, error) {
+	if divisor == 0 {
+		return Inductance{}, ErrZeroDivision
+	}
+
+	return Inductance{value: l.value / divisor, unit: l.unit}, nil
+}
+
+// Compare compares the inductances; see Comparer.
+func (l Inductance) Compare(other Inductance) int {
+	return cmp.Compare(l.common(other))
+}
+
+// Equal reports whether the inductances are equal; see Comparer.
+func (l Inductance) Equal(other Inductance) bool {
+	return l.Compare(other) == 0
+}
+
+// EqualWithinRel reports whether the inductances are equal within the relative
+// tolerance tol; see Comparer.
+func (l Inductance) EqualWithinRel(other Inductance, tol float64) bool {
+	x, y := l.common(other)
+
+	return equalWithinRel(x, y, tol)
+}
+
+// Ratio returns l/other, the ratio of the inductances, in ratio.BaseUnit:
+// convert it with ConvertTo(ratio.Percent) for a percentage. It fails with
+// ErrZeroDivision if other is zero.
+func (l Inductance) Ratio(other Inductance) (Ratio, error) {
+	x, y := l.common(other)
+	if y == 0 {
+		return Ratio{}, ErrZeroDivision
+	}
+
+	return Ratio{value: x / y, unit: ratio.BaseUnit}, nil
+}
+
+// common returns the values of the inductances in a common unit: their own if
+// they share it, otherwise the base unit. Either way the result doesn't depend
+// on the order of the operands, so comparisons are symmetric.
+func (l Inductance) common(other Inductance) (float64, float64) {
+	if l.unit == other.unit {
+		return l.value, other.value
+	}
+
+	return l.baseValue(), other.baseValue()
+}
+
+// ConvertToMeasurement is ConvertTo for generic code: it takes a unit symbol.
+// It fails with ErrUnknownUnit if symbol isn't an inductance unit.
+func (l Inductance) ConvertToMeasurement(symbol string) (Measurement, error) {
+	unit, ok := inductance.ParseUnit(symbol)
+	if !ok {
+		return nil, unknownUnitError(MeasureInductance, symbol)
+	}
+
+	return l.ConvertTo(unit), nil
+}
+
+// AddMeasurement is Add for generic code. It fails with
+// ErrIncompatibleMeasures if other isn't an inductance.
+func (l Inductance) AddMeasurement(other Measurement) (Measurement, error) {
+	value, err := inductanceSet.valueIn(other, uint16(l.unit))
+	if err != nil {
+		return nil, err
+	}
+
+	return Inductance{value: l.value + value, unit: l.unit}, nil
+}
+
+// SubMeasurement is Sub for generic code. It fails with
+// ErrIncompatibleMeasures if other isn't an inductance.
+func (l Inductance) SubMeasurement(other Measurement) (Measurement, error) {
+	value, err := inductanceSet.valueIn(other, uint16(l.unit))
+	if err != nil {
+		return nil, err
+	}
+
+	return Inductance{value: l.value - value, unit: l.unit}, nil
+}
+
+// MulMeasurement is Mul for generic code.
+func (l Inductance) MulMeasurement(multiplier float64) Measurement {
+	return l.Mul(multiplier)
+}
+
+// DivMeasurement is Div for generic code.
+func (l Inductance) DivMeasurement(divisor float64) (Measurement, error) {
+	if divisor == 0 {
+		return nil, ErrZeroDivision
+	}
+
+	return Inductance{value: l.value / divisor, unit: l.unit}, nil
+}
+
+// CompareMeasurement is Compare for generic code. It fails with
+// ErrIncompatibleMeasures if other isn't an inductance.
+func (l Inductance) CompareMeasurement(other Measurement) (int, error) {
+	return inductanceSet.compare(l.value, uint16(l.unit), other)
+}
+
+func (l Inductance) generic() genericValue {
+	return genericValue{value: l.value, unit: uint16(l.unit), set: inductanceSet}
+}
+
+const errInductanceConversion incompatibleError = "not an inductance measure"
+
+// ToInductance returns m as a Inductance, for example a result of ParseString. It fails
+// with ErrIncompatibleMeasures if m isn't an inductance.
+func ToInductance(m Measurement) (Inductance, error) {
+	value, ok := m.(Inductance)
+	if !ok {
+		return Inductance{}, errInductanceConversion
+	}
+
+	return value, nil
+}
+
+// StringToInductance parses an inductance from a string such as "10 mH". It fails with
+// ErrInvalidFormat unless the string has the form "<value> <symbol>" with a
+// finite value, and with ErrUnknownUnit if the symbol isn't an inductance unit.
+func StringToInductance(s string) (Inductance, error) {
+	value, symbol, err := parseValueAndUnit(s)
+	if err != nil {
+		return Inductance{}, err
+	}
+
+	unit, ok := inductance.ParseUnit(symbol)
+	if !ok {
+		return Inductance{}, unknownUnitError(MeasureInductance, symbol)
+	}
+
+	return Inductance{value: value, unit: unit}, nil
+}
+
+// AppendText implements encoding.TextAppender: it appends the String form,
+// such as "10 mH". It fails with ErrOutOfRange if the value isn't finite, and
+// with ErrUnknownUnit if the unit isn't valid, so that the text always parses
+// back.
+func (l Inductance) AppendText(b []byte) ([]byte, error) {
+	if !l.unit.Valid() {
+		return b, unknownUnitError(MeasureInductance, l.unit.String())
+	}
+
+	return appendText(b, l.value, l.unit.String())
+}
+
+// MarshalText implements encoding.TextMarshaler, so inductance values encode in
+// JSON as strings such as "10 mH". It fails like AppendText.
+func (l Inductance) MarshalText() ([]byte, error) {
+	return l.AppendText(nil)
+}
+
+// UnmarshalText implements encoding.TextUnmarshaler: it parses text as
+// StringToInductance does and stores the result in l. Unmarshalling needs a
+// pointer receiver; it changes only the value it is called on.
+func (l *Inductance) UnmarshalText(text []byte) error {
+	value, err := StringToInductance(string(text))
+	if err != nil {
+		return err
+	}
+
+	*l = value
+
+	return nil
+}
+
+// NewMagneticField returns a magnetic flux density of value in unit, such as
+// NewMagneticField(10, magneticfield.BaseUnit).
+func NewMagneticField(value float64, unit magneticfield.Unit) MagneticField {
+	return MagneticField{value: value, unit: unit}
+}
+
+// Value returns the numeric value, expressed in Unit.
+func (mf MagneticField) Value() float64 {
+	return mf.value
+}
+
+// Unit returns the unit of the value.
+func (mf MagneticField) Unit() magneticfield.Unit {
+	return mf.unit
+}
+
+// Symbol returns the symbol of the unit, as Unit().String() does.
+func (mf MagneticField) Symbol() string {
+	return mf.unit.String()
+}
+
+// Type returns MeasureMagneticField.
+func (MagneticField) Type() MeasureType {
+	return MeasureMagneticField
+}
+
+// String formats the magnetic flux density as "<value> <symbol>", such as "50 μT", the form
+// StringToMagneticField and ParseString accept. The value is formatted like fmt's %v,
+// in the shortest form that parses back to the same float64.
+func (mf MagneticField) String() string {
+	return formatString(mf.value, mf.unit.String())
+}
+
+// Format implements fmt.Formatter: %.2f formats the value and appends the
+// symbol. See the package documentation for every verb.
+func (mf MagneticField) Format(state fmt.State, verb rune) {
+	formatMeasurement(state, verb, "MagneticField", mf.value, mf.unit.String())
+}
+
+// ConvertTo returns the magnetic flux density expressed in unit.
+func (mf MagneticField) ConvertTo(unit magneticfield.Unit) MagneticField {
+	return MagneticField{value: mf.value * magneticfield.Rate(mf.unit, unit), unit: unit}
+}
+
+// MustConvertTo is ConvertTo.
+//
+// Deprecated: Use ConvertTo, which no longer fails.
+//
+//go:fix inline
+func (mf MagneticField) MustConvertTo(unit magneticfield.Unit) MagneticField {
+	return mf.ConvertTo(unit)
+}
+
+// ConvertToBaseUnits returns the magnetic flux density expressed in teslas.
+func (mf MagneticField) ConvertToBaseUnits() MagneticField {
+	return MagneticField{value: mf.baseValue(), unit: magneticfield.BaseUnit}
+}
+
+// baseValue returns the value in teslas.
+func (mf MagneticField) baseValue() float64 {
+	return mf.value * mf.unit.Factor()
+}
+
+// Add returns the sum of the magnetic flux densities, expressed in the receiver's unit.
+func (mf MagneticField) Add(other MagneticField) MagneticField {
+	return MagneticField{value: mf.value + other.value*magneticfield.Rate(other.unit, mf.unit), unit: mf.unit}
+}
+
+// Sub returns the difference of the magnetic flux densities, expressed in the receiver's unit.
+func (mf MagneticField) Sub(other MagneticField) MagneticField {
+	return MagneticField{value: mf.value - other.value*magneticfield.Rate(other.unit, mf.unit), unit: mf.unit}
+}
+
+// Mul returns the magnetic flux density multiplied by multiplier.
+func (mf MagneticField) Mul(multiplier float64) MagneticField {
+	return MagneticField{value: mf.value * multiplier, unit: mf.unit}
+}
+
+// Div returns the magnetic flux density divided by divisor. It fails with ErrZeroDivision if
+// divisor is zero.
+func (mf MagneticField) Div(divisor float64) (MagneticField, error) {
+	if divisor == 0 {
+		return MagneticField{}, ErrZeroDivision
+	}
+
+	return MagneticField{value: mf.value / divisor, unit: mf.unit}, nil
+}
+
+// Compare compares the magnetic flux densities; see Comparer.
+func (mf MagneticField) Compare(other MagneticField) int {
+	return cmp.Compare(mf.common(other))
+}
+
+// Equal reports whether the magnetic flux densities are equal; see Comparer.
+func (mf MagneticField) Equal(other MagneticField) bool {
+	return mf.Compare(other) == 0
+}
+
+// EqualWithinRel reports whether the magnetic flux densities are equal within the relative
+// tolerance tol; see Comparer.
+func (mf MagneticField) EqualWithinRel(other MagneticField, tol float64) bool {
+	x, y := mf.common(other)
+
+	return equalWithinRel(x, y, tol)
+}
+
+// Ratio returns mf/other, the ratio of the magnetic flux densities, in ratio.BaseUnit:
+// convert it with ConvertTo(ratio.Percent) for a percentage. It fails with
+// ErrZeroDivision if other is zero.
+func (mf MagneticField) Ratio(other MagneticField) (Ratio, error) {
+	x, y := mf.common(other)
+	if y == 0 {
+		return Ratio{}, ErrZeroDivision
+	}
+
+	return Ratio{value: x / y, unit: ratio.BaseUnit}, nil
+}
+
+// common returns the values of the magnetic flux densities in a common unit: their own if
+// they share it, otherwise the base unit. Either way the result doesn't depend
+// on the order of the operands, so comparisons are symmetric.
+func (mf MagneticField) common(other MagneticField) (float64, float64) {
+	if mf.unit == other.unit {
+		return mf.value, other.value
+	}
+
+	return mf.baseValue(), other.baseValue()
+}
+
+// ConvertToMeasurement is ConvertTo for generic code: it takes a unit symbol.
+// It fails with ErrUnknownUnit if symbol isn't a magnetic flux density unit.
+func (mf MagneticField) ConvertToMeasurement(symbol string) (Measurement, error) {
+	unit, ok := magneticfield.ParseUnit(symbol)
+	if !ok {
+		return nil, unknownUnitError(MeasureMagneticField, symbol)
+	}
+
+	return mf.ConvertTo(unit), nil
+}
+
+// AddMeasurement is Add for generic code. It fails with
+// ErrIncompatibleMeasures if other isn't a magnetic flux density.
+func (mf MagneticField) AddMeasurement(other Measurement) (Measurement, error) {
+	value, err := magneticfieldSet.valueIn(other, uint16(mf.unit))
+	if err != nil {
+		return nil, err
+	}
+
+	return MagneticField{value: mf.value + value, unit: mf.unit}, nil
+}
+
+// SubMeasurement is Sub for generic code. It fails with
+// ErrIncompatibleMeasures if other isn't a magnetic flux density.
+func (mf MagneticField) SubMeasurement(other Measurement) (Measurement, error) {
+	value, err := magneticfieldSet.valueIn(other, uint16(mf.unit))
+	if err != nil {
+		return nil, err
+	}
+
+	return MagneticField{value: mf.value - value, unit: mf.unit}, nil
+}
+
+// MulMeasurement is Mul for generic code.
+func (mf MagneticField) MulMeasurement(multiplier float64) Measurement {
+	return mf.Mul(multiplier)
+}
+
+// DivMeasurement is Div for generic code.
+func (mf MagneticField) DivMeasurement(divisor float64) (Measurement, error) {
+	if divisor == 0 {
+		return nil, ErrZeroDivision
+	}
+
+	return MagneticField{value: mf.value / divisor, unit: mf.unit}, nil
+}
+
+// CompareMeasurement is Compare for generic code. It fails with
+// ErrIncompatibleMeasures if other isn't a magnetic flux density.
+func (mf MagneticField) CompareMeasurement(other Measurement) (int, error) {
+	return magneticfieldSet.compare(mf.value, uint16(mf.unit), other)
+}
+
+func (mf MagneticField) generic() genericValue {
+	return genericValue{value: mf.value, unit: uint16(mf.unit), set: magneticfieldSet}
+}
+
+const errMagneticFieldConversion incompatibleError = "not a magnetic flux density measure"
+
+// ToMagneticField returns m as a MagneticField, for example a result of ParseString. It fails
+// with ErrIncompatibleMeasures if m isn't a magnetic flux density.
+func ToMagneticField(m Measurement) (MagneticField, error) {
+	value, ok := m.(MagneticField)
+	if !ok {
+		return MagneticField{}, errMagneticFieldConversion
+	}
+
+	return value, nil
+}
+
+// StringToMagneticField parses a magnetic flux density from a string such as "50 μT". It fails with
+// ErrInvalidFormat unless the string has the form "<value> <symbol>" with a
+// finite value, and with ErrUnknownUnit if the symbol isn't a magnetic flux density unit.
+func StringToMagneticField(s string) (MagneticField, error) {
+	value, symbol, err := parseValueAndUnit(s)
+	if err != nil {
+		return MagneticField{}, err
+	}
+
+	unit, ok := magneticfield.ParseUnit(symbol)
+	if !ok {
+		return MagneticField{}, unknownUnitError(MeasureMagneticField, symbol)
+	}
+
+	return MagneticField{value: value, unit: unit}, nil
+}
+
+// AppendText implements encoding.TextAppender: it appends the String form,
+// such as "50 μT". It fails with ErrOutOfRange if the value isn't finite, and
+// with ErrUnknownUnit if the unit isn't valid, so that the text always parses
+// back.
+func (mf MagneticField) AppendText(b []byte) ([]byte, error) {
+	if !mf.unit.Valid() {
+		return b, unknownUnitError(MeasureMagneticField, mf.unit.String())
+	}
+
+	return appendText(b, mf.value, mf.unit.String())
+}
+
+// MarshalText implements encoding.TextMarshaler, so magnetic flux density values encode in
+// JSON as strings such as "50 μT". It fails like AppendText.
+func (mf MagneticField) MarshalText() ([]byte, error) {
+	return mf.AppendText(nil)
+}
+
+// UnmarshalText implements encoding.TextUnmarshaler: it parses text as
+// StringToMagneticField does and stores the result in mf. Unmarshalling needs a
+// pointer receiver; it changes only the value it is called on.
+func (mf *MagneticField) UnmarshalText(text []byte) error {
+	value, err := StringToMagneticField(string(text))
+	if err != nil {
+		return err
+	}
+
+	*mf = value
+
+	return nil
+}
+
+// NewIlluminance returns an illuminance of value in unit, such as
+// NewIlluminance(10, illuminance.BaseUnit).
+func NewIlluminance(value float64, unit illuminance.Unit) Illuminance {
+	return Illuminance{value: value, unit: unit}
+}
+
+// Value returns the numeric value, expressed in Unit.
+func (e Illuminance) Value() float64 {
+	return e.value
+}
+
+// Unit returns the unit of the value.
+func (e Illuminance) Unit() illuminance.Unit {
+	return e.unit
+}
+
+// Symbol returns the symbol of the unit, as Unit().String() does.
+func (e Illuminance) Symbol() string {
+	return e.unit.String()
+}
+
+// Type returns MeasureIlluminance.
+func (Illuminance) Type() MeasureType {
+	return MeasureIlluminance
+}
+
+// String formats the illuminance as "<value> <symbol>", such as "500 lx", the form
+// StringToIlluminance and ParseString accept. The value is formatted like fmt's %v,
+// in the shortest form that parses back to the same float64.
+func (e Illuminance) String() string {
+	return formatString(e.value, e.unit.String())
+}
+
+// Format implements fmt.Formatter: %.2f formats the value and appends the
+// symbol. See the package documentation for every verb.
+func (e Illuminance) Format(state fmt.State, verb rune) {
+	formatMeasurement(state, verb, "Illuminance", e.value, e.unit.String())
+}
+
+// ConvertTo returns the illuminance expressed in unit.
+func (e Illuminance) ConvertTo(unit illuminance.Unit) Illuminance {
+	return Illuminance{value: e.value * illuminance.Rate(e.unit, unit), unit: unit}
+}
+
+// MustConvertTo is ConvertTo.
+//
+// Deprecated: Use ConvertTo, which no longer fails.
+//
+//go:fix inline
+func (e Illuminance) MustConvertTo(unit illuminance.Unit) Illuminance {
+	return e.ConvertTo(unit)
+}
+
+// ConvertToBaseUnits returns the illuminance expressed in lux.
+func (e Illuminance) ConvertToBaseUnits() Illuminance {
+	return Illuminance{value: e.baseValue(), unit: illuminance.BaseUnit}
+}
+
+// baseValue returns the value in lux.
+func (e Illuminance) baseValue() float64 {
+	return e.value * e.unit.Factor()
+}
+
+// Add returns the sum of the illuminances, expressed in the receiver's unit.
+func (e Illuminance) Add(other Illuminance) Illuminance {
+	return Illuminance{value: e.value + other.value*illuminance.Rate(other.unit, e.unit), unit: e.unit}
+}
+
+// Sub returns the difference of the illuminances, expressed in the receiver's unit.
+func (e Illuminance) Sub(other Illuminance) Illuminance {
+	return Illuminance{value: e.value - other.value*illuminance.Rate(other.unit, e.unit), unit: e.unit}
+}
+
+// Mul returns the illuminance multiplied by multiplier.
+func (e Illuminance) Mul(multiplier float64) Illuminance {
+	return Illuminance{value: e.value * multiplier, unit: e.unit}
+}
+
+// Div returns the illuminance divided by divisor. It fails with ErrZeroDivision if
+// divisor is zero.
+func (e Illuminance) Div(divisor float64) (Illuminance, error) {
+	if divisor == 0 {
+		return Illuminance{}, ErrZeroDivision
+	}
+
+	return Illuminance{value: e.value / divisor, unit: e.unit}, nil
+}
+
+// Compare compares the illuminances; see Comparer.
+func (e Illuminance) Compare(other Illuminance) int {
+	return cmp.Compare(e.common(other))
+}
+
+// Equal reports whether the illuminances are equal; see Comparer.
+func (e Illuminance) Equal(other Illuminance) bool {
+	return e.Compare(other) == 0
+}
+
+// EqualWithinRel reports whether the illuminances are equal within the relative
+// tolerance tol; see Comparer.
+func (e Illuminance) EqualWithinRel(other Illuminance, tol float64) bool {
+	x, y := e.common(other)
+
+	return equalWithinRel(x, y, tol)
+}
+
+// Ratio returns e/other, the ratio of the illuminances, in ratio.BaseUnit:
+// convert it with ConvertTo(ratio.Percent) for a percentage. It fails with
+// ErrZeroDivision if other is zero.
+func (e Illuminance) Ratio(other Illuminance) (Ratio, error) {
+	x, y := e.common(other)
+	if y == 0 {
+		return Ratio{}, ErrZeroDivision
+	}
+
+	return Ratio{value: x / y, unit: ratio.BaseUnit}, nil
+}
+
+// common returns the values of the illuminances in a common unit: their own if
+// they share it, otherwise the base unit. Either way the result doesn't depend
+// on the order of the operands, so comparisons are symmetric.
+func (e Illuminance) common(other Illuminance) (float64, float64) {
+	if e.unit == other.unit {
+		return e.value, other.value
+	}
+
+	return e.baseValue(), other.baseValue()
+}
+
+// ConvertToMeasurement is ConvertTo for generic code: it takes a unit symbol.
+// It fails with ErrUnknownUnit if symbol isn't an illuminance unit.
+func (e Illuminance) ConvertToMeasurement(symbol string) (Measurement, error) {
+	unit, ok := illuminance.ParseUnit(symbol)
+	if !ok {
+		return nil, unknownUnitError(MeasureIlluminance, symbol)
+	}
+
+	return e.ConvertTo(unit), nil
+}
+
+// AddMeasurement is Add for generic code. It fails with
+// ErrIncompatibleMeasures if other isn't an illuminance.
+func (e Illuminance) AddMeasurement(other Measurement) (Measurement, error) {
+	value, err := illuminanceSet.valueIn(other, uint16(e.unit))
+	if err != nil {
+		return nil, err
+	}
+
+	return Illuminance{value: e.value + value, unit: e.unit}, nil
+}
+
+// SubMeasurement is Sub for generic code. It fails with
+// ErrIncompatibleMeasures if other isn't an illuminance.
+func (e Illuminance) SubMeasurement(other Measurement) (Measurement, error) {
+	value, err := illuminanceSet.valueIn(other, uint16(e.unit))
+	if err != nil {
+		return nil, err
+	}
+
+	return Illuminance{value: e.value - value, unit: e.unit}, nil
+}
+
+// MulMeasurement is Mul for generic code.
+func (e Illuminance) MulMeasurement(multiplier float64) Measurement {
+	return e.Mul(multiplier)
+}
+
+// DivMeasurement is Div for generic code.
+func (e Illuminance) DivMeasurement(divisor float64) (Measurement, error) {
+	if divisor == 0 {
+		return nil, ErrZeroDivision
+	}
+
+	return Illuminance{value: e.value / divisor, unit: e.unit}, nil
+}
+
+// CompareMeasurement is Compare for generic code. It fails with
+// ErrIncompatibleMeasures if other isn't an illuminance.
+func (e Illuminance) CompareMeasurement(other Measurement) (int, error) {
+	return illuminanceSet.compare(e.value, uint16(e.unit), other)
+}
+
+func (e Illuminance) generic() genericValue {
+	return genericValue{value: e.value, unit: uint16(e.unit), set: illuminanceSet}
+}
+
+const errIlluminanceConversion incompatibleError = "not an illuminance measure"
+
+// ToIlluminance returns m as a Illuminance, for example a result of ParseString. It fails
+// with ErrIncompatibleMeasures if m isn't an illuminance.
+func ToIlluminance(m Measurement) (Illuminance, error) {
+	value, ok := m.(Illuminance)
+	if !ok {
+		return Illuminance{}, errIlluminanceConversion
+	}
+
+	return value, nil
+}
+
+// StringToIlluminance parses an illuminance from a string such as "500 lx". It fails with
+// ErrInvalidFormat unless the string has the form "<value> <symbol>" with a
+// finite value, and with ErrUnknownUnit if the symbol isn't an illuminance unit.
+func StringToIlluminance(s string) (Illuminance, error) {
+	value, symbol, err := parseValueAndUnit(s)
+	if err != nil {
+		return Illuminance{}, err
+	}
+
+	unit, ok := illuminance.ParseUnit(symbol)
+	if !ok {
+		return Illuminance{}, unknownUnitError(MeasureIlluminance, symbol)
+	}
+
+	return Illuminance{value: value, unit: unit}, nil
+}
+
+// AppendText implements encoding.TextAppender: it appends the String form,
+// such as "500 lx". It fails with ErrOutOfRange if the value isn't finite, and
+// with ErrUnknownUnit if the unit isn't valid, so that the text always parses
+// back.
+func (e Illuminance) AppendText(b []byte) ([]byte, error) {
+	if !e.unit.Valid() {
+		return b, unknownUnitError(MeasureIlluminance, e.unit.String())
+	}
+
+	return appendText(b, e.value, e.unit.String())
+}
+
+// MarshalText implements encoding.TextMarshaler, so illuminance values encode in
+// JSON as strings such as "500 lx". It fails like AppendText.
+func (e Illuminance) MarshalText() ([]byte, error) {
+	return e.AppendText(nil)
+}
+
+// UnmarshalText implements encoding.TextUnmarshaler: it parses text as
+// StringToIlluminance does and stores the result in e. Unmarshalling needs a
+// pointer receiver; it changes only the value it is called on.
+func (e *Illuminance) UnmarshalText(text []byte) error {
+	value, err := StringToIlluminance(string(text))
+	if err != nil {
+		return err
+	}
+
+	*e = value
+
+	return nil
+}
+
+// NewLuminousFlux returns a luminous flux of value in unit, such as
+// NewLuminousFlux(10, luminousflux.BaseUnit).
+func NewLuminousFlux(value float64, unit luminousflux.Unit) LuminousFlux {
+	return LuminousFlux{value: value, unit: unit}
+}
+
+// Value returns the numeric value, expressed in Unit.
+func (f LuminousFlux) Value() float64 {
+	return f.value
+}
+
+// Unit returns the unit of the value.
+func (f LuminousFlux) Unit() luminousflux.Unit {
+	return f.unit
+}
+
+// Symbol returns the symbol of the unit, as Unit().String() does.
+func (f LuminousFlux) Symbol() string {
+	return f.unit.String()
+}
+
+// Type returns MeasureLuminousFlux.
+func (LuminousFlux) Type() MeasureType {
+	return MeasureLuminousFlux
+}
+
+// String formats the luminous flux as "<value> <symbol>", such as "800 lm", the form
+// StringToLuminousFlux and ParseString accept. The value is formatted like fmt's %v,
+// in the shortest form that parses back to the same float64.
+func (f LuminousFlux) String() string {
+	return formatString(f.value, f.unit.String())
+}
+
+// Format implements fmt.Formatter: %.2f formats the value and appends the
+// symbol. See the package documentation for every verb.
+func (f LuminousFlux) Format(state fmt.State, verb rune) {
+	formatMeasurement(state, verb, "LuminousFlux", f.value, f.unit.String())
+}
+
+// ConvertTo returns the luminous flux expressed in unit.
+func (f LuminousFlux) ConvertTo(unit luminousflux.Unit) LuminousFlux {
+	return LuminousFlux{value: f.value * luminousflux.Rate(f.unit, unit), unit: unit}
+}
+
+// MustConvertTo is ConvertTo.
+//
+// Deprecated: Use ConvertTo, which no longer fails.
+//
+//go:fix inline
+func (f LuminousFlux) MustConvertTo(unit luminousflux.Unit) LuminousFlux {
+	return f.ConvertTo(unit)
+}
+
+// ConvertToBaseUnits returns the luminous flux expressed in lumens.
+func (f LuminousFlux) ConvertToBaseUnits() LuminousFlux {
+	return LuminousFlux{value: f.baseValue(), unit: luminousflux.BaseUnit}
+}
+
+// baseValue returns the value in lumens.
+func (f LuminousFlux) baseValue() float64 {
+	return f.value * f.unit.Factor()
+}
+
+// Add returns the sum of the luminous fluxes, expressed in the receiver's unit.
+func (f LuminousFlux) Add(other LuminousFlux) LuminousFlux {
+	return LuminousFlux{value: f.value + other.value*luminousflux.Rate(other.unit, f.unit), unit: f.unit}
+}
+
+// Sub returns the difference of the luminous fluxes, expressed in the receiver's unit.
+func (f LuminousFlux) Sub(other LuminousFlux) LuminousFlux {
+	return LuminousFlux{value: f.value - other.value*luminousflux.Rate(other.unit, f.unit), unit: f.unit}
+}
+
+// Mul returns the luminous flux multiplied by multiplier.
+func (f LuminousFlux) Mul(multiplier float64) LuminousFlux {
+	return LuminousFlux{value: f.value * multiplier, unit: f.unit}
+}
+
+// Div returns the luminous flux divided by divisor. It fails with ErrZeroDivision if
+// divisor is zero.
+func (f LuminousFlux) Div(divisor float64) (LuminousFlux, error) {
+	if divisor == 0 {
+		return LuminousFlux{}, ErrZeroDivision
+	}
+
+	return LuminousFlux{value: f.value / divisor, unit: f.unit}, nil
+}
+
+// Compare compares the luminous fluxes; see Comparer.
+func (f LuminousFlux) Compare(other LuminousFlux) int {
+	return cmp.Compare(f.common(other))
+}
+
+// Equal reports whether the luminous fluxes are equal; see Comparer.
+func (f LuminousFlux) Equal(other LuminousFlux) bool {
+	return f.Compare(other) == 0
+}
+
+// EqualWithinRel reports whether the luminous fluxes are equal within the relative
+// tolerance tol; see Comparer.
+func (f LuminousFlux) EqualWithinRel(other LuminousFlux, tol float64) bool {
+	x, y := f.common(other)
+
+	return equalWithinRel(x, y, tol)
+}
+
+// Ratio returns f/other, the ratio of the luminous fluxes, in ratio.BaseUnit:
+// convert it with ConvertTo(ratio.Percent) for a percentage. It fails with
+// ErrZeroDivision if other is zero.
+func (f LuminousFlux) Ratio(other LuminousFlux) (Ratio, error) {
+	x, y := f.common(other)
+	if y == 0 {
+		return Ratio{}, ErrZeroDivision
+	}
+
+	return Ratio{value: x / y, unit: ratio.BaseUnit}, nil
+}
+
+// common returns the values of the luminous fluxes in a common unit: their own if
+// they share it, otherwise the base unit. Either way the result doesn't depend
+// on the order of the operands, so comparisons are symmetric.
+func (f LuminousFlux) common(other LuminousFlux) (float64, float64) {
+	if f.unit == other.unit {
+		return f.value, other.value
+	}
+
+	return f.baseValue(), other.baseValue()
+}
+
+// ConvertToMeasurement is ConvertTo for generic code: it takes a unit symbol.
+// It fails with ErrUnknownUnit if symbol isn't a luminous flux unit.
+func (f LuminousFlux) ConvertToMeasurement(symbol string) (Measurement, error) {
+	unit, ok := luminousflux.ParseUnit(symbol)
+	if !ok {
+		return nil, unknownUnitError(MeasureLuminousFlux, symbol)
+	}
+
+	return f.ConvertTo(unit), nil
+}
+
+// AddMeasurement is Add for generic code. It fails with
+// ErrIncompatibleMeasures if other isn't a luminous flux.
+func (f LuminousFlux) AddMeasurement(other Measurement) (Measurement, error) {
+	value, err := luminousfluxSet.valueIn(other, uint16(f.unit))
+	if err != nil {
+		return nil, err
+	}
+
+	return LuminousFlux{value: f.value + value, unit: f.unit}, nil
+}
+
+// SubMeasurement is Sub for generic code. It fails with
+// ErrIncompatibleMeasures if other isn't a luminous flux.
+func (f LuminousFlux) SubMeasurement(other Measurement) (Measurement, error) {
+	value, err := luminousfluxSet.valueIn(other, uint16(f.unit))
+	if err != nil {
+		return nil, err
+	}
+
+	return LuminousFlux{value: f.value - value, unit: f.unit}, nil
+}
+
+// MulMeasurement is Mul for generic code.
+func (f LuminousFlux) MulMeasurement(multiplier float64) Measurement {
+	return f.Mul(multiplier)
+}
+
+// DivMeasurement is Div for generic code.
+func (f LuminousFlux) DivMeasurement(divisor float64) (Measurement, error) {
+	if divisor == 0 {
+		return nil, ErrZeroDivision
+	}
+
+	return LuminousFlux{value: f.value / divisor, unit: f.unit}, nil
+}
+
+// CompareMeasurement is Compare for generic code. It fails with
+// ErrIncompatibleMeasures if other isn't a luminous flux.
+func (f LuminousFlux) CompareMeasurement(other Measurement) (int, error) {
+	return luminousfluxSet.compare(f.value, uint16(f.unit), other)
+}
+
+func (f LuminousFlux) generic() genericValue {
+	return genericValue{value: f.value, unit: uint16(f.unit), set: luminousfluxSet}
+}
+
+const errLuminousFluxConversion incompatibleError = "not a luminous flux measure"
+
+// ToLuminousFlux returns m as a LuminousFlux, for example a result of ParseString. It fails
+// with ErrIncompatibleMeasures if m isn't a luminous flux.
+func ToLuminousFlux(m Measurement) (LuminousFlux, error) {
+	value, ok := m.(LuminousFlux)
+	if !ok {
+		return LuminousFlux{}, errLuminousFluxConversion
+	}
+
+	return value, nil
+}
+
+// StringToLuminousFlux parses a luminous flux from a string such as "800 lm". It fails with
+// ErrInvalidFormat unless the string has the form "<value> <symbol>" with a
+// finite value, and with ErrUnknownUnit if the symbol isn't a luminous flux unit.
+func StringToLuminousFlux(s string) (LuminousFlux, error) {
+	value, symbol, err := parseValueAndUnit(s)
+	if err != nil {
+		return LuminousFlux{}, err
+	}
+
+	unit, ok := luminousflux.ParseUnit(symbol)
+	if !ok {
+		return LuminousFlux{}, unknownUnitError(MeasureLuminousFlux, symbol)
+	}
+
+	return LuminousFlux{value: value, unit: unit}, nil
+}
+
+// AppendText implements encoding.TextAppender: it appends the String form,
+// such as "800 lm". It fails with ErrOutOfRange if the value isn't finite, and
+// with ErrUnknownUnit if the unit isn't valid, so that the text always parses
+// back.
+func (f LuminousFlux) AppendText(b []byte) ([]byte, error) {
+	if !f.unit.Valid() {
+		return b, unknownUnitError(MeasureLuminousFlux, f.unit.String())
+	}
+
+	return appendText(b, f.value, f.unit.String())
+}
+
+// MarshalText implements encoding.TextMarshaler, so luminous flux values encode in
+// JSON as strings such as "800 lm". It fails like AppendText.
+func (f LuminousFlux) MarshalText() ([]byte, error) {
+	return f.AppendText(nil)
+}
+
+// UnmarshalText implements encoding.TextUnmarshaler: it parses text as
+// StringToLuminousFlux does and stores the result in f. Unmarshalling needs a
+// pointer receiver; it changes only the value it is called on.
+func (f *LuminousFlux) UnmarshalText(text []byte) error {
+	value, err := StringToLuminousFlux(string(text))
+	if err != nil {
+		return err
+	}
+
+	*f = value
+
+	return nil
+}
+
+// NewSpecificEnergy returns a specific energy of value in unit, such as
+// NewSpecificEnergy(10, specificenergy.BaseUnit).
+func NewSpecificEnergy(value float64, unit specificenergy.Unit) SpecificEnergy {
+	return SpecificEnergy{value: value, unit: unit}
+}
+
+// Value returns the numeric value, expressed in Unit.
+func (e SpecificEnergy) Value() float64 {
+	return e.value
+}
+
+// Unit returns the unit of the value.
+func (e SpecificEnergy) Unit() specificenergy.Unit {
+	return e.unit
+}
+
+// Symbol returns the symbol of the unit, as Unit().String() does.
+func (e SpecificEnergy) Symbol() string {
+	return e.unit.String()
+}
+
+// Type returns MeasureSpecificEnergy.
+func (SpecificEnergy) Type() MeasureType {
+	return MeasureSpecificEnergy
+}
+
+// String formats the specific energy as "<value> <symbol>", such as "250 Wh/kg", the form
+// StringToSpecificEnergy and ParseString accept. The value is formatted like fmt's %v,
+// in the shortest form that parses back to the same float64.
+func (e SpecificEnergy) String() string {
+	return formatString(e.value, e.unit.String())
+}
+
+// Format implements fmt.Formatter: %.2f formats the value and appends the
+// symbol. See the package documentation for every verb.
+func (e SpecificEnergy) Format(state fmt.State, verb rune) {
+	formatMeasurement(state, verb, "SpecificEnergy", e.value, e.unit.String())
+}
+
+// ConvertTo returns the specific energy expressed in unit.
+func (e SpecificEnergy) ConvertTo(unit specificenergy.Unit) SpecificEnergy {
+	return SpecificEnergy{value: e.value * specificenergy.Rate(e.unit, unit), unit: unit}
+}
+
+// MustConvertTo is ConvertTo.
+//
+// Deprecated: Use ConvertTo, which no longer fails.
+//
+//go:fix inline
+func (e SpecificEnergy) MustConvertTo(unit specificenergy.Unit) SpecificEnergy {
+	return e.ConvertTo(unit)
+}
+
+// ConvertToBaseUnits returns the specific energy expressed in joules per kilogram.
+func (e SpecificEnergy) ConvertToBaseUnits() SpecificEnergy {
+	return SpecificEnergy{value: e.baseValue(), unit: specificenergy.BaseUnit}
+}
+
+// baseValue returns the value in joules per kilogram.
+func (e SpecificEnergy) baseValue() float64 {
+	return e.value * e.unit.Factor()
+}
+
+// Add returns the sum of the specific energies, expressed in the receiver's unit.
+func (e SpecificEnergy) Add(other SpecificEnergy) SpecificEnergy {
+	return SpecificEnergy{value: e.value + other.value*specificenergy.Rate(other.unit, e.unit), unit: e.unit}
+}
+
+// Sub returns the difference of the specific energies, expressed in the receiver's unit.
+func (e SpecificEnergy) Sub(other SpecificEnergy) SpecificEnergy {
+	return SpecificEnergy{value: e.value - other.value*specificenergy.Rate(other.unit, e.unit), unit: e.unit}
+}
+
+// Mul returns the specific energy multiplied by multiplier.
+func (e SpecificEnergy) Mul(multiplier float64) SpecificEnergy {
+	return SpecificEnergy{value: e.value * multiplier, unit: e.unit}
+}
+
+// Div returns the specific energy divided by divisor. It fails with ErrZeroDivision if
+// divisor is zero.
+func (e SpecificEnergy) Div(divisor float64) (SpecificEnergy, error) {
+	if divisor == 0 {
+		return SpecificEnergy{}, ErrZeroDivision
+	}
+
+	return SpecificEnergy{value: e.value / divisor, unit: e.unit}, nil
+}
+
+// Compare compares the specific energies; see Comparer.
+func (e SpecificEnergy) Compare(other SpecificEnergy) int {
+	return cmp.Compare(e.common(other))
+}
+
+// Equal reports whether the specific energies are equal; see Comparer.
+func (e SpecificEnergy) Equal(other SpecificEnergy) bool {
+	return e.Compare(other) == 0
+}
+
+// EqualWithinRel reports whether the specific energies are equal within the relative
+// tolerance tol; see Comparer.
+func (e SpecificEnergy) EqualWithinRel(other SpecificEnergy, tol float64) bool {
+	x, y := e.common(other)
+
+	return equalWithinRel(x, y, tol)
+}
+
+// Ratio returns e/other, the ratio of the specific energies, in ratio.BaseUnit:
+// convert it with ConvertTo(ratio.Percent) for a percentage. It fails with
+// ErrZeroDivision if other is zero.
+func (e SpecificEnergy) Ratio(other SpecificEnergy) (Ratio, error) {
+	x, y := e.common(other)
+	if y == 0 {
+		return Ratio{}, ErrZeroDivision
+	}
+
+	return Ratio{value: x / y, unit: ratio.BaseUnit}, nil
+}
+
+// common returns the values of the specific energies in a common unit: their own if
+// they share it, otherwise the base unit. Either way the result doesn't depend
+// on the order of the operands, so comparisons are symmetric.
+func (e SpecificEnergy) common(other SpecificEnergy) (float64, float64) {
+	if e.unit == other.unit {
+		return e.value, other.value
+	}
+
+	return e.baseValue(), other.baseValue()
+}
+
+// ConvertToMeasurement is ConvertTo for generic code: it takes a unit symbol.
+// It fails with ErrUnknownUnit if symbol isn't a specific energy unit.
+func (e SpecificEnergy) ConvertToMeasurement(symbol string) (Measurement, error) {
+	unit, ok := specificenergy.ParseUnit(symbol)
+	if !ok {
+		return nil, unknownUnitError(MeasureSpecificEnergy, symbol)
+	}
+
+	return e.ConvertTo(unit), nil
+}
+
+// AddMeasurement is Add for generic code. It fails with
+// ErrIncompatibleMeasures if other isn't a specific energy.
+func (e SpecificEnergy) AddMeasurement(other Measurement) (Measurement, error) {
+	value, err := specificenergySet.valueIn(other, uint16(e.unit))
+	if err != nil {
+		return nil, err
+	}
+
+	return SpecificEnergy{value: e.value + value, unit: e.unit}, nil
+}
+
+// SubMeasurement is Sub for generic code. It fails with
+// ErrIncompatibleMeasures if other isn't a specific energy.
+func (e SpecificEnergy) SubMeasurement(other Measurement) (Measurement, error) {
+	value, err := specificenergySet.valueIn(other, uint16(e.unit))
+	if err != nil {
+		return nil, err
+	}
+
+	return SpecificEnergy{value: e.value - value, unit: e.unit}, nil
+}
+
+// MulMeasurement is Mul for generic code.
+func (e SpecificEnergy) MulMeasurement(multiplier float64) Measurement {
+	return e.Mul(multiplier)
+}
+
+// DivMeasurement is Div for generic code.
+func (e SpecificEnergy) DivMeasurement(divisor float64) (Measurement, error) {
+	if divisor == 0 {
+		return nil, ErrZeroDivision
+	}
+
+	return SpecificEnergy{value: e.value / divisor, unit: e.unit}, nil
+}
+
+// CompareMeasurement is Compare for generic code. It fails with
+// ErrIncompatibleMeasures if other isn't a specific energy.
+func (e SpecificEnergy) CompareMeasurement(other Measurement) (int, error) {
+	return specificenergySet.compare(e.value, uint16(e.unit), other)
+}
+
+func (e SpecificEnergy) generic() genericValue {
+	return genericValue{value: e.value, unit: uint16(e.unit), set: specificenergySet}
+}
+
+const errSpecificEnergyConversion incompatibleError = "not a specific energy measure"
+
+// ToSpecificEnergy returns m as a SpecificEnergy, for example a result of ParseString. It fails
+// with ErrIncompatibleMeasures if m isn't a specific energy.
+func ToSpecificEnergy(m Measurement) (SpecificEnergy, error) {
+	value, ok := m.(SpecificEnergy)
+	if !ok {
+		return SpecificEnergy{}, errSpecificEnergyConversion
+	}
+
+	return value, nil
+}
+
+// StringToSpecificEnergy parses a specific energy from a string such as "250 Wh/kg". It fails with
+// ErrInvalidFormat unless the string has the form "<value> <symbol>" with a
+// finite value, and with ErrUnknownUnit if the symbol isn't a specific energy unit.
+func StringToSpecificEnergy(s string) (SpecificEnergy, error) {
+	value, symbol, err := parseValueAndUnit(s)
+	if err != nil {
+		return SpecificEnergy{}, err
+	}
+
+	unit, ok := specificenergy.ParseUnit(symbol)
+	if !ok {
+		return SpecificEnergy{}, unknownUnitError(MeasureSpecificEnergy, symbol)
+	}
+
+	return SpecificEnergy{value: value, unit: unit}, nil
+}
+
+// AppendText implements encoding.TextAppender: it appends the String form,
+// such as "250 Wh/kg". It fails with ErrOutOfRange if the value isn't finite, and
+// with ErrUnknownUnit if the unit isn't valid, so that the text always parses
+// back.
+func (e SpecificEnergy) AppendText(b []byte) ([]byte, error) {
+	if !e.unit.Valid() {
+		return b, unknownUnitError(MeasureSpecificEnergy, e.unit.String())
+	}
+
+	return appendText(b, e.value, e.unit.String())
+}
+
+// MarshalText implements encoding.TextMarshaler, so specific energy values encode in
+// JSON as strings such as "250 Wh/kg". It fails like AppendText.
+func (e SpecificEnergy) MarshalText() ([]byte, error) {
+	return e.AppendText(nil)
+}
+
+// UnmarshalText implements encoding.TextUnmarshaler: it parses text as
+// StringToSpecificEnergy does and stores the result in e. Unmarshalling needs a
+// pointer receiver; it changes only the value it is called on.
+func (e *SpecificEnergy) UnmarshalText(text []byte) error {
+	value, err := StringToSpecificEnergy(string(text))
+	if err != nil {
+		return err
+	}
+
+	*e = value
+
+	return nil
+}
+
+// NewEnergyDensity returns an energy density of value in unit, such as
+// NewEnergyDensity(10, energydensity.BaseUnit).
+func NewEnergyDensity(value float64, unit energydensity.Unit) EnergyDensity {
+	return EnergyDensity{value: value, unit: unit}
+}
+
+// Value returns the numeric value, expressed in Unit.
+func (u EnergyDensity) Value() float64 {
+	return u.value
+}
+
+// Unit returns the unit of the value.
+func (u EnergyDensity) Unit() energydensity.Unit {
+	return u.unit
+}
+
+// Symbol returns the symbol of the unit, as Unit().String() does.
+func (u EnergyDensity) Symbol() string {
+	return u.unit.String()
+}
+
+// Type returns MeasureEnergyDensity.
+func (EnergyDensity) Type() MeasureType {
+	return MeasureEnergyDensity
+}
+
+// String formats the energy density as "<value> <symbol>", such as "700 Wh/L", the form
+// StringToEnergyDensity and ParseString accept. The value is formatted like fmt's %v,
+// in the shortest form that parses back to the same float64.
+func (u EnergyDensity) String() string {
+	return formatString(u.value, u.unit.String())
+}
+
+// Format implements fmt.Formatter: %.2f formats the value and appends the
+// symbol. See the package documentation for every verb.
+func (u EnergyDensity) Format(state fmt.State, verb rune) {
+	formatMeasurement(state, verb, "EnergyDensity", u.value, u.unit.String())
+}
+
+// ConvertTo returns the energy density expressed in unit.
+func (u EnergyDensity) ConvertTo(unit energydensity.Unit) EnergyDensity {
+	return EnergyDensity{value: u.value * energydensity.Rate(u.unit, unit), unit: unit}
+}
+
+// MustConvertTo is ConvertTo.
+//
+// Deprecated: Use ConvertTo, which no longer fails.
+//
+//go:fix inline
+func (u EnergyDensity) MustConvertTo(unit energydensity.Unit) EnergyDensity {
+	return u.ConvertTo(unit)
+}
+
+// ConvertToBaseUnits returns the energy density expressed in joules per cubic metre.
+func (u EnergyDensity) ConvertToBaseUnits() EnergyDensity {
+	return EnergyDensity{value: u.baseValue(), unit: energydensity.BaseUnit}
+}
+
+// baseValue returns the value in joules per cubic metre.
+func (u EnergyDensity) baseValue() float64 {
+	return u.value * u.unit.Factor()
+}
+
+// Add returns the sum of the energy densities, expressed in the receiver's unit.
+func (u EnergyDensity) Add(other EnergyDensity) EnergyDensity {
+	return EnergyDensity{value: u.value + other.value*energydensity.Rate(other.unit, u.unit), unit: u.unit}
+}
+
+// Sub returns the difference of the energy densities, expressed in the receiver's unit.
+func (u EnergyDensity) Sub(other EnergyDensity) EnergyDensity {
+	return EnergyDensity{value: u.value - other.value*energydensity.Rate(other.unit, u.unit), unit: u.unit}
+}
+
+// Mul returns the energy density multiplied by multiplier.
+func (u EnergyDensity) Mul(multiplier float64) EnergyDensity {
+	return EnergyDensity{value: u.value * multiplier, unit: u.unit}
+}
+
+// Div returns the energy density divided by divisor. It fails with ErrZeroDivision if
+// divisor is zero.
+func (u EnergyDensity) Div(divisor float64) (EnergyDensity, error) {
+	if divisor == 0 {
+		return EnergyDensity{}, ErrZeroDivision
+	}
+
+	return EnergyDensity{value: u.value / divisor, unit: u.unit}, nil
+}
+
+// Compare compares the energy densities; see Comparer.
+func (u EnergyDensity) Compare(other EnergyDensity) int {
+	return cmp.Compare(u.common(other))
+}
+
+// Equal reports whether the energy densities are equal; see Comparer.
+func (u EnergyDensity) Equal(other EnergyDensity) bool {
+	return u.Compare(other) == 0
+}
+
+// EqualWithinRel reports whether the energy densities are equal within the relative
+// tolerance tol; see Comparer.
+func (u EnergyDensity) EqualWithinRel(other EnergyDensity, tol float64) bool {
+	x, y := u.common(other)
+
+	return equalWithinRel(x, y, tol)
+}
+
+// Ratio returns u/other, the ratio of the energy densities, in ratio.BaseUnit:
+// convert it with ConvertTo(ratio.Percent) for a percentage. It fails with
+// ErrZeroDivision if other is zero.
+func (u EnergyDensity) Ratio(other EnergyDensity) (Ratio, error) {
+	x, y := u.common(other)
+	if y == 0 {
+		return Ratio{}, ErrZeroDivision
+	}
+
+	return Ratio{value: x / y, unit: ratio.BaseUnit}, nil
+}
+
+// common returns the values of the energy densities in a common unit: their own if
+// they share it, otherwise the base unit. Either way the result doesn't depend
+// on the order of the operands, so comparisons are symmetric.
+func (u EnergyDensity) common(other EnergyDensity) (float64, float64) {
+	if u.unit == other.unit {
+		return u.value, other.value
+	}
+
+	return u.baseValue(), other.baseValue()
+}
+
+// ConvertToMeasurement is ConvertTo for generic code: it takes a unit symbol.
+// It fails with ErrUnknownUnit if symbol isn't an energy density unit.
+func (u EnergyDensity) ConvertToMeasurement(symbol string) (Measurement, error) {
+	unit, ok := energydensity.ParseUnit(symbol)
+	if !ok {
+		return nil, unknownUnitError(MeasureEnergyDensity, symbol)
+	}
+
+	return u.ConvertTo(unit), nil
+}
+
+// AddMeasurement is Add for generic code. It fails with
+// ErrIncompatibleMeasures if other isn't an energy density.
+func (u EnergyDensity) AddMeasurement(other Measurement) (Measurement, error) {
+	value, err := energydensitySet.valueIn(other, uint16(u.unit))
+	if err != nil {
+		return nil, err
+	}
+
+	return EnergyDensity{value: u.value + value, unit: u.unit}, nil
+}
+
+// SubMeasurement is Sub for generic code. It fails with
+// ErrIncompatibleMeasures if other isn't an energy density.
+func (u EnergyDensity) SubMeasurement(other Measurement) (Measurement, error) {
+	value, err := energydensitySet.valueIn(other, uint16(u.unit))
+	if err != nil {
+		return nil, err
+	}
+
+	return EnergyDensity{value: u.value - value, unit: u.unit}, nil
+}
+
+// MulMeasurement is Mul for generic code.
+func (u EnergyDensity) MulMeasurement(multiplier float64) Measurement {
+	return u.Mul(multiplier)
+}
+
+// DivMeasurement is Div for generic code.
+func (u EnergyDensity) DivMeasurement(divisor float64) (Measurement, error) {
+	if divisor == 0 {
+		return nil, ErrZeroDivision
+	}
+
+	return EnergyDensity{value: u.value / divisor, unit: u.unit}, nil
+}
+
+// CompareMeasurement is Compare for generic code. It fails with
+// ErrIncompatibleMeasures if other isn't an energy density.
+func (u EnergyDensity) CompareMeasurement(other Measurement) (int, error) {
+	return energydensitySet.compare(u.value, uint16(u.unit), other)
+}
+
+func (u EnergyDensity) generic() genericValue {
+	return genericValue{value: u.value, unit: uint16(u.unit), set: energydensitySet}
+}
+
+const errEnergyDensityConversion incompatibleError = "not an energy density measure"
+
+// ToEnergyDensity returns m as a EnergyDensity, for example a result of ParseString. It fails
+// with ErrIncompatibleMeasures if m isn't an energy density.
+func ToEnergyDensity(m Measurement) (EnergyDensity, error) {
+	value, ok := m.(EnergyDensity)
+	if !ok {
+		return EnergyDensity{}, errEnergyDensityConversion
+	}
+
+	return value, nil
+}
+
+// StringToEnergyDensity parses an energy density from a string such as "700 Wh/L". It fails with
+// ErrInvalidFormat unless the string has the form "<value> <symbol>" with a
+// finite value, and with ErrUnknownUnit if the symbol isn't an energy density unit.
+func StringToEnergyDensity(s string) (EnergyDensity, error) {
+	value, symbol, err := parseValueAndUnit(s)
+	if err != nil {
+		return EnergyDensity{}, err
+	}
+
+	unit, ok := energydensity.ParseUnit(symbol)
+	if !ok {
+		return EnergyDensity{}, unknownUnitError(MeasureEnergyDensity, symbol)
+	}
+
+	return EnergyDensity{value: value, unit: unit}, nil
+}
+
+// AppendText implements encoding.TextAppender: it appends the String form,
+// such as "700 Wh/L". It fails with ErrOutOfRange if the value isn't finite, and
+// with ErrUnknownUnit if the unit isn't valid, so that the text always parses
+// back.
+func (u EnergyDensity) AppendText(b []byte) ([]byte, error) {
+	if !u.unit.Valid() {
+		return b, unknownUnitError(MeasureEnergyDensity, u.unit.String())
+	}
+
+	return appendText(b, u.value, u.unit.String())
+}
+
+// MarshalText implements encoding.TextMarshaler, so energy density values encode in
+// JSON as strings such as "700 Wh/L". It fails like AppendText.
+func (u EnergyDensity) MarshalText() ([]byte, error) {
+	return u.AppendText(nil)
+}
+
+// UnmarshalText implements encoding.TextUnmarshaler: it parses text as
+// StringToEnergyDensity does and stores the result in u. Unmarshalling needs a
+// pointer receiver; it changes only the value it is called on.
+func (u *EnergyDensity) UnmarshalText(text []byte) error {
+	value, err := StringToEnergyDensity(string(text))
+	if err != nil {
+		return err
+	}
+
+	*u = value
+
+	return nil
+}
+
+// NewRatio returns a ratio of value in unit, such as
+// NewRatio(10, ratio.BaseUnit).
+func NewRatio(value float64, unit ratio.Unit) Ratio {
+	return Ratio{value: value, unit: unit}
+}
+
+// Value returns the numeric value, expressed in Unit.
+func (r Ratio) Value() float64 {
+	return r.value
+}
+
+// Unit returns the unit of the value.
+func (r Ratio) Unit() ratio.Unit {
+	return r.unit
+}
+
+// Symbol returns the symbol of the unit, as Unit().String() does.
+func (r Ratio) Symbol() string {
+	return r.unit.String()
+}
+
+// Type returns MeasureRatio.
+func (Ratio) Type() MeasureType {
+	return MeasureRatio
+}
+
+// String formats the ratio as "<value> <symbol>", such as "12.5 %", the form
+// StringToRatio and ParseString accept. The value is formatted like fmt's %v,
+// in the shortest form that parses back to the same float64.
+func (r Ratio) String() string {
+	return formatString(r.value, r.unit.String())
+}
+
+// Format implements fmt.Formatter: %.2f formats the value and appends the
+// symbol. See the package documentation for every verb.
+func (r Ratio) Format(state fmt.State, verb rune) {
+	formatMeasurement(state, verb, "Ratio", r.value, r.unit.String())
+}
+
+// ConvertTo returns the ratio expressed in unit.
+func (r Ratio) ConvertTo(unit ratio.Unit) Ratio {
+	return Ratio{value: r.value * ratio.Rate(r.unit, unit), unit: unit}
+}
+
+// MustConvertTo is ConvertTo.
+//
+// Deprecated: Use ConvertTo, which no longer fails.
+//
+//go:fix inline
+func (r Ratio) MustConvertTo(unit ratio.Unit) Ratio {
+	return r.ConvertTo(unit)
+}
+
+// ConvertToBaseUnits returns the ratio expressed in the unit 1, as a plain fraction.
+func (r Ratio) ConvertToBaseUnits() Ratio {
+	return Ratio{value: r.baseValue(), unit: ratio.BaseUnit}
+}
+
+// baseValue returns the value in the unit 1, as a plain fraction.
+func (r Ratio) baseValue() float64 {
+	return r.value * r.unit.Factor()
+}
+
+// Add returns the sum of the ratios, expressed in the receiver's unit.
+func (r Ratio) Add(other Ratio) Ratio {
+	return Ratio{value: r.value + other.value*ratio.Rate(other.unit, r.unit), unit: r.unit}
+}
+
+// Sub returns the difference of the ratios, expressed in the receiver's unit.
+func (r Ratio) Sub(other Ratio) Ratio {
+	return Ratio{value: r.value - other.value*ratio.Rate(other.unit, r.unit), unit: r.unit}
+}
+
+// Mul returns the ratio multiplied by multiplier.
+func (r Ratio) Mul(multiplier float64) Ratio {
+	return Ratio{value: r.value * multiplier, unit: r.unit}
+}
+
+// Div returns the ratio divided by divisor. It fails with ErrZeroDivision if
+// divisor is zero.
+func (r Ratio) Div(divisor float64) (Ratio, error) {
+	if divisor == 0 {
+		return Ratio{}, ErrZeroDivision
+	}
+
+	return Ratio{value: r.value / divisor, unit: r.unit}, nil
+}
+
+// Compare compares the ratios; see Comparer.
+func (r Ratio) Compare(other Ratio) int {
+	return cmp.Compare(r.common(other))
+}
+
+// Equal reports whether the ratios are equal; see Comparer.
+func (r Ratio) Equal(other Ratio) bool {
+	return r.Compare(other) == 0
+}
+
+// EqualWithinRel reports whether the ratios are equal within the relative
+// tolerance tol; see Comparer.
+func (r Ratio) EqualWithinRel(other Ratio, tol float64) bool {
+	x, y := r.common(other)
+
+	return equalWithinRel(x, y, tol)
+}
+
+// Ratio returns r/other, the ratio of the ratios, in ratio.BaseUnit:
+// convert it with ConvertTo(ratio.Percent) for a percentage. It fails with
+// ErrZeroDivision if other is zero.
+func (r Ratio) Ratio(other Ratio) (Ratio, error) {
+	x, y := r.common(other)
+	if y == 0 {
+		return Ratio{}, ErrZeroDivision
+	}
+
+	return Ratio{value: x / y, unit: ratio.BaseUnit}, nil
+}
+
+// common returns the values of the ratios in a common unit: their own if
+// they share it, otherwise the base unit. Either way the result doesn't depend
+// on the order of the operands, so comparisons are symmetric.
+func (r Ratio) common(other Ratio) (float64, float64) {
+	if r.unit == other.unit {
+		return r.value, other.value
+	}
+
+	return r.baseValue(), other.baseValue()
+}
+
+// ConvertToMeasurement is ConvertTo for generic code: it takes a unit symbol.
+// It fails with ErrUnknownUnit if symbol isn't a ratio unit.
+func (r Ratio) ConvertToMeasurement(symbol string) (Measurement, error) {
+	unit, ok := ratio.ParseUnit(symbol)
+	if !ok {
+		return nil, unknownUnitError(MeasureRatio, symbol)
+	}
+
+	return r.ConvertTo(unit), nil
+}
+
+// AddMeasurement is Add for generic code. It fails with
+// ErrIncompatibleMeasures if other isn't a ratio.
+func (r Ratio) AddMeasurement(other Measurement) (Measurement, error) {
+	value, err := ratioSet.valueIn(other, uint16(r.unit))
+	if err != nil {
+		return nil, err
+	}
+
+	return Ratio{value: r.value + value, unit: r.unit}, nil
+}
+
+// SubMeasurement is Sub for generic code. It fails with
+// ErrIncompatibleMeasures if other isn't a ratio.
+func (r Ratio) SubMeasurement(other Measurement) (Measurement, error) {
+	value, err := ratioSet.valueIn(other, uint16(r.unit))
+	if err != nil {
+		return nil, err
+	}
+
+	return Ratio{value: r.value - value, unit: r.unit}, nil
+}
+
+// MulMeasurement is Mul for generic code.
+func (r Ratio) MulMeasurement(multiplier float64) Measurement {
+	return r.Mul(multiplier)
+}
+
+// DivMeasurement is Div for generic code.
+func (r Ratio) DivMeasurement(divisor float64) (Measurement, error) {
+	if divisor == 0 {
+		return nil, ErrZeroDivision
+	}
+
+	return Ratio{value: r.value / divisor, unit: r.unit}, nil
+}
+
+// CompareMeasurement is Compare for generic code. It fails with
+// ErrIncompatibleMeasures if other isn't a ratio.
+func (r Ratio) CompareMeasurement(other Measurement) (int, error) {
+	return ratioSet.compare(r.value, uint16(r.unit), other)
+}
+
+func (r Ratio) generic() genericValue {
+	return genericValue{value: r.value, unit: uint16(r.unit), set: ratioSet}
+}
+
+const errRatioConversion incompatibleError = "not a ratio measure"
+
+// ToRatio returns m as a Ratio, for example a result of ParseString. It fails
+// with ErrIncompatibleMeasures if m isn't a ratio.
+func ToRatio(m Measurement) (Ratio, error) {
+	value, ok := m.(Ratio)
+	if !ok {
+		return Ratio{}, errRatioConversion
+	}
+
+	return value, nil
+}
+
+// StringToRatio parses a ratio from a string such as "12.5 %". It fails with
+// ErrInvalidFormat unless the string has the form "<value> <symbol>" with a
+// finite value, and with ErrUnknownUnit if the symbol isn't a ratio unit.
+func StringToRatio(s string) (Ratio, error) {
+	value, symbol, err := parseValueAndUnit(s)
+	if err != nil {
+		return Ratio{}, err
+	}
+
+	unit, ok := ratio.ParseUnit(symbol)
+	if !ok {
+		return Ratio{}, unknownUnitError(MeasureRatio, symbol)
+	}
+
+	return Ratio{value: value, unit: unit}, nil
+}
+
+// AppendText implements encoding.TextAppender: it appends the String form,
+// such as "12.5 %". It fails with ErrOutOfRange if the value isn't finite, and
+// with ErrUnknownUnit if the unit isn't valid, so that the text always parses
+// back.
+func (r Ratio) AppendText(b []byte) ([]byte, error) {
+	if !r.unit.Valid() {
+		return b, unknownUnitError(MeasureRatio, r.unit.String())
+	}
+
+	return appendText(b, r.value, r.unit.String())
+}
+
+// MarshalText implements encoding.TextMarshaler, so ratio values encode in
+// JSON as strings such as "12.5 %". It fails like AppendText.
+func (r Ratio) MarshalText() ([]byte, error) {
+	return r.AppendText(nil)
+}
+
+// UnmarshalText implements encoding.TextUnmarshaler: it parses text as
+// StringToRatio does and stores the result in r. Unmarshalling needs a
+// pointer receiver; it changes only the value it is called on.
+func (r *Ratio) UnmarshalText(text []byte) error {
+	value, err := StringToRatio(string(text))
+	if err != nil {
+		return err
+	}
+
+	*r = value
 
 	return nil
 }

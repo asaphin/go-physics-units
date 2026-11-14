@@ -6,10 +6,13 @@ import (
 	"testing"
 
 	units "github.com/asaphin/go-physics-units"
+	"github.com/asaphin/go-physics-units/absorbeddose"
 	"github.com/asaphin/go-physics-units/acceleration"
+	"github.com/asaphin/go-physics-units/amount"
 	"github.com/asaphin/go-physics-units/angle"
 	"github.com/asaphin/go-physics-units/angularvelocity"
 	"github.com/asaphin/go-physics-units/area"
+	"github.com/asaphin/go-physics-units/capacitance"
 	"github.com/asaphin/go-physics-units/charge"
 	"github.com/asaphin/go-physics-units/conversion"
 	"github.com/asaphin/go-physics-units/current"
@@ -17,14 +20,33 @@ import (
 	"github.com/asaphin/go-physics-units/datasize"
 	"github.com/asaphin/go-physics-units/density"
 	"github.com/asaphin/go-physics-units/distance"
+	"github.com/asaphin/go-physics-units/doserate"
 	"github.com/asaphin/go-physics-units/energy"
+	"github.com/asaphin/go-physics-units/energydensity"
+	"github.com/asaphin/go-physics-units/equivalentdose"
+	"github.com/asaphin/go-physics-units/flowrate"
 	"github.com/asaphin/go-physics-units/force"
 	"github.com/asaphin/go-physics-units/frequency"
+	"github.com/asaphin/go-physics-units/fuelconsumption"
+	"github.com/asaphin/go-physics-units/fueleconomy"
+	"github.com/asaphin/go-physics-units/illuminance"
+	"github.com/asaphin/go-physics-units/inductance"
+	"github.com/asaphin/go-physics-units/luminousflux"
+	"github.com/asaphin/go-physics-units/magneticfield"
 	"github.com/asaphin/go-physics-units/mass"
+	"github.com/asaphin/go-physics-units/massflowrate"
+	"github.com/asaphin/go-physics-units/molarity"
+	"github.com/asaphin/go-physics-units/molarmass"
+	"github.com/asaphin/go-physics-units/momentum"
+	"github.com/asaphin/go-physics-units/pace"
 	"github.com/asaphin/go-physics-units/power"
 	"github.com/asaphin/go-physics-units/pressure"
+	"github.com/asaphin/go-physics-units/radioactivity"
+	"github.com/asaphin/go-physics-units/ratio"
 	"github.com/asaphin/go-physics-units/resistance"
+	"github.com/asaphin/go-physics-units/specificenergy"
 	"github.com/asaphin/go-physics-units/time"
+	"github.com/asaphin/go-physics-units/torque"
 	"github.com/asaphin/go-physics-units/velocity"
 	"github.com/asaphin/go-physics-units/voltage"
 	"github.com/asaphin/go-physics-units/volume"
@@ -52,6 +74,28 @@ var predefinedFactors = map[units.MeasureType]conversion.Factors{
 	units.MeasureCharge:          charge.ConversionFactors(),
 	units.MeasureResistance:      resistance.ConversionFactors(),
 	units.MeasureAngularVelocity: angularvelocity.ConversionFactors(),
+	units.MeasureTorque:          torque.ConversionFactors(),
+	units.MeasureFlowRate:        flowrate.ConversionFactors(),
+	units.MeasureMassFlowRate:    massflowrate.ConversionFactors(),
+	units.MeasureMomentum:        momentum.ConversionFactors(),
+	units.MeasurePace:            pace.ConversionFactors(),
+	units.MeasureFuelEconomy:     fueleconomy.ConversionFactors(),
+	units.MeasureFuelConsumption: fuelconsumption.ConversionFactors(),
+	units.MeasureAmount:          amount.ConversionFactors(),
+	units.MeasureMolarMass:       molarmass.ConversionFactors(),
+	units.MeasureMolarity:        molarity.ConversionFactors(),
+	units.MeasureRadioactivity:   radioactivity.ConversionFactors(),
+	units.MeasureAbsorbedDose:    absorbeddose.ConversionFactors(),
+	units.MeasureEquivalentDose:  equivalentdose.ConversionFactors(),
+	units.MeasureDoseRate:        doserate.ConversionFactors(),
+	units.MeasureCapacitance:     capacitance.ConversionFactors(),
+	units.MeasureInductance:      inductance.ConversionFactors(),
+	units.MeasureMagneticField:   magneticfield.ConversionFactors(),
+	units.MeasureIlluminance:     illuminance.ConversionFactors(),
+	units.MeasureLuminousFlux:    luminousflux.ConversionFactors(),
+	units.MeasureSpecificEnergy:  specificenergy.ConversionFactors(),
+	units.MeasureEnergyDensity:   energydensity.ConversionFactors(),
+	units.MeasureRatio:           ratio.ConversionFactors(),
 }
 
 // TestConversion_AllUnitPairs converts between every ordered pair of units of
@@ -234,6 +278,126 @@ func TestConversion_ReferenceValues(t *testing.T) {
 		{angularvelocity.RevolutionPerSecond, angularvelocity.RevolutionPerMinute, 60},
 		{angularvelocity.RevolutionPerSecond, angularvelocity.DegreePerSecond, 360},
 		{angularvelocity.RevolutionPerMinute, angularvelocity.RadianPerSecond, 0.10471975511965977},
+		// Units added in v0.2.0, with values from their definitions.
+		{energy.TonOfTNT, energy.Gigajoule, 4.184},
+		{energy.KilotonOfTNT, energy.TonOfTNT, 1000},
+		{energy.MegatonOfTNT, energy.KilotonOfTNT, 1000},
+		{energy.GramOfTNT, energy.Kilocalorie, 1},
+		{energy.Megaelectronvolt, energy.Kiloelectronvolt, 1000},
+		{energy.Teraelectronvolt, energy.Electronvolt, 1e12},
+		{energy.Gigaelectronvolt, energy.Joule, 1.602176634e-10},
+		{energy.TonneOfOilEquivalent, energy.Gigajoule, 41.868},
+		{energy.TonneOfOilEquivalent, energy.MegawattHour, 11.63},
+		{energy.Joule, energy.Millijoule, 1000},
+		{area.Hectare, area.SquareMeter, 1e4},
+		{area.SquareKilometer, area.Hectare, 100},
+		{area.Acre, area.SquareFoot, 43560},
+		{area.Acre, area.SquareMeter, 4046.8564224},
+		{area.SquareMile, area.Acre, 640},
+		{area.SquareYard, area.SquareFoot, 9},
+		{mass.Stone, mass.Pound, 14},
+		{mass.Carat, mass.Milligram, 200},
+		{mass.Grain, mass.Milligram, 64.79891},
+		{mass.TroyOunce, mass.Gram, 31.1034768},
+		{mass.TroyOunce, mass.Grain, 480},
+		{mass.Dalton, mass.Kilogram, 1.66053906892e-27},
+		{velocity.KilometerPerSecond, velocity.KilometerPerHour, 3600},
+		{distance.Megaparsec, distance.Kiloparsec, 1000},
+		{distance.Gigaparsec, distance.Parsec, 1e9},
+		{distance.Kiloparsec, distance.LightYear, 3261.5637771674},
+		{distance.Mil, distance.Micrometer, 25.4},
+		{distance.Inch, distance.Mil, 1000},
+		{distance.Fathom, distance.Feet, 6},
+		{distance.Fathom, distance.Meter, 1.8288},
+		{frequency.BeatPerMinute, frequency.RevolutionPerMinute, 1},
+		{frequency.Hertz, frequency.BeatPerMinute, 60},
+		{pressure.MillimeterOfWater, pressure.Pascal, 9.80665},
+		{pressure.CentimeterOfWater, pressure.Pascal, 98.0665},
+		{pressure.InchOfWater, pressure.Pascal, 249.08891},
+		{pressure.KilopoundPerSquareInch, pressure.PoundPerSquareInch, 1000},
+		{pressure.KilopoundPerSquareInch, pressure.Megapascal, 6.894757293168361},
+		{force.Kip, force.PoundForce, 1000},
+		{force.Kip, force.Newton, 4448.2216152605},
+		{force.PoundForce, force.OunceForce, 16},
+		{force.TonneForce, force.Kilonewton, 9.80665},
+		{power.TonOfRefrigeration, power.BTUPerHour, 12000},
+		{power.TonOfRefrigeration, power.Watt, 3516.8528420666667},
+		{power.SolarLuminosity, power.Watt, 3.828e26},
+		{datasize.Exabyte, datasize.Petabyte, 1000},
+		{datasize.Exbibyte, datasize.Pebibyte, 1024},
+		{volume.Deciliter, volume.Milliliter, 100},
+		{volume.Centiliter, volume.Milliliter, 10},
+		{volume.Liter, volume.Deciliter, 10},
+		// Measures added in v0.2.0.
+		{torque.PoundForceFoot, torque.NewtonMeter, 1.3558179483314004},
+		{torque.KilogramForceMeter, torque.NewtonMeter, 9.80665},
+		{torque.NewtonMeter, torque.NewtonCentimeter, 100},
+		{torque.PoundForceInch, torque.OunceForceInch, 16},
+		{flowrate.GallonPerMinute, flowrate.LiterPerMinute, 3.785411784},
+		{flowrate.CubicFootPerMinute, flowrate.LiterPerSecond, 0.4719474432},
+		{flowrate.CubicFootPerSecond, flowrate.CubicFootPerMinute, 60},
+		{flowrate.CubicMeterPerHour, flowrate.LiterPerHour, 1000},
+		{flowrate.LiterPerHour, flowrate.MilliliterPerHour, 1000},
+		{massflowrate.TonnePerHour, massflowrate.KilogramPerHour, 1000},
+		{massflowrate.PoundPerHour, massflowrate.KilogramPerHour, 0.45359237},
+		{massflowrate.KilogramPerSecond, massflowrate.KilogramPerMinute, 60},
+		{momentum.NewtonSecond, momentum.KilogramMeterPerSecond, 1},
+		{momentum.PoundForceSecond, momentum.NewtonSecond, 4.4482216152605},
+		{momentum.KilogramMeterPerSecond, momentum.GramCentimeterPerSecond, 1e5},
+		{momentum.PoundFootPerSecond, momentum.KilogramMeterPerSecond, 0.138254954376},
+		{pace.MinutePerKilometer, pace.SecondPerKilometer, 60},
+		{pace.MinutePerMile, pace.MinutePerKilometer, 1 / 1.609344},
+		{pace.SecondPer100Meters, pace.SecondPerKilometer, 10},
+		{pace.SecondPer500Meters, pace.SecondPer100Meters, 0.2},
+		{fueleconomy.MilePerGallon, fueleconomy.KilometerPerLiter, 0.4251437074302721},
+		{fueleconomy.MilePerImperialGallon, fueleconomy.MilePerGallon, 3.785411784 / 4.54609},
+		{fuelconsumption.LiterPerKilometer, fuelconsumption.LiterPer100Kilometers, 100},
+		{fuelconsumption.GallonPer100Miles, fuelconsumption.LiterPer100Kilometers, 3.785411784 / 1.609344},
+		{amount.Mole, amount.Millimole, 1000},
+		{amount.Kilomole, amount.Mole, 1000},
+		{amount.Micromole, amount.Picomole, 1e6},
+		{molarmass.KilogramPerMole, molarmass.GramPerMole, 1000},
+		{molarity.Molar, molarity.MolePerLiter, 1},
+		{molarity.Millimolar, molarity.MillimolePerLiter, 1},
+		{molarity.MolePerLiter, molarity.MolePerCubicMeter, 1000},
+		{molarity.Micromolar, molarity.Nanomolar, 1000},
+		{molarity.Nanomolar, molarity.Picomolar, 1000},
+		{radioactivity.Curie, radioactivity.Becquerel, 3.7e10},
+		{radioactivity.Millicurie, radioactivity.Megabecquerel, 37},
+		{radioactivity.Nanocurie, radioactivity.Becquerel, 37},
+		{absorbeddose.Gray, absorbeddose.Rad, 100},
+		{absorbeddose.Centigray, absorbeddose.Rad, 1},
+		{absorbeddose.Gray, absorbeddose.Milligray, 1000},
+		{equivalentdose.Sievert, equivalentdose.Rem, 100},
+		{equivalentdose.Millisievert, equivalentdose.Millirem, 100},
+		{equivalentdose.Millisievert, equivalentdose.Microsievert, 1000},
+		{doserate.MillisievertPerHour, doserate.MicrosievertPerHour, 1000},
+		{doserate.MicrosievertPerHour, doserate.MillisievertPerYear, 8.766},
+		{doserate.SievertPerHour, doserate.MilliremPerHour, 1e5},
+		{capacitance.Farad, capacitance.Microfarad, 1e6},
+		{capacitance.Nanofarad, capacitance.Picofarad, 1000},
+		{inductance.Henry, inductance.Millihenry, 1000},
+		{inductance.Microhenry, inductance.Nanohenry, 1000},
+		{magneticfield.Tesla, magneticfield.Gauss, 1e4},
+		{magneticfield.Gauss, magneticfield.Milligauss, 1000},
+		{magneticfield.Microtesla, magneticfield.Milligauss, 10},
+		{illuminance.FootCandle, illuminance.Lux, 10.763910416709722},
+		{illuminance.Phot, illuminance.Lux, 1e4},
+		{illuminance.Kilolux, illuminance.Lux, 1000},
+		{luminousflux.Kilolumen, luminousflux.Lumen, 1000},
+		{specificenergy.KilowattHourPerKilogram, specificenergy.MegajoulePerKilogram, 3.6},
+		{specificenergy.BTUPerPound, specificenergy.KilojoulePerKilogram, 2.326},
+		{specificenergy.KilocaloriePerKilogram, specificenergy.KilojoulePerKilogram, 4.184},
+		{specificenergy.WattHourPerKilogram, specificenergy.JoulePerKilogram, 3600},
+		{energydensity.KilowattHourPerLiter, energydensity.WattHourPerLiter, 1000},
+		{energydensity.WattHourPerLiter, energydensity.KilowattHourPerCubicMeter, 1},
+		{energydensity.MegajoulePerLiter, energydensity.MegajoulePerCubicMeter, 1000},
+		{ratio.One, ratio.Percent, 100},
+		{ratio.Percent, ratio.PerMille, 10},
+		{ratio.PerMille, ratio.PartsPerMillion, 1000},
+		{ratio.BasisPoint, ratio.Percent, 0.01},
+		{ratio.PartsPerMillion, ratio.PartsPerBillion, 1000},
+		{ratio.PartsPerBillion, ratio.PartsPerTrillion, 1000},
 	}
 
 	for _, c := range cases {
@@ -361,6 +525,28 @@ func TestConversionFactors_ReturnsCopy(t *testing.T) {
 		units.MeasureCharge:          charge.ConversionFactors,
 		units.MeasureResistance:      resistance.ConversionFactors,
 		units.MeasureAngularVelocity: angularvelocity.ConversionFactors,
+		units.MeasureTorque:          torque.ConversionFactors,
+		units.MeasureFlowRate:        flowrate.ConversionFactors,
+		units.MeasureMassFlowRate:    massflowrate.ConversionFactors,
+		units.MeasureMomentum:        momentum.ConversionFactors,
+		units.MeasurePace:            pace.ConversionFactors,
+		units.MeasureFuelEconomy:     fueleconomy.ConversionFactors,
+		units.MeasureFuelConsumption: fuelconsumption.ConversionFactors,
+		units.MeasureAmount:          amount.ConversionFactors,
+		units.MeasureMolarMass:       molarmass.ConversionFactors,
+		units.MeasureMolarity:        molarity.ConversionFactors,
+		units.MeasureRadioactivity:   radioactivity.ConversionFactors,
+		units.MeasureAbsorbedDose:    absorbeddose.ConversionFactors,
+		units.MeasureEquivalentDose:  equivalentdose.ConversionFactors,
+		units.MeasureDoseRate:        doserate.ConversionFactors,
+		units.MeasureCapacitance:     capacitance.ConversionFactors,
+		units.MeasureInductance:      inductance.ConversionFactors,
+		units.MeasureMagneticField:   magneticfield.ConversionFactors,
+		units.MeasureIlluminance:     illuminance.ConversionFactors,
+		units.MeasureLuminousFlux:    luminousflux.ConversionFactors,
+		units.MeasureSpecificEnergy:  specificenergy.ConversionFactors,
+		units.MeasureEnergyDensity:   energydensity.ConversionFactors,
+		units.MeasureRatio:           ratio.ConversionFactors,
 	} {
 		f := factorsFn()
 		for unit := range f {

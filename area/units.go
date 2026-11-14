@@ -21,6 +21,9 @@ const (
 	SquareFoot                   // ft²
 	SquareKilometer              // km²
 	SquareMile                   // mi²
+	Hectare                      // ha
+	Acre                         // ac: international acre, 43560 ft²
+	SquareYard                   // yd²
 
 	unitCount // the number of units; keep it last
 )
@@ -35,4 +38,7 @@ var definitions = [unitCount]definition{
 	SquareFoot:       {"ft²", 0.09290304},
 	SquareKilometer:  {"km²", 1e6},
 	SquareMile:       {"mi²", 2589988.110336},
+	Hectare:          {"ha", 1e4},
+	Acre:             {"ac", 43560 * 0.09290304},
+	SquareYard:       {"yd²", 0.9144 * 0.9144},
 }

@@ -27,6 +27,10 @@ const (
 	Megapascal                                   // MPa
 	Gigapascal                                   // GPa
 	KilogramForcePerSquareCentimeter             // kgf/cm²: the technical atmosphere, 1 kgf on 1 cm², often written kg/cm²
+	MillimeterOfWater                            // mmH2O: conventional: 1 mm of water of density 1000 kg/m³ under standard gravity
+	CentimeterOfWater                            // cmH2O: conventional, as for MillimeterOfWater
+	InchOfWater                                  // inH2O: conventional, as for MillimeterOfWater
+	KilopoundPerSquareInch                       // ksi: 1000 psi
 
 	unitCount // the number of units; keep it last
 )
@@ -52,4 +56,8 @@ var definitions = [unitCount]definition{
 	Megapascal:                       {"MPa", 1e6},
 	Gigapascal:                       {"GPa", 1e9},
 	KilogramForcePerSquareCentimeter: {"kgf/cm²", 9.80665 / (0.01 * 0.01)},
+	MillimeterOfWater:                {"mmH2O", 1000 * 9.80665 / 1000},
+	CentimeterOfWater:                {"cmH2O", 1000 * 9.80665 / 100},
+	InchOfWater:                      {"inH2O", 1000 * 9.80665 * 0.0254},
+	KilopoundPerSquareInch:           {"ksi", 1000 * 0.45359237 * 9.80665 / (0.0254 * 0.0254)},
 }

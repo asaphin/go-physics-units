@@ -15,18 +15,29 @@ import (
 
 	units "github.com/asaphin/go-physics-units"
 	"github.com/asaphin/go-physics-units/acceleration"
+	"github.com/asaphin/go-physics-units/amount"
+	"github.com/asaphin/go-physics-units/angularvelocity"
 	"github.com/asaphin/go-physics-units/area"
 	"github.com/asaphin/go-physics-units/charge"
 	"github.com/asaphin/go-physics-units/current"
 	"github.com/asaphin/go-physics-units/datasize"
 	"github.com/asaphin/go-physics-units/density"
 	"github.com/asaphin/go-physics-units/distance"
+	"github.com/asaphin/go-physics-units/doserate"
 	"github.com/asaphin/go-physics-units/energy"
+	"github.com/asaphin/go-physics-units/equivalentdose"
+	"github.com/asaphin/go-physics-units/fuelconsumption"
+	"github.com/asaphin/go-physics-units/fueleconomy"
 	"github.com/asaphin/go-physics-units/mass"
+	"github.com/asaphin/go-physics-units/molarity"
+	"github.com/asaphin/go-physics-units/molarmass"
+	"github.com/asaphin/go-physics-units/physics"
 	"github.com/asaphin/go-physics-units/power"
 	"github.com/asaphin/go-physics-units/pressure"
+	"github.com/asaphin/go-physics-units/ratio"
 	"github.com/asaphin/go-physics-units/temperature"
 	"github.com/asaphin/go-physics-units/time"
+	"github.com/asaphin/go-physics-units/torque"
 	"github.com/asaphin/go-physics-units/velocity"
 	"github.com/asaphin/go-physics-units/voltage"
 	"github.com/asaphin/go-physics-units/volume"
@@ -377,4 +388,143 @@ func Example_recipeScaling() {
 	// milk    375 mL     375 mL   386 g
 	// sugar   4.5 tbsp    67 mL    57 g
 	// butter  6 tbsp      89 mL    85 g
+}
+
+func Example_carTrip() {
+	// The engine makes 350 N·m at 4000 rev/min.
+	engine := units.NewTorque(350, torque.NewtonMeter).MultiplyByAngularVelocity(
+		units.NewAngularVelocity(4000, angularvelocity.RevolutionPerMinute))
+
+	fmt.Printf("power:   %.0f = %.0f\n", engine.ConvertTo(power.Kilowatt), engine.ConvertTo(power.Horsepower))
+
+	// A 620 km trip at 6.8 L/100km, with fuel at 1.85 a litre.
+	trip := units.NewDistance(620, distance.Kilometer)
+	consumption := units.NewFuelConsumption(6.8, fuelconsumption.LiterPer100Kilometers)
+	fuel := consumption.MultiplyByDistance(trip).ConvertTo(volume.Liter)
+
+	fmt.Printf("fuel:    %.1f, costing %.2f\n", fuel, fuel.Value()*1.85)
+
+	// The same car, as an American driver would rate it.
+	economy, err := consumption.Economy()
+	if err != nil {
+		panic(err) // the consumption is zero
+	}
+
+	fmt.Printf("economy: %.1f\n", economy.ConvertTo(fueleconomy.MilePerGallon))
+
+	// The time it takes at an average of 95 km/h.
+	duration, err := trip.DivideByVelocity(units.NewVelocity(95, velocity.KilometerPerHour))
+	if err != nil {
+		panic(err) // the speed is zero
+	}
+
+	d, err := duration.ToDuration()
+	if err != nil {
+		panic(err) // beyond the range of time.Duration
+	}
+
+	fmt.Println("time:   ", d.Round(builtintime.Minute))
+	// Output:
+	// power:   147 kW = 197 hp
+	// fuel:    42.2 L, costing 78.00
+	// economy: 34.6 mpg
+	// time:    6h32m0s
+}
+
+func Example_labSolution() {
+	// 500 mL of 0.15 M sodium chloride, NaCl (58.44 g/mol).
+	stock := units.NewMolarity(0.15, molarity.Molar)
+	salt := stock.MultiplyByVolume(units.NewVolume(500, volume.Milliliter))
+
+	fmt.Printf("weigh out %.3f of NaCl (%.0f)\n",
+		salt.MultiplyByMolarMass(units.NewMolarMass(58.44, molarmass.GramPerMole)).ConvertTo(mass.Gram),
+		salt.ConvertTo(amount.Millimole))
+
+	// Dilute 10 mL of the stock to 250 mL.
+	aliquot := stock.MultiplyByVolume(units.NewVolume(10, volume.Milliliter))
+
+	diluted, err := aliquot.DivideByVolume(units.NewVolume(250, volume.Milliliter))
+	if err != nil {
+		panic(err) // the volume is zero
+	}
+
+	fmt.Printf("diluted: %.0f\n", diluted.ConvertTo(molarity.Millimolar))
+	fmt.Printf("sodium ions in the aliquot: %.2e\n", aliquot.Entities())
+	// Output:
+	// weigh out 4.383 g of NaCl (75 mmol)
+	// diluted: 6 mM
+	// sodium ions in the aliquot: 9.03e+20
+}
+
+func Example_flightRadiation() {
+	// Cosmic rays give about 5 μSv/h at cruising altitude.
+	cruise := units.NewDoseRate(5, doserate.MicrosievertPerHour)
+	flight := units.NewTime(11, time.Hour)
+
+	dose := cruise.MultiplyByTime(flight)
+
+	fmt.Printf("one flight: %.0f\n", dose.ConvertTo(equivalentdose.Microsievert))
+
+	// Compared with a year of natural background radiation.
+	share, err := dose.Ratio(units.NewEquivalentDose(2.4, equivalentdose.Millisievert))
+	if err != nil {
+		panic(err) // the background dose is zero
+	}
+
+	fmt.Printf("of a year's background: %.1f\n", share.ConvertTo(ratio.Percent))
+
+	// The hours in the air that add up to 1 mSv.
+	hours, err := units.NewEquivalentDose(1, equivalentdose.Millisievert).DivideByDoseRate(cruise)
+	if err != nil {
+		panic(err) // the dose rate is zero
+	}
+
+	flights, err := hours.Ratio(flight)
+	if err != nil {
+		panic(err) // the flight takes no time
+	}
+
+	fmt.Printf("1 mSv after %.0f, about %.0f such flights\n", hours.ConvertTo(time.Hour), flights.Fraction())
+	// Output:
+	// one flight: 55 μSv
+	// of a year's background: 2.3 %
+	// 1 mSv after 200 h, about 18 such flights
+}
+
+func Example_orbits() {
+	earth := units.NewMass(1, mass.EarthMass)
+	radius := units.NewDistance(6371, distance.Kilometer)
+
+	// The International Space Station flies about 420 km up.
+	iss := radius.Add(units.NewDistance(420, distance.Kilometer))
+
+	speed, err := physics.OrbitalVelocity(earth, iss)
+	if err != nil {
+		panic(err) // the radius is zero
+	}
+
+	period, err := physics.OrbitalPeriod(earth, iss)
+	if err != nil {
+		panic(err) // the mass is zero
+	}
+
+	fmt.Printf("ISS: %.2f, once every %.0f\n", speed.ConvertTo(velocity.KilometerPerSecond),
+		period.ConvertTo(time.Minute))
+
+	escape, err := physics.EscapeVelocity(earth, radius)
+	if err != nil {
+		panic(err) // the radius is zero
+	}
+
+	fmt.Printf("escape from the surface: %.1f\n", escape.ConvertTo(velocity.KilometerPerSecond))
+
+	// The kinetic energy of 1 kg at the station's speed, as TNT.
+	impact := units.NewMass(1, mass.Kilogram).KineticEnergy(speed)
+
+	fmt.Printf("1 kg at that speed: %.1f, like %.1f kg of TNT\n", impact.ConvertTo(energy.Megajoule),
+		impact.ConvertTo(energy.GramOfTNT).Value()/1000)
+	// Output:
+	// ISS: 7.66 km/s, once every 93 min
+	// escape from the surface: 11.2 km/s
+	// 1 kg at that speed: 29.3 MJ, like 7.0 kg of TNT
 }

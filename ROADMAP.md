@@ -43,6 +43,9 @@ Size is relative effort: S < M < L.
 | ☑ | [4.2](#42-configurable-parser) | Configurable parser with aliases | P3, P2 | no | M | v0.2.x |
 | ☑ | [4.3](#43-new-measures-one-per-step) | New measures, one per step | P3 | no | S each | v0.2.x |
 | ☑ | [4.4](#44-decision-temperature) | Temperature (design first) | P3 | **Decision** | M | v0.2.x |
+| ☑ | [4.5](#45-science-and-everyday-measures) | Science and everyday measures, calculators, physics, constants | P3 | no | L | v0.2.0 |
+| ☐ | [4.6](#46-documentation-pass) | Documentation pass: godoc as contracts, for people and AI agents | docs | no | M | v0.2.0 |
+| ☐ | [4.7](#47-release-v020) | Release v0.2.0 | — | no | S | v0.2.0 |
 | ☐ | [5.1](#51-stabilise-and-release-v100) | Stabilise and release v1.0.0 | — | removals | M | v1.0.0 |
 
 ## Phase 0: finish and ship v0.1.0
@@ -278,6 +281,23 @@ Serves **P3**.
 - It also needs to tell absolute temperatures apart from differences: 20 °C plus a 10 K difference is 30 °C, but adding two absolute temperatures is meaningless.
 - Design the model for affine units, and the operations they allow, before writing any code.
 - **Status:** done, after Phase 3, as proposed in [docs/rfc-temperature.md](docs/rfc-temperature.md), with one change the author decided on 2026-11-14: temperatures below absolute zero are rejected with `ErrOutOfRange`.
+
+### 4.5 Science and everyday measures
+
+Serves **P3**. The author chose the groups and the API shape on 2026-11-14.
+
+- **Status:** done. 22 measures (mechanics and everyday, chemistry and radiation, electronics and light, energy densities and ratios), common and scientific units in the existing measures, 66 operations between measures, calculator methods, `Ratio` on every measure, and the `physics` and `constant` packages.
+- **The rule:** relations that hold exactly between two measures are methods; formulas with more inputs, approximations or measured constants are functions in `physics`.
+
+### 4.6 Documentation pass
+
+- Write the doc comment of every exported identifier as a contract: what it returns and in which unit, how it fails (the sentinel), and when it panics.
+- Use doc links (`[ErrZeroDivision]`), and turn the package documentation into a task guide: which function to use for what, and the common mistakes.
+- A test checks that every exported function that returns an error names its sentinel.
+
+### 4.7 Release v0.2.0
+
+- As in step 0.4: CHANGELOG section, a PR from `dev` into `main`, an annotated tag, the GitHub release and the proxy request.
 
 ### Not planned unless there is demand
 

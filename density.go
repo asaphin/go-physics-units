@@ -3,6 +3,7 @@ package units
 import (
 	"github.com/asaphin/go-physics-units/density"
 	"github.com/asaphin/go-physics-units/mass"
+	"github.com/asaphin/go-physics-units/massflowrate"
 )
 
 // Density is a density: a value in a density.Unit, such as 1.2 kg/m³. Create one with
@@ -18,4 +19,9 @@ type Density struct {
 // MultiplyByVolume returns the mass d·v (kg) in mass.BaseUnit.
 func (d Density) MultiplyByVolume(v Volume) Mass {
 	return Mass{value: d.baseValue() * v.baseValue(), unit: mass.BaseUnit}
+}
+
+// MultiplyByFlowRate returns the mass flow rate d·q (kg/s) in massflowrate.BaseUnit.
+func (d Density) MultiplyByFlowRate(q FlowRate) MassFlowRate {
+	return MassFlowRate{value: d.baseValue() * q.baseValue(), unit: massflowrate.BaseUnit}
 }

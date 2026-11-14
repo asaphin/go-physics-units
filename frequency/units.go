@@ -20,6 +20,7 @@ const (
 	Megahertz                       // MHz
 	Gigahertz                       // GHz
 	Terahertz                       // THz
+	BeatPerMinute                   // bpm: one beat per minute: heart rate, tempo
 
 	unitCount // the number of units; keep it last
 )
@@ -38,4 +39,5 @@ var definitions = [unitCount]definition{
 	Megahertz:           {"MHz", 1e6},
 	Gigahertz:           {"GHz", 1e9},
 	Terahertz:           {"THz", 1e12},
+	BeatPerMinute:       {"bpm", 1.0 / 60},
 }
