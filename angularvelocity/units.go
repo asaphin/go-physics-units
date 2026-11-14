@@ -1,5 +1,13 @@
 // Package angularvelocity defines the angular velocity units of the units package and their
 // conversion factors to the base unit, the radian per second.
+//
+// Use the units with units.NewAngularVelocity, from the root package
+// github.com/asaphin/go-physics-units:
+//
+//	w := units.NewAngularVelocity(33.3, angularvelocity.RevolutionPerMinute)
+//
+// ParseUnit turns a symbol such as "rev/min" into a Unit, and String turns a
+// Unit into its symbol.
 package angularvelocity
 
 import "math"

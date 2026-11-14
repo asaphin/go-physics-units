@@ -1,5 +1,13 @@
 // Package velocity defines the velocity (speed) units of the units package and
 // their conversion factors to the base unit, the metre per second.
+//
+// Use the units with units.NewVelocity, from the root package
+// github.com/asaphin/go-physics-units:
+//
+//	v := units.NewVelocity(10, velocity.KilometerPerHour)
+//
+// ParseUnit turns a symbol such as "km/h" into a Unit, and String turns a
+// Unit into its symbol.
 package velocity
 
 // Unit is a velocity unit: one of the constants below. String returns its
@@ -14,12 +22,13 @@ const BaseUnit = MeterPerSecond
 
 // Velocity units, with their symbols.
 const (
-	MeterPerSecond   Unit = iota // m/s
-	KilometerPerHour             // km/h
-	FeetPerSecond                // ft/s
-	MilePerHour                  // mph
-	Knot                         // kn
-	SpeedOfLight                 // c
+	MeterPerSecond     Unit = iota // m/s
+	KilometerPerHour               // km/h
+	FeetPerSecond                  // ft/s
+	MilePerHour                    // mph
+	Knot                           // kn
+	SpeedOfLight                   // c
+	KilometerPerSecond             // km/s
 
 	unitCount // the number of units; keep it last
 )
@@ -27,10 +36,11 @@ const (
 // definitions holds the symbol of each unit and its factor: how many base
 // units (m/s) there are in one unit.
 var definitions = [unitCount]definition{
-	MeterPerSecond:   {"m/s", 1},
-	KilometerPerHour: {"km/h", 1000.0 / 3600},
-	FeetPerSecond:    {"ft/s", 0.3048},
-	MilePerHour:      {"mph", 0.44704},
-	Knot:             {"kn", 1852.0 / 3600}, // one nautical mile per hour
-	SpeedOfLight:     {"c", 299792458},      // exact by definition
+	MeterPerSecond:     {"m/s", 1},
+	KilometerPerHour:   {"km/h", 1000.0 / 3600},
+	FeetPerSecond:      {"ft/s", 0.3048},
+	MilePerHour:        {"mph", 0.44704},
+	Knot:               {"kn", 1852.0 / 3600}, // one nautical mile per hour
+	SpeedOfLight:       {"c", 299792458},      // exact by definition
+	KilometerPerSecond: {"km/s", 1000},
 }

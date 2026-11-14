@@ -1,5 +1,13 @@
 // Package angle defines the angle units of the units package
 // and their conversion factors to the base unit, the radian.
+//
+// Use the units with units.NewAngle, from the root package
+// github.com/asaphin/go-physics-units:
+//
+//	a := units.NewAngle(90, angle.Degree)
+//
+// ParseUnit turns a symbol such as "°" into a Unit, and String turns a
+// Unit into its symbol.
 package angle
 
 import "math"

@@ -1,5 +1,13 @@
 // Package volume defines the volume units of the units package
 // and their conversion factors to the base unit, the cubic metre.
+//
+// Use the units with units.NewVolume, from the root package
+// github.com/asaphin/go-physics-units:
+//
+//	v := units.NewVolume(10, volume.Liter)
+//
+// ParseUnit turns a symbol such as "L" into a Unit, and String turns a
+// Unit into its symbol.
 package volume
 
 // Unit is a volume unit: one of the constants below. String returns its
@@ -28,6 +36,8 @@ const (
 	Barrel                      // bbl: oil barrel, 42 US gallons
 	CubicYard                   // yd³
 	CubicKilometer              // km³
+	Centiliter                  // cL
+	Deciliter                   // dL
 
 	unitCount // the number of units; keep it last
 )
@@ -55,4 +65,6 @@ var definitions = [unitCount]definition{
 	Barrel:          {"bbl", 42 * 231 * 0.0254 * 0.0254 * 0.0254},
 	CubicYard:       {"yd³", 0.9144 * 0.9144 * 0.9144},
 	CubicKilometer:  {"km³", 1e9},
+	Centiliter:      {"cL", 1e-5},
+	Deciliter:       {"dL", 1e-4},
 }

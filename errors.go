@@ -1,6 +1,6 @@
 package units
 
-// Error is the type of the package's sentinel errors, such as ErrUnknownUnit.
+// Error is the type of the package's sentinel errors, such as [ErrUnknownUnit].
 // Test for them with errors.Is:
 //
 //	if errors.Is(err, units.ErrUnknownUnit) { … }
@@ -49,7 +49,9 @@ const (
 	ErrInvalidMeasure Error = "invalid measure"
 	// ErrOutOfRange: the value can't be represented in the target type, as in
 	// Time.ToDuration of NaN or of more than about 292 years, or MarshalText of
-	// a value that isn't finite.
+	// a value that isn't finite; or a calculation has no real result, as in
+	// Area.SquareSide of a negative area or Velocity.LorentzFactor at the
+	// speed of light.
 	ErrOutOfRange Error = "value out of range"
 	// ErrAmbiguousUnit: a case-insensitive Parser got a unit that matches
 	// several symbols differing only in case, such as "KN" for kN and kn.
@@ -85,12 +87,12 @@ func (e *UnitError) Error() string {
 	return "unknown " + string(e.Measure) + " unit " + e.Unit
 }
 
-// Unwrap returns ErrUnknownUnit.
+// Unwrap returns [ErrUnknownUnit].
 func (*UnitError) Unwrap() error {
 	return ErrUnknownUnit
 }
 
-// incompatibleError is an ErrIncompatibleMeasures with a fixed message of its
+// incompatibleError is an [ErrIncompatibleMeasures] with a fixed message of its
 // own. Its values are constants, so returning one doesn't allocate.
 type incompatibleError string
 
@@ -98,6 +100,23 @@ const (
 	errNilMeasurement incompatibleError = "measurement is nil"
 	errNoUnits        incompatibleError = "the measurement's measure has no units: its Units method returns the zero UnitSet"
 )
+
+// rangeError is an [ErrOutOfRange] error with a fixed message of its own. Its
+// values are constants, so returning one doesn't allocate.
+type rangeError string
+
+const (
+	errNegativeArea  rangeError = "the area is negative: it has no real square root"
+	errNotBelowLight rangeError = "the speed isn't below the speed of light"
+)
+
+func (e rangeError) Error() string {
+	return string(e)
+}
+
+func (rangeError) Unwrap() error {
+	return ErrOutOfRange
+}
 
 func (e incompatibleError) Error() string {
 	return string(e)

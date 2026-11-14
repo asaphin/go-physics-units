@@ -1,5 +1,13 @@
 // Package voltage defines the voltage units of the units package and their
 // conversion factors to the base unit, the volt.
+//
+// Use the units with units.NewVoltage, from the root package
+// github.com/asaphin/go-physics-units:
+//
+//	v := units.NewVoltage(230, voltage.Volt)
+//
+// ParseUnit turns a symbol such as "V" into a Unit, and String turns a
+// Unit into its symbol.
 package voltage
 
 // Unit is a voltage unit: one of the constants below. String returns its

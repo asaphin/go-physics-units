@@ -4,9 +4,9 @@ Guidance for AI coding agents (and humans) working in this repository. `CLAUDE.m
 
 ## What this is
 
-`go-physics-units` (module `github.com/asaphin/go-physics-units`, package name `units`) is a small Go library for creating, converting, comparing, parsing, encoding and doing arithmetic on physical measurements (distance, area, volume, mass, time, velocity, acceleration, force, energy, power, pressure, frequency, angle, angular velocity, data size, density, data rate, temperature, electric current, voltage, electric charge, resistance) and user-defined measures (e.g. currency).
+`go-physics-units` (module `github.com/asaphin/go-physics-units`, package name `units`) is a small Go library for creating, converting, comparing, parsing, encoding and doing arithmetic on physical measurements: 43 predefined measures, from distance, time and mass to torque, molar concentration, radiation dose and luminous flux (the README's units table lists them), plus temperature and user-defined measures (e.g. currency). The `physics` package adds formulas that combine measures, and `constant` physical constants.
 
-- **Published and pre-1.0** (tags `v0.0.0`–`v0.1.0`). v0.1.0 redesigned the API (value types and typed units, ROADMAP Phase 3); `MIGRATION.md` is the upgrade guide from v0.0.4. Until v1.0.0 (ROADMAP 5.1), a breaking change bumps the minor version. Exported API changes affect real users: make them deliberately, call them out, and record them in `CHANGELOG.md` and, if they break code, `MIGRATION.md`. `make api`, and the CI job "API changes", list every exported change since the latest tag; check that each one is in the CHANGELOG.
+- **Published and pre-1.0** (tags `v0.0.0`–`v0.2.0`). v0.1.0 redesigned the API (value types and typed units, ROADMAP Phase 3); `MIGRATION.md` is the upgrade guide from v0.0.4. Until v1.0.0 (ROADMAP 5.1), a breaking change bumps the minor version. Exported API changes affect real users: make them deliberately, call them out, and record them in `CHANGELOG.md` and, if they break code, `MIGRATION.md`. `make api`, and the CI job "API changes", list every exported change since the latest tag; check that each one is in the CHANGELOG.
 - **Go version:** `go.mod` declares `go 1.27.0`. CI tests that exact version and the latest stable release. Use modern Go freely: iterators and the `maps`/`slices` helpers, `strings.FieldsSeq`, `testing.B.Loop`, `sync.WaitGroup.Go`, `encoding.TextAppender`, and generic methods (Go 1.27). The `modernize` linter points out older forms. Raising the minimum again is its own deliberate change, with a CHANGELOG entry.
 - **No third-party dependencies**, including in tests (stdlib `testing` only, no testify). Keep it that way unless asked.
 - **Branches:** `dev` is the working branch, and it only accepts pull requests. Work on a short-lived branch and open a PR into `dev`. Releases are merged from `dev` into `main`.
@@ -75,6 +75,9 @@ User-defined measures are first-class: they convert, combine, compare, parse and
 | `distance/`, `area/`, … (one per measure) | `units.go`: the `Unit` type, its constants, `BaseUnit` and the `definitions` array (symbol and factor of each unit). `unit_gen.go`, **generated**: `String`, `Factor`, `Valid`, `ParseUnit`, `Units`, `ConversionFactors`, `Rate` |
 | `temperature/` | The temperature units, hand-written: scales with offsets, `Convert`, `DifferenceRate`, `AbsoluteZero` |
 | `conversion/` | Public `Factors` type alias (`map[string]float64`) and `CopyConversionFactors` |
+| `constant/` | Physical constants as untyped constants: the SI defining constants, exact derived ones, CODATA 2022 measured values, IAU astronomical constants. `TestConstantsMatchUnits` checks them against the unit packages |
+| `physics/` | Formulas that combine several measures, rest on an approximation or use a measured constant (free fall, orbits, ideal gases, …). Functions over the typed values, using only the exported API; errors are the root's sentinels |
+| `operations_test.go`, `calculators_test.go` | Tests of the operations between measures and of the calculator methods, against values computed from definitions; their examples are in `example_operations_test.go` and `example_calculators_test.go` |
 | `internal/rates` | `Validate` (unit definitions), `Matrix` (the rates between every pair of units), `CanonicalUnit` |
 | `internal/gen` | The code generator, and `TestGenerated`, which fails when a generated file is stale |
 | `Makefile` | Task runner (see Commands) |
@@ -95,7 +98,10 @@ User-defined measures are first-class: they convert, combine, compare, parse and
 6. **Combining values.**
    - Typed `Add`/`Sub` need no check: two values of one Go type share their units. The result keeps the receiver's unit.
    - The generic `AddMeasurement`, `SubMeasurement` and `CompareMeasurement` check that the operand belongs to the same unit set (`unitSet.operand`).
-   - Cross-measure operations (`Distance.DivideByTime`, `Force.DivideByArea`, `Frequency.Period` and the others in the README's operations table) convert to base units with `baseValue()` and return results in the target measure's base unit. Dividing by a zero value returns `ErrZeroDivision`, as `Div` does for a zero divisor.
+   - Cross-measure operations (`Distance.DivideByTime`, `Force.DivideByArea`, `Frequency.Period` and the others in the README's methods table) convert to base units with `baseValue()` and return results in the target measure's base unit. Dividing by a zero value returns `ErrZeroDivision`, as `Div` does for a zero divisor.
+   - **Calculators** are methods too: formulas of a single value (`Volume.CubeEdge`, `Mass.RestEnergy`, `Velocity.LorentzFactor`, `Radioactivity.DecayAfter`). A result that isn't real fails with a `rangeError` constant, which wraps `ErrOutOfRange`.
+   - **Methods or `physics`?** A relation between two measures that holds exactly (a product, a quotient, or a defined constant such as c, h or gₙ) is a method. A formula with more inputs, an approximation (dry air, small swings) or a measured constant (G) is a function in `physics`.
+   - `Ratio(other)`, generated for every measure and written for `Quantity`, divides two values of one measure with the same common unit as `Compare`.
    - **Comparisons** (`Compare`, `Equal`, `EqualWithinRel`, `CompareMeasurement`) compare two values in the same unit exactly. Otherwise they multiply each value by its unit's factor, which gives the value in the base unit. The result doesn't depend on the order of the operands, so `a.Equal(b) == b.Equal(a)`; converting one value into the other's unit would break that at the last bit. `TestCompare_Symmetric` enforces it.
 7. **Custom measures.** `NewUnitSet` validates and copies the factors, puts the base unit at index 0 and sorts the other symbols, so the indexes don't depend on map iteration. `Quantity[M]` reaches the set through `M.Units()` on every operation; generic code calls that method through a dictionary, which costs about 3 ns.
 8. **Parsing.** `ParseString` and `StringToX` accept exactly `"<float> <unit>"`, two whitespace-separated fields. They reject NaN and ±Inf.
@@ -160,7 +166,14 @@ make fix       # every automatic fix: go fix, then golangci-lint run --fix, then
    - an entry in `predefinedFactors` and in `TestConversionFactors_ReturnsCopy` (`conversion_test.go`);
    - reference values;
    - rows in `TestCrossMeasureOperations` (and `_ZeroDivision`) for any cross-measure operations.
-6. **Docs:** an `ExampleNewX` in `example_measures_test.go` (and one per cross-measure operation), `README.md` (units table and operations table) and `CHANGELOG.md`.
+6. **Docs:** an `ExampleNewX` in `example_measures_test.go` (and one per cross-measure operation), `README.md` (units table and methods table) and `CHANGELOG.md`.
+
+### Add an operation between measures
+
+1. Add the method to the receiver's file (`<measure>.go`): the result in its base unit, computed with `baseValue()`. A division returns `(X, error)` and fails with `ErrZeroDivision` for a zero divisor.
+2. Document the formula and the base unit, as the neighbouring methods do: `DivideByVelocity returns the time d/v (s) in time.BaseUnit: …`.
+3. Test it in `TestOperations` against a value computed from the units' definitions, and its zero divisor in `TestOperations_ZeroDivision`.
+4. Add an example to `example_operations_test.go` and the method to the README's methods table.
 
 The factor model is multiplicative only. Temperature, with its offsets, has its own hand-written types (`temperature.go`). Don't shoehorn other non-linear scales (dB, pH) into either; raise them as a design question instead.
 
@@ -168,9 +181,10 @@ The factor model is multiplicative only. Temperature, with its offsets, has its 
 
 - Format with `make fmt`. It runs gofumpt and goimports, with stdlib imports first, a blank line, then module imports, and golines wraps lines longer than 120 columns.
 - Error strings are lower-case with no trailing punctuation and include the offending unit.
-- **Every returned error matches exactly one sentinel** (`TestErrors` checks each one). Use `unknownUnitError(mt, unit)` for unknown units, `ErrZeroDivision` itself, an `incompatibleError` constant for a fixed message, or `newError(kind, msg, cause)` for anything else; `cause` is the underlying error, or nil. A new kind of error needs a new sentinel, added to `sentinels` in `errors_test.go` and to the README table.
+- **Every returned error matches exactly one sentinel** (`TestErrors` checks each one). Use `unknownUnitError(mt, unit)` for unknown units, `ErrZeroDivision` itself, an `incompatibleError` or `rangeError` constant for a fixed message, or `newError(kind, msg, cause)` for anything else; `cause` is the underlying error, or nil. A new kind of error needs a new sentinel, added to `sentinels` in `errors_test.go` and to the README table.
 - Return errors rather than panicking. The only intended panics are `MustNewUnitSet`, `MustUnitOf`, `rates.MustValidate` on constant data, and conversions in an invalid unit.
 - Exported identifiers need doc comments that start with the identifier's name, as do package clauses (`revive` enforces both).
+- **Doc comments are contracts.** Say what a function returns and in which unit, how it fails ("It fails with [ErrZeroDivision] if v is zero") and when it panics. Link sentinels, types and base units with doc links (`[ErrZeroDivision]`, `[velocity.BaseUnit]`). `TestDocContracts` (`doc_test.go`) fails when an exported function that returns an error names no sentinel, or a `Must` function doesn't say when it panics. The docs are read by people and by AI agents through `go doc`, so they should answer "how do I use this, and what can go wrong?" without the code.
 - **Look-alike characters:** U+00B5 and U+03BC look identical, as do ℃ (U+2103) and °C. Wherever the difference matters in code (comparisons, tests), write them as Go escape sequences, as `internal/rates.CanonicalUnit` and the tests do. Comments and the `definitions` arrays keep the readable characters; `TestMeasuresSelfCheck` checks that definitions are canonical. Some editing tools turn escapes into the literal characters when they write a file; check with `grep` afterwards.
 - **Shadowed `time` package:** the `time` subpackage shadows the stdlib one. Import the stdlib package as `builtintime "time"`, as `time.go` and `time_test.go` do.
 - **Renaming exported names** breaks users. Add the new name and keep the old one as an alias with a `// Deprecated: Use X.` paragraph and a `//go:fix inline` directive, as `distance.PlankLength` does: `go fix` then rewrites the callers' code. The directive works on constants and on functions whose body is a single call, such as `MustConvertTo`. Unexported names can change freely.

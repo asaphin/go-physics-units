@@ -1,5 +1,13 @@
 // Package force defines the force units of the units package
 // and their conversion factors to the base unit, the newton.
+//
+// Use the units with units.NewForce, from the root package
+// github.com/asaphin/go-physics-units:
+//
+//	f := units.NewForce(10, force.Newton)
+//
+// ParseUnit turns a symbol such as "N" into a Unit, and String turns a
+// Unit into its symbol.
 package force
 
 // Unit is a force unit: one of the constants below. String returns its
@@ -21,6 +29,9 @@ const (
 	KilogramForce             // kgf: the kilogram under standard gravity
 	Kilonewton                // kN: not to be confused with velocity.Knot, "kn"
 	Meganewton                // MN
+	Kip                       // kip: 1000 lbf
+	OunceForce                // ozf: 1/16 lbf
+	TonneForce                // tf: the tonne under standard gravity
 
 	unitCount // the number of units; keep it last
 )
@@ -40,4 +51,7 @@ var definitions = [unitCount]definition{
 	KilogramForce: {"kgf", 9.80665},
 	Kilonewton:    {"kN", 1e3},
 	Meganewton:    {"MN", 1e6},
+	Kip:           {"kip", 1000 * 0.45359237 * 9.80665},
+	OunceForce:    {"ozf", 0.45359237 * 9.80665 / 16},
+	TonneForce:    {"tf", 1000 * 9.80665},
 }

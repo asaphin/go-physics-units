@@ -19,10 +19,10 @@ fmt.Println(vel.ConvertTo(velocity.KilometerPerHour)) // 60 km/h
 ## Highlights
 
 - **Fast.** Values are plain structs, and units are typed constants that index tables built at startup. Converting, adding or comparing takes 2–5 ns and never allocates.
-- **Type-safe.** `units.NewDistance(5, mass.Kilogram)` doesn't compile. The typed operations can't fail, except division by zero.
+- **Type-safe.** `units.NewDistance(5, mass.Kilogram)` doesn't compile. The typed operations can't fail, except division by zero and the few calculations without a real result.
 - **Immutable and safe for concurrent use.** Values never change, and the library's tables are fixed once the package is initialised. No importer can alter them, and no locks are needed.
 - **Extensible.** Your own measures, such as currencies, get the same typed API as the built-in ones, and can extend them.
-- **Broad.** 22 measures with 185 units, more than 40 operations between measures (force is mass × acceleration, power is voltage × current, …), `fmt` verbs, JSON and text encoding, a configurable parser, and temperatures with their offsets.
+- **Broad.** 43 measures with 356 units, from distance and time to torque, molarity and radiation dose. More than 100 operations between measures (force is mass × acceleration, power is torque × angular velocity, …) and calculators (the equivalent cube of a volume, rest energy, the Lorentz factor, …), a `physics` package of formulas, and the CODATA physical constants. Plus `fmt` verbs, JSON and text encoding, a configurable parser, and temperatures with their offsets.
 - **Dependency-free and well tested.** Only the standard library, 100% test coverage, fuzzed parsers, and allocation counts checked in CI.
 
 > [!NOTE]
@@ -33,7 +33,7 @@ fmt.Println(vel.ConvertTo(velocity.KilometerPerHour)) // 60 km/h
 
 - [Installation](#installation)
 - [Quick start](#quick-start), and [use cases](USECASES.md) from real-world domains
-- [Usage](#usage): [values and units](#values-and-units), [comparing](#comparing-values), [combining measures](#combining-measures), [formatting](#formatting), [parsing](#parsing), [JSON](#json-and-text-encoding), [temperature](#temperature), [custom measures](#custom-measures), [errors](#errors)
+- [Usage](#usage): [values and units](#values-and-units), [comparing](#comparing-values), [combining measures](#combining-measures), [calculators](#calculators), [physics formulas](#physics-formulas), [constants](#constants), [formatting](#formatting), [parsing](#parsing), [JSON](#json-and-text-encoding), [temperature](#temperature), [custom measures](#custom-measures), [errors](#errors)
 - [Supported units](#supported-units)
 - [Performance](#performance)
 - [Design](#design)
@@ -147,7 +147,7 @@ Values are `float64`, so conversions round to the nearest representable number. 
 
 ### Combining measures
 
-Operations that combine measures return their result in the SI base unit of the result (m/s, N, J, W, …):
+Methods combine measures and return their result in the SI base unit of the result (m/s, N, J, W, …):
 
 ```go
 climber := units.NewMass(75, mass.Kilogram)
@@ -167,31 +167,123 @@ fmt.Printf("%.1f, %.1f, %.1f = %.2f\n", weight, work, p, p.ConvertTo(power.Horse
 // 735.5 N, 2206.5 J, 551.6 W = 0.74 hp
 ```
 
-| Value             | Operations and their results                                                                                                    |
-|-------------------|---------------------------------------------------------------------------------------------------------------------------------|
-| `Distance`        | `Square` → `Area`, `Cube` → `Volume`, `DivideByTime` → `Velocity`                                                               |
-| `Area`            | `MultiplyByDistance` → `Volume`, `DivideByDistance` → `Distance`                                                                |
-| `Volume`          | `DivideByArea` → `Distance`, `DivideByDistance` → `Area`                                                                        |
-| `Angle`           | `DivideByTime` → `AngularVelocity`                                                                                              |
-| `Time`            | `ToDuration` → `time.Duration`, rounded to the nearest nanosecond; `ParseDuration` converts back                                |
-| `Frequency`       | `Period` → `Time`                                                                                                               |
-| `Velocity`        | `MultiplyByTime` → `Distance`, `DivideByTime` → `Acceleration`                                                                  |
-| `Acceleration`    | `MultiplyByTime` → `Velocity`, `MultiplyByMass` → `Force`                                                                       |
-| `AngularVelocity` | `MultiplyByTime` → `Angle`                                                                                                      |
-| `Mass`            | `MultiplyByAcceleration` → `Force`, `DivideByVolume` → `Density`, `DivideByDensity` → `Volume`                                  |
-| `Density`         | `MultiplyByVolume` → `Mass`                                                                                                     |
-| `Force`           | `DivideByMass` → `Acceleration`, `DivideByAcceleration` → `Mass`, `DivideByArea` → `Pressure`, `MultiplyByDistance` → `Energy`  |
-| `Pressure`        | `MultiplyByArea` → `Force`                                                                                                      |
-| `Energy`          | `DivideByTime` → `Power`, `DivideByDistance` → `Force`, `DivideByCharge` → `Voltage`                                            |
-| `Power`           | `MultiplyByTime` → `Energy`, `DivideByVoltage` → `Current`, `DivideByCurrent` → `Voltage`                                       |
-| `Current`         | `MultiplyByVoltage` → `Power`, `MultiplyByResistance` → `Voltage`, `MultiplyByTime` → `Charge`                                  |
-| `Voltage`         | `MultiplyByCurrent` → `Power`, `DivideByCurrent` → `Resistance` (Ohm's law), `DivideByResistance` → `Current`, `MultiplyByCharge` → `Energy` |
-| `Resistance`      | `MultiplyByCurrent` → `Voltage`                                                                                                 |
-| `Charge`          | `DivideByTime` → `Current`, `DivideByCurrent` → `Time` (how long a battery lasts), `MultiplyByVoltage` → `Energy`               |
-| `DataSize`        | `DivideByTime` → `DataRate`, `DivideByDataRate` → `Time`                                                                        |
-| `DataRate`        | `MultiplyByTime` → `DataSize`                                                                                                   |
+| Value             | Methods and their results |
+|-------------------|--------------------------|
+| `Distance`        | `DivideByTime(Time)` → `Velocity`, `Square()` → `Area`, `Cube()` → `Volume`, `DivideByVelocity(Velocity)` → `Time`, `MultiplyByPace(Pace)` → `Time`, `DivideByVolume(Volume)` → `FuelEconomy`, `DivideByFuelEconomy(FuelEconomy)` → `Volume`, `MultiplyByFuelConsumption(FuelConsumption)` → `Volume`, `CircleArea()` → `Area`, `SphereArea()` → `Area`, `SphereVolume()` → `Volume` |
+| `Area`            | `DivideByDistance(Distance)` → `Distance`, `MultiplyByDistance(Distance)` → `Volume`, `SquareSide()` → `Distance`, `CircleRadius()` → `Distance` |
+| `Volume`          | `DivideByArea(Area)` → `Distance`, `DivideByDistance(Distance)` → `Area`, `DivideByTime(Time)` → `FlowRate`, `DivideByFlowRate(FlowRate)` → `Time`, `DivideByFuelConsumption(FuelConsumption)` → `Distance`, `CubeEdge()` → `Distance`, `SphereRadius()` → `Distance` |
+| `Angle`           | `DivideByTime(Time)` → `AngularVelocity` |
+| `Time`            | `ToDuration()` → `time.Duration`, `DivideByDistance(Distance)` → `Pace`, `Frequency()` → `Frequency` |
+| `Frequency`       | `Period()` → `Time`, `MultiplyByDistance(Distance)` → `Velocity`, `PhotonEnergy()` → `Energy` |
+| `Velocity`        | `MultiplyByTime(Time)` → `Distance`, `DivideByTime(Time)` → `Acceleration`, `MultiplyByMass(Mass)` → `Momentum`, `MultiplyByArea(Area)` → `FlowRate`, `DivideByFrequency(Frequency)` → `Distance`, `DivideByDistance(Distance)` → `Frequency`, `Pace()` → `Pace`, `LorentzFactor()` → `float64` |
+| `Acceleration`    | `MultiplyByTime(Time)` → `Velocity`, `MultiplyByMass(Mass)` → `Force` |
+| `AngularVelocity` | `MultiplyByTime(Time)` → `Angle`, `MultiplyByTorque(Torque)` → `Power` |
+| `Pace`            | `MultiplyByDistance(Distance)` → `Time`, `Velocity()` → `Velocity` |
+| `Mass`            | `MultiplyByAcceleration(Acceleration)` → `Force`, `DivideByVolume(Volume)` → `Density`, `DivideByDensity(Density)` → `Volume`, `MultiplyByVelocity(Velocity)` → `Momentum`, `DivideByTime(Time)` → `MassFlowRate`, `DivideByMassFlowRate(MassFlowRate)` → `Time`, `DivideByMolarMass(MolarMass)` → `Amount`, `DivideByAmount(Amount)` → `MolarMass`, `MultiplyBySpecificEnergy(SpecificEnergy)` → `Energy`, `KineticEnergy(Velocity)` → `Energy`, `Weight()` → `Force`, `RestEnergy()` → `Energy` |
+| `Density`         | `MultiplyByVolume(Volume)` → `Mass`, `MultiplyByFlowRate(FlowRate)` → `MassFlowRate` |
+| `Force`           | `DivideByMass(Mass)` → `Acceleration`, `DivideByAcceleration(Acceleration)` → `Mass`, `DivideByArea(Area)` → `Pressure`, `MultiplyByDistance(Distance)` → `Energy`, `MultiplyByTime(Time)` → `Momentum`, `TorqueAt(Distance)` → `Torque` |
+| `Pressure`        | `MultiplyByArea(Area)` → `Force`, `MultiplyByFlowRate(FlowRate)` → `Power` |
+| `Torque`          | `DivideByDistance(Distance)` → `Force`, `MultiplyByAngularVelocity(AngularVelocity)` → `Power`, `MultiplyByAngle(Angle)` → `Energy` |
+| `Momentum`        | `DivideByMass(Mass)` → `Velocity`, `DivideByVelocity(Velocity)` → `Mass`, `DivideByTime(Time)` → `Force` |
+| `Energy`          | `DivideByTime(Time)` → `Power`, `DivideByDistance(Distance)` → `Force`, `DivideByCharge(Charge)` → `Voltage`, `DivideByPower(Power)` → `Time`, `DivideByMass(Mass)` → `SpecificEnergy`, `DivideBySpecificEnergy(SpecificEnergy)` → `Mass`, `DivideByVolume(Volume)` → `EnergyDensity`, `DivideByEnergyDensity(EnergyDensity)` → `Volume`, `MassEquivalent()` → `Mass`, `PhotonFrequency()` → `Frequency` |
+| `Power`           | `MultiplyByTime(Time)` → `Energy`, `DivideByVoltage(Voltage)` → `Current`, `DivideByCurrent(Current)` → `Voltage`, `DivideByAngularVelocity(AngularVelocity)` → `Torque`, `DivideByTorque(Torque)` → `AngularVelocity` |
+| `SpecificEnergy`  | `MultiplyByMass(Mass)` → `Energy` |
+| `EnergyDensity`   | `MultiplyByVolume(Volume)` → `Energy` |
+| `FlowRate`        | `MultiplyByTime(Time)` → `Volume`, `DivideByArea(Area)` → `Velocity`, `MultiplyByPressure(Pressure)` → `Power`, `MultiplyByDensity(Density)` → `MassFlowRate` |
+| `MassFlowRate`    | `DivideByDensity(Density)` → `FlowRate`, `MultiplyByTime(Time)` → `Mass` |
+| `FuelEconomy`     | `MultiplyByVolume(Volume)` → `Distance`, `Consumption()` → `FuelConsumption` |
+| `FuelConsumption` | `MultiplyByDistance(Distance)` → `Volume`, `Economy()` → `FuelEconomy` |
+| `Current`         | `MultiplyByVoltage(Voltage)` → `Power`, `MultiplyByResistance(Resistance)` → `Voltage`, `MultiplyByTime(Time)` → `Charge` |
+| `Voltage`         | `MultiplyByCurrent(Current)` → `Power`, `DivideByCurrent(Current)` → `Resistance`, `DivideByResistance(Resistance)` → `Current`, `MultiplyByCharge(Charge)` → `Energy`, `MultiplyByCapacitance(Capacitance)` → `Charge` |
+| `Charge`          | `DivideByTime(Time)` → `Current`, `DivideByCurrent(Current)` → `Time`, `MultiplyByVoltage(Voltage)` → `Energy`, `DivideByVoltage(Voltage)` → `Capacitance`, `DivideByCapacitance(Capacitance)` → `Voltage` |
+| `Resistance`      | `MultiplyByCurrent(Current)` → `Voltage`, `MultiplyByCapacitance(Capacitance)` → `Time` |
+| `Capacitance`     | `MultiplyByVoltage(Voltage)` → `Charge`, `MultiplyByResistance(Resistance)` → `Time` |
+| `Inductance`      | `DivideByResistance(Resistance)` → `Time` |
+| `Illuminance`     | `MultiplyByArea(Area)` → `LuminousFlux` |
+| `LuminousFlux`    | `DivideByArea(Area)` → `Illuminance` |
+| `Amount`          | `MultiplyByMolarMass(MolarMass)` → `Mass`, `DivideByVolume(Volume)` → `Molarity`, `DivideByMolarity(Molarity)` → `Volume`, `Entities()` → `float64` |
+| `MolarMass`       | `MultiplyByAmount(Amount)` → `Mass` |
+| `Molarity`        | `MultiplyByVolume(Volume)` → `Amount` |
+| `Radioactivity`   | `DecayAfter(Time, Time)` → `Radioactivity` |
+| `AbsorbedDose`    | `Equivalent(float64)` → `EquivalentDose` |
+| `EquivalentDose`  | `DivideByTime(Time)` → `DoseRate`, `DivideByDoseRate(DoseRate)` → `Time` |
+| `DoseRate`        | `MultiplyByTime(Time)` → `EquivalentDose` |
+| `DataSize`        | `DivideByTime(Time)` → `DataRate`, `DivideByDataRate(DataRate)` → `Time` |
+| `DataRate`        | `MultiplyByTime(Time)` → `DataSize` |
+| `Ratio`           | `Fraction()` → `float64` |
 
-The divisions fail with `ErrZeroDivision` when the divisor is zero, as `Div(0)` does.
+Divisions and reciprocals also return an error: `ErrZeroDivision` for a zero divisor, as `Div(0)` does. `SquareSide`, `CircleRadius` and `LorentzFactor` fail with `ErrOutOfRange` when the result isn't real.
+`ParseDuration` turns a `time.Duration` into a `Time`, and the `Ratio` method of every measure gives the ratio of two values, such as a share in percent.
+
+### Calculators
+
+Some methods are formulas of a single value: the equivalent cube or sphere of a volume, the kinetic, rest and photon energies, the Lorentz factor, radioactive decay:
+
+```go
+// All the gold ever mined, about 216 000 t, would fit in one cube.
+gold, err := units.NewMass(216000, mass.Tonne).
+	DivideByDensity(units.NewDensity(19.32, density.GramPerCubicCentimeter))
+if err != nil {
+	panic(err) // the density is zero
+}
+
+fmt.Printf("%.1f\n", gold.CubeEdge()) // 22.4 m
+
+// The energy equivalent of one gram of matter, as TNT.
+gram := units.NewMass(1, mass.Gram)
+
+fmt.Printf("%.1f\n", gram.RestEnergy().ConvertTo(energy.KilotonOfTNT)) // 21.5 ktTNT
+```
+
+### Physics formulas
+
+The `physics` package has the formulas with several inputs, an approximation or a measured constant. They take and return the same typed values:
+
+| Topic                     | Functions                                                                                                          |
+|---------------------------|--------------------------------------------------------------------------------------------------------------------|
+| Falling bodies            | `FreeFallTime`, `FreeFallSpeed`, `FallDistance`, `PotentialEnergy`, `ProjectileRange`, `PendulumPeriod`, `HydrostaticPressure` |
+| Gravitation and orbits    | `GravitationalForce`, `SurfaceGravity`, `EscapeVelocity`, `OrbitalVelocity`, `OrbitalPeriod`, `SchwarzschildRadius` |
+| Light, sound, relativity  | `LightWavelength`, `LightFrequency`, `PhotonEnergy`, `SpeedOfSoundInAir`, `MachNumber`, `TimeDilation`             |
+| Thermodynamics            | `IdealGasPressure`, `IdealGasVolume`, `IdealGasAmount`, `BlackBodyPower`, `WienPeakWavelength`                     |
+| Circuits                  | `CapacitorEnergy`, `InductorEnergy`, `ResonantFrequency`                                                           |
+
+```go
+earth := units.NewMass(1, mass.EarthMass)
+
+v, err := physics.EscapeVelocity(earth, units.NewDistance(6371, distance.Kilometer))
+if err != nil {
+	panic(err)
+}
+
+fmt.Printf("%.1f\n", v.ConvertTo(velocity.KilometerPerSecond)) // 11.2 km/s
+
+// A geostationary orbit goes round once a sidereal day.
+t, err := physics.OrbitalPeriod(earth, units.NewDistance(42164, distance.Kilometer))
+if err != nil {
+	panic(err)
+}
+
+fmt.Printf("%.2f\n", t.ConvertTo(time.Hour)) // 23.93 h
+```
+
+They fail with `ErrZeroDivision` for a zero divisor and with `ErrOutOfRange` when the result isn't real, such as the time to fall a height against gravity.
+
+### Constants
+
+The `constant` package has physical constants in SI units, as untyped Go constants:
+
+- the defining constants of the SI, which are exact: c, h, e, k and N_A;
+- constants derived from them: ħ, R, F and σ;
+- the CODATA 2022 values of measured constants: G, mₑ, mₚ, u, α, ε₀ and μ₀;
+- astronomical constants of the IAU: the astronomical unit, the light-year, the parsec and nominal solar and terrestrial values.
+
+```go
+c := units.NewVelocity(constant.SpeedOfLight, velocity.MeterPerSecond)
+
+fmt.Println(c.ConvertTo(velocity.KilometerPerSecond)) // 299792.458 km/s
+```
+
+They are constants, not variables, so no importer can change them.
 
 ### Formatting
 
@@ -375,7 +467,7 @@ Every error matches exactly one sentinel, which you can test for with `errors.Is
 | `ErrInvalidMeasure`       | `NewUnitSet` gets an empty or predefined measure name, or a measure has no units           |
 | `ErrAmbiguousUnit`        | a case-insensitive `Parser` gets a unit that matches several symbols, such as `KN`         |
 | `ErrInvalidOption`        | `NewParser` gets an invalid alias, or two measures that share a symbol                     |
-| `ErrOutOfRange`           | a temperature below absolute zero, `Time.ToDuration` beyond ±292 years, or marshalling NaN |
+| `ErrOutOfRange`           | a temperature below absolute zero, `Time.ToDuration` beyond ±292 years, marshalling NaN, or a result that isn't real, such as `Area.SquareSide` of a negative area |
 
 ```go
 _, err := units.StringToDistance("3 kg")
@@ -394,30 +486,52 @@ The sentinels are constants of type `units.Error`, so no other package can reass
 
 ## Supported units
 
-| Measure          | Package           | Base unit | Symbols                                                                   |
-|------------------|-------------------|-----------|---------------------------------------------------------------------------|
-| Distance         | `distance`        | m         | lp, fm, pm, Å, nm, μm, mm, cm, dm, m, km, in, ft, yd, mi, nmi, AU, ly, pc |
-| Area             | `area`            | m²        | mm², cm², in², ft², m², km², mi²                                          |
-| Volume           | `volume`          | m³        | mm³, μL, cm³, mL, in³, L, pt, qt, gal, ft³, bbl, yd³, m³, km³             |
-| Angle            | `angle`           | rad       | arcsec, arcmin, mrad, gon, °, rad, rev                                    |
-| Time             | `time`            | s         | tp, ns, μs, ms, s, min, h, d, wk, yr                                      |
-| Frequency        | `frequency`       | Hz        | rpm, Hz, kHz, MHz, GHz, THz                                               |
-| Velocity         | `velocity`        | m/s       | km/h, ft/s, mph, kn, m/s, c                                               |
-| Acceleration     | `acceleration`    | m/s²      | cm/s², ft/s², m/s², gₙ                                                    |
-| Angular velocity | `angularvelocity` | rad/s     | rad/s, °/s, rev/min, rev/s                                                |
-| Mass             | `mass`            | kg        | Da, μg, mg, g, kg, oz, lb, q, t, M⊕, M☉                                   |
-| Density          | `density`         | kg/m³     | kg/m³, g/L, lb/ft³, lb/gal, kg/L, g/mL, g/cm³                             |
-| Force            | `force`           | N         | dyn, mN, N, lbf, kgf, kN, MN                                              |
-| Pressure         | `pressure`        | Pa        | Pa, hPa, mbar, kPa, Torr, mmHg, inHg, psi, kgf/cm², bar, atm, MPa, GPa    |
-| Energy           | `energy`          | J         | eV, erg, J, ft·lbf, cal, kJ, Btu, kcal, Wh, MJ, kWh, GJ, MWh              |
-| Power            | `power`           | W         | mW, W, Btu/h, PS, hp, kW, MW, GW                                          |
-| Temperature      | `temperature`     | K         | K, °C, °F, °R                                                             |
-| Electric current | `current`         | A         | A, μA, mA, kA                                                             |
-| Voltage          | `voltage`         | V         | V, μV, mV, kV, MV                                                         |
-| Electric charge  | `charge`          | C         | C, μC, mC, mAh, Ah                                                        |
-| Resistance       | `resistance`      | Ω         | Ω, mΩ, kΩ, MΩ, GΩ                                                         |
-| Data size        | `datasize`        | B         | bit, B, kbit, kB, KiB, Mbit, MB, MiB, Gbit, GB, GiB, TB, TiB, PB, PiB     |
-| Data rate        | `datarate`        | B/s       | bit/s, B/s, kbit/s, kB/s, KiB/s, Mbit/s, MB/s, MiB/s, Gbit/s, GB/s, GiB/s |
+| Measure               | Package           | Base unit | Symbols                                                                                                             |
+|-----------------------|-------------------|-----------|---------------------------------------------------------------------------------------------------------------------|
+| Distance              | `distance`        | m         | lp, fm, pm, Å, nm, μm, mil, mm, cm, in, dm, ft, yd, m, ftm, km, mi, nmi, AU, ly, pc, kpc, Mpc, Gpc                  |
+| Area                  | `area`            | m²        | mm², cm², in², ft², yd², m², ac, ha, km², mi²                                                                       |
+| Volume                | `volume`          | m³        | mm³, μL, cm³, mL, cL, in³, dL, pt, qt, L, gal, ft³, bbl, yd³, m³, km³                                               |
+| Angle                 | `angle`           | rad       | arcsec, arcmin, mrad, gon, °, rad, rev                                                                              |
+| Time                  | `time`            | s         | tp, ns, μs, ms, s, min, h, d, wk, yr                                                                                |
+| Frequency             | `frequency`       | Hz        | rpm, bpm, Hz, kHz, MHz, GHz, THz                                                                                    |
+| Velocity              | `velocity`        | m/s       | km/h, ft/s, mph, kn, m/s, km/s, c                                                                                   |
+| Acceleration          | `acceleration`    | m/s²      | cm/s², ft/s², m/s², gₙ                                                                                              |
+| Angular velocity      | `angularvelocity` | rad/s     | °/s, rev/min, rad/s, rev/s                                                                                          |
+| Pace                  | `pace`            | s/m       | s/mi, s/km, s/500m, s/100m, min/mi, min/km, s/m                                                                     |
+| Mass                  | `mass`            | kg        | Da, μg, mg, gr, ct, g, oz, ozt, lb, kg, st, q, t, M⊕, M☉                                                            |
+| Density               | `density`         | kg/m³     | kg/m³, g/L, lb/ft³, lb/gal, kg/L, g/mL, g/cm³                                                                       |
+| Force                 | `force`           | N         | dyn, mN, ozf, N, lbf, kgf, kN, kip, tf, MN                                                                          |
+| Pressure              | `pressure`        | Pa        | Pa, mmH2O, cmH2O, hPa, mbar, Torr, mmHg, inH2O, kPa, inHg, psi, kgf/cm², bar, atm, MPa, ksi, GPa                    |
+| Torque                | `torque`          | N·m       | mN·m, ozf·in, N·cm, kgf·cm, lbf·in, N·m, lbf·ft, kgf·m, kN·m                                                        |
+| Momentum              | `momentum`        | kg·m/s    | g·cm/s, lb·ft/s, kg·m/s, N·s, lbf·s                                                                                 |
+| Energy                | `energy`          | J         | eV, keV, MeV, GeV, erg, TeV, mJ, J, ft·lbf, cal, kJ, Btu, Wh, kcal, gTNT, MJ, kWh, GJ, MWh, tTNT, toe, ktTNT, MtTNT |
+| Power                 | `power`           | W         | mW, Btu/h, W, PS, hp, kW, TR, MW, GW, L☉                                                                            |
+| Specific energy       | `specificenergy`  | J/kg      | J/kg, kJ/kg, Btu/lb, Wh/kg, kcal/kg, MJ/kg, kWh/kg                                                                  |
+| Energy density        | `energydensity`   | J/m³      | J/m³, kJ/m³, MJ/m³, Wh/L, kWh/m³, MJ/L, kWh/L                                                                       |
+| Flow rate             | `flowrate`        | m³/s      | mL/h, mL/min, L/h, L/min, gal/min, m³/h, ft³/min, L/s, ft³/s, m³/s                                                  |
+| Mass flow rate        | `massflowrate`    | kg/s      | lb/h, kg/h, g/s, lb/min, kg/min, t/h, lb/s, kg/s                                                                    |
+| Fuel economy          | `fueleconomy`     | m/m³      | m/m³, mpg(imp), mpg, km/L                                                                                           |
+| Fuel consumption      | `fuelconsumption` | m³/m      | L/100km, gal/100mi, L/km, m³/m                                                                                      |
+| Temperature           | `temperature`     | K         | K, °C, °F, °R                                                                                                       |
+| Electric current      | `current`         | A         | μA, mA, A, kA                                                                                                       |
+| Voltage               | `voltage`         | V         | μV, mV, V, kV, MV                                                                                                   |
+| Electric charge       | `charge`          | C         | μC, mC, C, mAh, Ah                                                                                                  |
+| Resistance            | `resistance`      | Ω         | mΩ, Ω, kΩ, MΩ, GΩ                                                                                                   |
+| Capacitance           | `capacitance`     | F         | pF, nF, μF, mF, F                                                                                                   |
+| Inductance            | `inductance`      | H         | nH, μH, mH, H                                                                                                       |
+| Magnetic flux density | `magneticfield`   | T         | nT, mG, μT, G, mT, T                                                                                                |
+| Illuminance           | `illuminance`     | lx        | lx, fc, klx, ph                                                                                                     |
+| Luminous flux         | `luminousflux`    | lm        | lm, klm                                                                                                             |
+| Amount of substance   | `amount`          | mol       | pmol, nmol, μmol, mmol, mol, kmol                                                                                   |
+| Molar mass            | `molarmass`       | kg/mol    | g/mol, kg/mol                                                                                                       |
+| Molar concentration   | `molarity`        | mol/m³    | pM, nmol/L, nM, μmol/L, μM, mol/m³, mmol/L, mM, mol/L, M                                                            |
+| Radioactivity         | `radioactivity`   | Bq        | Bq, nCi, kBq, μCi, MBq, mCi, GBq, Ci, TBq                                                                           |
+| Absorbed dose         | `absorbeddose`    | Gy        | μGy, mGy, cGy, rd, Gy                                                                                               |
+| Equivalent dose       | `equivalentdose`  | Sv        | nSv, μSv, mrem, mSv, rem, Sv                                                                                        |
+| Dose rate             | `doserate`        | Sv/s      | nSv/h, mSv/yr, μSv/h, mrem/h, mSv/h, Sv/h, Sv/s                                                                     |
+| Data size             | `datasize`        | B         | bit, B, kbit, kB, KiB, Mbit, MB, MiB, Gbit, GB, GiB, TB, TiB, PB, PiB, EB, EiB                                      |
+| Data rate             | `datarate`        | B/s       | bit/s, B/s, kbit/s, kB/s, KiB/s, Mbit/s, MB/s, MiB/s, Gbit/s, GB/s, GiB/s                                           |
+| Ratio                 | `ratio`           | 1         | ppt, ppb, ppm, bp, ‰, %, 1                                                                                          |
 
 - Every unit is a typed constant in its package, for example `distance.LightYear` or `mass.Pound`; `String()` returns its symbol.
 - Each unit package also provides `ParseUnit(symbol)`, `Units()`, `ConversionFactors()`, a copy of its factors, and `Rate(from, to)`, the multiplier between two units. For example, `distance.Rate(distance.Mile, distance.Kilometer)` returns 1.609344. The `temperature` package has `Convert` and `DifferenceRate` instead.
@@ -431,6 +545,12 @@ The sentinels are constants of type `units.Error`, so no other package can reass
 - `℃` (U+2103) and `℉` (U+2109) are accepted for `°C` and `°F`, `Ω` (U+2126 OHM SIGN) for `Ω` (U+03A9), `Å` (U+212B ANGSTROM SIGN) for `Å` (U+00C5), and `K` (U+212A KELVIN SIGN) for `K`.
 - Angular velocity's `rev/min` counts radians; frequency's `rpm` counts cycles. Convert between them through `Angle.DivideByTime` or the factor 2π.
 - Data sizes have both decimal (`kB` = 1000 B) and binary (`KiB` = 1024 B) prefixes, and bits (`bit`, `Mbit`, …).
+- Symbols are listed in order of size.
+- `tTNT`, `ktTNT` and `MtTNT` are TNT equivalents, 4.184 GJ per ton by convention, and `toe` is the tonne of oil equivalent, 41.868 GJ by the IEA convention.
+- `mpg` is miles per US gallon and `mpg(imp)` per imperial gallon. Fuel economy (`km/L`, `mpg`) and fuel consumption (`L/100km`) are reciprocals: `Consumption` and `Economy` convert between them.
+- `M`, `mM`, `μM`, … are the chemists' molar units of mol/L. The rad of absorbed dose is `rd`, because `rad` is the radian.
+- `mmH2O`, `cmH2O` and `inH2O` are conventional water columns, `bpm` and `rpm` both count per minute, and `L☉` is the IAU's nominal solar luminosity.
+- `ppm`, `ppb` and `ppt` are on the short scale (1e-6, 1e-9 and 1e-12), `bp` is a basis point, 0.01 %, and `1` is the unit of a plain fraction.
 - Strings are parsed in the form `"<value> <unit>"`, with whitespace between the value and the unit. NaN and infinite values are rejected.
 
 ## Performance
@@ -469,7 +589,7 @@ The design decisions are recorded in [docs/rfc-value-types.md](docs/rfc-value-ty
 
 The module follows [semantic versioning](https://semver.org).
 Before v1.0.0, a minor release (v0.x.0) may break the API, and a patch release doesn't.
-[CHANGELOG.md](CHANGELOG.md) records every user-visible change, and [MIGRATION.md](MIGRATION.md) covers the upgrade from v0.0.4.
+[CHANGELOG.md](CHANGELOG.md) records every user-visible change, and [MIGRATION.md](MIGRATION.md) covers the upgrade from v0.0.4; v0.2.0 needs no changes after v0.1.0.
 Deprecated names keep working until v1.0.0, and `go fix` rewrites your code to their replacements, such as `MustConvertTo` to `ConvertTo`.
 
 The full API reference, with runnable examples for every measure, is on [pkg.go.dev](https://pkg.go.dev/github.com/asaphin/go-physics-units).

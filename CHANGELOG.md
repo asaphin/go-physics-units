@@ -2,6 +2,31 @@
 
 ## Unreleased
 
+## v0.2.0 - 2026-11-14
+
+This release makes the library more scientific: 22 measures, units for science and everyday use in the existing measures, operations between measures, calculators, and two packages, `physics` (formulas) and `constant` (physical constants). Code written for v0.1.0 builds and runs unchanged; the one changed value is `mass.Dalton`, now the CODATA 2022 value.
+
+### Added
+
+- **22 measures:** `Torque`, `FlowRate`, `MassFlowRate`, `Momentum`, `Pace`, `FuelEconomy`, `FuelConsumption`, `Amount` (of substance), `MolarMass`, `Molarity`, `Radioactivity`, `AbsorbedDose`, `EquivalentDose`, `DoseRate`, `Capacitance`, `Inductance`, `MagneticField`, `Illuminance`, `LuminousFlux`, `SpecificEnergy`, `EnergyDensity` and `Ratio` (%, ‰, bp, ppm, ppb, ppt), each with its unit package, the typed API and a `MeasureType`. The rad of absorbed dose is `rd`, because `rad` is the radian.
+- **Units in the existing measures:** TNT equivalents (`gTNT`, `tTNT`, `ktTNT`, `MtTNT`, 4.184 GJ per ton by convention), `keV` to `TeV`, `mJ` and `toe` (energy); `ha`, `ac` and `yd²` (area); `st`, `ct`, `gr` and `ozt` (mass); `km/s`; `kpc`, `Mpc`, `Gpc`, `mil` and `ftm` (distance); `bpm`; `mmH2O`, `cmH2O`, `inH2O` and `ksi` (pressure); `kip`, `ozf` and `tf` (force); `TR` and `L☉` (power); `EB` and `EiB`; `cL` and `dL`.
+- **66 operations between measures,** in the result's SI base unit, among them `Distance.DivideByVelocity`, `Energy.DivideByPower`, momentum and impulse, torque and engine power (`Torque.MultiplyByAngularVelocity`, `Power.DivideByAngularVelocity`), flow rates, pace, fuel economy and consumption, amounts of substance and molarity, dose rates, `Q = C·V` and RC and L/R time constants, illuminance, specific energy, energy density and wavelengths. The README's methods table lists them all.
+- **Calculators:** `Volume.CubeEdge` and `SphereRadius` (the equivalent cube and sphere), `Area.SquareSide` and `CircleRadius`, `Distance.CircleArea`, `SphereArea` and `SphereVolume`, `Mass.KineticEnergy`, `Weight` and `RestEnergy`, `Energy.MassEquivalent` and `PhotonFrequency`, `Frequency.PhotonEnergy`, `Velocity.LorentzFactor` and `Pace`, `Pace.Velocity`, `Time.Frequency`, `FuelEconomy.Consumption`, `FuelConsumption.Economy`, `Amount.Entities`, `Radioactivity.DecayAfter`, `AbsorbedDose.Equivalent` and `Ratio.Fraction`.
+- **`Ratio(other)`** on every measure and on `Quantity`: the ratio of two values, exact when they share a unit.
+- **Package `physics`:** formulas that combine measures: falling bodies, projectiles, pendulums and hydrostatic pressure; gravitation, orbits and black holes; light, sound, Mach numbers and time dilation; ideal gases and black-body radiation; capacitor and inductor energy and LC resonance.
+- **Package `constant`:** the SI defining constants, exact derived constants (ħ, R, F, σ), the CODATA 2022 values of G, mₑ, mₚ, u, α, ε₀ and μ₀, and IAU astronomical constants.
+- **Documentation:** every doc comment says how its function fails, with links to the sentinels and base units; the package documentation is a task guide (which function for which job, and the common mistakes); every unit package shows how its units are used.
+- **USECASES.md:** four more scenarios: a car's power and a road trip, a lab solution, the radiation of a long-haul flight, and orbits.
+
+### Changed
+
+- **`mass.Dalton`** is the CODATA 2022 value, 1.66053906892e-27 kg (it was the CODATA 2018 value, 1.6605390666e-27 kg).
+- **`ErrOutOfRange`** also reports a calculation without a real result, such as `Area.SquareSide` of a negative area.
+
+### Performance
+
+- The typed operations are unchanged: 2–5 ns, no allocations. `NewUnitSet` takes longer for a set built from a predefined measure that gained units (distance has 24 instead of 19).
+
 ## v0.1.0 - 2026-11-14
 
 This release redesigns the API around value types and typed units, as decided in [docs/rfc-value-types.md](docs/rfc-value-types.md). Every program that uses the library needs changes; [MIGRATION.md](MIGRATION.md) lists them with before-and-after code. Most are mechanical, and the compiler reports each one.

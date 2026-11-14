@@ -4,6 +4,8 @@ v0.1.0 redesigns the API around value types and typed units (see [docs/rfc-value
 
 After the redesign the typed operations take 2–5 ns and don't allocate, where they took about 30–90 ns and one allocation. Unit mix-ups become compile errors.
 
+Upgrading from v0.1.0 to v0.2.0 needs no changes: v0.2.0 only adds to the API (see [CHANGELOG.md](CHANGELOG.md)).
+
 ## The checklist
 
 1. Set `go 1.27` or later in your `go.mod`.

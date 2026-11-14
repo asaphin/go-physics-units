@@ -1,5 +1,13 @@
 // Package datasize defines the data size units of the units package
 // and their conversion factors to the base unit, the byte.
+//
+// Use the units with units.NewDataSize, from the root package
+// github.com/asaphin/go-physics-units:
+//
+//	s := units.NewDataSize(1.5, datasize.Gigabyte)
+//
+// ParseUnit turns a symbol such as "GB" into a Unit, and String turns a
+// Unit into its symbol.
 package datasize
 
 // Unit is a data size unit: one of the constants below. String returns its
@@ -29,6 +37,8 @@ const (
 	Tebibyte             // TiB
 	Petabyte             // PB
 	Pebibyte             // PiB
+	Exabyte              // EB
+	Exbibyte             // EiB
 
 	unitCount // the number of units; keep it last
 )
@@ -57,4 +67,6 @@ var definitions = [unitCount]definition{
 	Tebibyte: {"TiB", 1 << 40},
 	Petabyte: {"PB", 1e15},
 	Pebibyte: {"PiB", 1 << 50},
+	Exabyte:  {"EB", 1e18},
+	Exbibyte: {"EiB", 1 << 60},
 }

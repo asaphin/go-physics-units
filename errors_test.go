@@ -13,6 +13,7 @@ import (
 	"github.com/asaphin/go-physics-units/mass"
 	"github.com/asaphin/go-physics-units/temperature"
 	"github.com/asaphin/go-physics-units/time"
+	"github.com/asaphin/go-physics-units/velocity"
 )
 
 // sentinels lists every sentinel error. A new sentinel needs an entry here.
@@ -114,6 +115,15 @@ func TestErrors(t *testing.T) {
 			"MarshalText of NaN", errOf(units.NewDistance(math.NaN(), distance.Meter).MarshalText()),
 			units.ErrOutOfRange, "value NaN m can't be encoded as text: it isn't finite",
 		},
+		{
+			"Area.SquareSide of a negative area", errOf(units.NewArea(-1, area.SquareMeter).SquareSide()),
+			units.ErrOutOfRange, "the area is negative: it has no real square root",
+		},
+		{
+			"Velocity.LorentzFactor at c", errOf(units.NewVelocity(1, velocity.SpeedOfLight).LorentzFactor()),
+			units.ErrOutOfRange, "the speed isn't below the speed of light",
+		},
+		{"Distance.Ratio by zero", errOf(km.Ratio(noDistance)), units.ErrZeroDivision, "division by zero"},
 
 		{
 			"ambiguous unit", errOf(mustParser(t, units.CaseInsensitive()).Parse("1 KN")),

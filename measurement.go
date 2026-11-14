@@ -36,11 +36,11 @@ type Measurement interface {
 	fmt.Formatter
 
 	// ConvertToMeasurement returns the measurement expressed in the unit with
-	// the given symbol. It fails with ErrUnknownUnit if the symbol isn't a
+	// the given symbol. It fails with [ErrUnknownUnit] if the symbol isn't a
 	// unit of the measure.
 	ConvertToMeasurement(symbol string) (Measurement, error)
 	// AddMeasurement returns the sum of the measurement and m, expressed in the
-	// receiver's unit. It fails with ErrIncompatibleMeasures if m is nil or of
+	// receiver's unit. It fails with [ErrIncompatibleMeasures] if m is nil or of
 	// another measure.
 	AddMeasurement(m Measurement) (Measurement, error)
 	// SubMeasurement returns the difference of the measurement and m, expressed
@@ -49,7 +49,7 @@ type Measurement interface {
 	// MulMeasurement returns the measurement multiplied by multiplier.
 	MulMeasurement(multiplier float64) Measurement
 	// DivMeasurement returns the measurement divided by divisor. It fails with
-	// ErrZeroDivision if divisor is zero.
+	// [ErrZeroDivision] if divisor is zero.
 	DivMeasurement(divisor float64) (Measurement, error)
 	// CompareMeasurement compares the measurement with m as Comparer.Compare
 	// does: it returns -1, 0 or +1 as the measurement is less than, equal to or
@@ -69,7 +69,7 @@ type genericValue struct {
 
 // NewMeasurement creates a measurement of one of the predefined measures,
 // detected from the unit symbol: NewMeasurement(10, "km") returns a Distance.
-// It fails with ErrUnknownUnit if no predefined measure has the unit. Use the
+// It fails with [ErrUnknownUnit] if no predefined measure has the unit. Use the
 // measure-specific constructors (NewDistance, …) when the measure is known in
 // advance.
 func NewMeasurement(value float64, symbol string) (Measurement, error) {
@@ -84,6 +84,12 @@ func NewMeasurement(value float64, symbol string) (Measurement, error) {
 // ParseString parses a measurement of a predefined measure from a string of the
 // form "<value> <symbol>", such as "10 km" or "1.5e3 m". The value must be
 // finite. The result has the measure's concrete type: "10 km" gives a Distance.
+//
+// It fails with [ErrInvalidFormat] unless s has that form, with
+// [ErrUnknownUnit] if the symbol isn't a predefined one, and with
+// [ErrIncompatibleMeasures] for a temperature symbol: temperatures aren't
+// Measurements, so use [StringToTemperature]. Symbols are case-sensitive and
+// need a space before them; a [Parser] accepts more.
 func ParseString(s string) (Measurement, error) {
 	value, symbol, err := parseValueAndUnit(s)
 	if err != nil {

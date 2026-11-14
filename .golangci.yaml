@@ -228,8 +228,10 @@ linters:
       os-temp-dir: true
 
     wrapcheck:
-      # Errors from this module's own packages need no extra wrapping.
+      # Errors from this module's own packages need no extra wrapping: the root
+      # package and its subpackages (physics returns the root's sentinels).
       ignore-package-globs:
+        - github.com/asaphin/go-physics-units
         - github.com/asaphin/go-physics-units/*
 
   exclusions:
