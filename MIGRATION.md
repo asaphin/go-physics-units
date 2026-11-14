@@ -15,6 +15,7 @@ After the redesign the typed operations take 2–5 ns and don't allocate, where 
 7. Replace `ConversionRates()` with `Rate(from, to)` or `ConversionFactors()`.
 8. Check stored data for the `Qts` symbol, now `q`.
 9. Replace error-message matching with `errors.Is`.
+10. Run `go fix ./...` once your code compiles: it replaces the deprecated `MustConvertTo`, `PlankLength` and `PlankTime`.
 
 ## Creating and converting values
 
@@ -32,7 +33,7 @@ d := units.NewDistance(5, distance.Kilometer)
 km := d.ConvertTo(distance.Kilometer)
 ```
 
-`MustConvertTo` still compiles but is deprecated: it is `ConvertTo`.
+`MustConvertTo` still compiles but is deprecated: it is `ConvertTo`. Run `go fix ./...` to replace the calls, and the misspelled `distance.PlankLength` and `time.PlankTime` with `PlanckLength` and `PlanckTime`.
 
 ## Unit symbols
 

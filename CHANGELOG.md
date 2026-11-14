@@ -12,7 +12,7 @@ The entries below describe the changes since v0.0.4.
 
 - **Value types.** `Distance`, `Mass`, `Time`, `Velocity` and the new measures are structs, not interfaces. Their methods have value receivers and return new values. The zero value is 0 in the base unit (0 m), not nil.
 - **Typed units.** Each unit package declares `type Unit uint8`, and its unit constants are typed: `distance.Kilometer` is a `distance.Unit`, not the string `"km"`. A unit of another measure, or a string literal, no longer compiles. `String()` returns the symbol and `ParseUnit` parses one.
-- **No errors where none can occur.** `NewX` and `ConvertTo` return just the value. `MustConvertTo` is deprecated: it is `ConvertTo`.
+- **No errors where none can occur.** `NewX` and `ConvertTo` return just the value. `MustConvertTo` is deprecated: it is `ConvertTo`, and `go fix` rewrites calls to it.
 - **`Measurement`** is implemented by every value, and `ParseString` and `NewMeasurement` return the measure's concrete type, so `m.(units.Distance)` works. Its `Unit()` method is now `Symbol()`, because the typed `Unit()` returns the typed unit. `CompareMeasurement` is new.
 - **Custom measures:** `NewMeasurementCreator`, `MeasurementCreator` and `NewBaseMeasurement` are removed. A custom measure is a marker type whose `Units` method returns a `UnitSet`, and its values are `Quantity[M]` (see Added). Values of two unit sets combine only when they are the same set, even if the sets share a name.
 - **Unit packages:** `ConversionRates()` is removed; `Rate(from, to Unit) float64` returns the multiplier between two units, and `ConversionFactors()` a copy of the factors.
@@ -38,7 +38,7 @@ The entries below describe the changes since v0.0.4.
 - **`Time.ToDuration`**, the reverse of `ParseDuration`: it rounds to the nearest nanosecond and fails with `ErrOutOfRange` for NaN or beyond about ±292 years.
 - **Unit packages:** `ParseUnit`, `Units`, and the `Unit` methods `String`, `Factor` and `Valid`.
 - **Look-alike characters** in symbols are accepted as Unicode NFKC maps them: `µ` (MICRO SIGN) for `μ`, `Ω` (OHM SIGN) for `Ω`, `Å` (ANGSTROM SIGN) for `Å` and `K` (KELVIN SIGN) for `K`.
-- **`distance.PlanckLength`** and **`time.PlanckTime`**. The misspelled `PlankLength` and `PlankTime` remain as deprecated aliases.
+- **`distance.PlanckLength`** and **`time.PlanckTime`**. The misspelled `PlankLength` and `PlankTime` remain as deprecated aliases, which `go fix` replaces.
 - Runnable examples on pkg.go.dev for every measure, every cross-measure operation, custom measures, JSON, parsing and formatting.
 
 ### Fixed

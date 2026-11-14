@@ -42,6 +42,8 @@ const (
 // PlankLength is a misspelled alias of PlanckLength.
 //
 // Deprecated: Use PlanckLength.
+//
+//go:fix inline
 const PlankLength = PlanckLength
 
 const (

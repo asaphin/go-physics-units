@@ -467,7 +467,7 @@ The design decisions are recorded in [docs/rfc-value-types.md](docs/rfc-value-ty
 The module follows [semantic versioning](https://semver.org).
 Before v1.0.0, a minor release (v0.x.0) may break the API, and a patch release doesn't.
 [CHANGELOG.md](CHANGELOG.md) records every user-visible change, and [MIGRATION.md](MIGRATION.md) covers the upgrade from v0.0.4.
-Deprecated names keep working until v1.0.0; `go fix` rewrites calls to the ones marked with `//go:fix inline`, such as `MustConvertTo`.
+Deprecated names keep working until v1.0.0, and `go fix` rewrites your code to their replacements, such as `MustConvertTo` to `ConvertTo`.
 
 The full API reference, with runnable examples for every measure, is on [pkg.go.dev](https://pkg.go.dev/github.com/asaphin/go-physics-units).
 
@@ -481,6 +481,7 @@ make check    # what CI runs: formatting, go vet, golangci-lint, tests with the 
 make cover    # coverage summary, plus an HTML report in coverage/
 make bench    # benchmarks
 make fuzz     # fuzz the string parser (FUZZTIME=30s by default)
+make fix      # apply every automatic fix: go fix, golangci-lint --fix, formatting
 make generate # regenerate the code every measure shares, after changing internal/gen
 make help     # every target
 ```

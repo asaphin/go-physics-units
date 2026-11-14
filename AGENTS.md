@@ -78,7 +78,7 @@ User-defined measures are first-class: they convert, combine, compare, parse and
 | `internal/rates` | `Validate` (unit definitions), `Matrix` (the rates between every pair of units), `CanonicalUnit` |
 | `internal/gen` | The code generator, and `TestGenerated`, which fails when a generated file is stale |
 | `Makefile` | Task runner (see Commands) |
-| `.github/workflows/ci.yml` | CI: `go mod tidy` check, vet, race tests and coverage (the `go.mod` Go version and stable), allocation guards, short fuzz runs, golangci-lint (pinned version), the exported-API report, govulncheck |
+| `.github/workflows/ci.yml` | CI: `go mod tidy` check, vet, race tests and coverage (the `go.mod` Go version and stable), allocation guards, short fuzz runs, golangci-lint (pinned version) and `go fix -diff`, the exported-API report, govulncheck |
 | `.github/dependabot.yml`, `.github/pull_request_template.md` | Weekly bumps of the CI actions (into `dev`); the PR checklist |
 | `docs/` | Design documents: `docs/rfc-value-types.md` (ROADMAP 2.1, accepted) and `docs/rfc-temperature.md` (ROADMAP 4.4, accepted) |
 | `CHANGELOG.md`, `MIGRATION.md` | User-visible changes, under `## Unreleased` until the next tag; the upgrade guide from v0.0.4 |
@@ -115,7 +115,7 @@ On error, return the zero value of a concrete type (`return Distance{}, err`) or
 
 ```sh
 make tools      # once per clone: the pinned golangci-lint into ./bin (gitignored), built with the go.mod Go
-make check      # what CI runs: go mod tidy check, format check, go vet, golangci-lint, go test -race, allocation guards
+make check      # what CI runs: go mod tidy check, format check, go vet, go fix check, golangci-lint, go test -race, allocation guards
 make help       # every documented target
 make generate   # regenerate measures_gen.go and the unit packages' unit_gen.go (go generate ./...)
 make test       # quick tests without the race detector
@@ -125,11 +125,13 @@ make bench-compare  # benchstat: BENCH_BASE (default the latest tag) vs the work
 make api        # gorelease: exported API changes since the latest tag, and the suggested version
 make fuzz       # FuzzParseString; FUZZTIME=30s by default
 make fmt        # golangci-lint fmt: gofumpt, goimports, golines (120 columns)
+make fix       # every automatic fix: go fix, then golangci-lint run --fix, then make fmt
 ```
 
 - **golangci-lint:** `.golangci.yaml` (v2 format) lists every enabled linter explicitly, grouped by purpose, and gives a reason for each linter it leaves out. It is adapted from the golden config by Marat Reimers. golangci-lint also runs staticcheck with all checks, so there is no separate staticcheck step.
 - **Pinned version:** golangci-lint `v2.15.0`, set in the Makefile (`GOLANGCI_LINT_VERSION`) and in CI. `make lint` refuses to run any other version and points to `make tools`, which builds that version into `./bin` with `GOTOOLCHAIN` set to the `go.mod` Go (golangci-lint's own `go.mod` would otherwise select an older Go, too old for this module).
 - **Lint Go version:** CI runs golangci-lint with the `go.mod` Go version. A golangci-lint binary can't read the export data of Go releases newer than it supports: v2.13.2 fails on Go 1.27.4, for example. Linting with the latest Go would therefore break whenever Go is released.
+- **go fix and the linter:** `go fix` applies the modernizers of the Go toolchain and the `//go:fix inline` directives; the `modernize` linter reports most of the same findings, from the `golang.org/x/tools` version that golangci-lint pins. `make fix` applies both, `go fix` first, and `make check` and CI fail while `go fix -diff` isn't empty. CI runs `go fix` with the `go.mod` Go version, like the linter. If the two ever disagree, so that one rewrites what the other reports, the toolchain's `go fix` wins: disable that analyzer in the `modernize` settings of `.golangci.yaml`, with a reason.
 - **Upgrading golangci-lint:** upgrade on purpose, in its own PR. Bump both pins, read the changelog for renamed options, then fix the new findings or disable a check with a reason. Enabling a new linter is a separate, reviewed change.
 - **`nolint`:** add a `//nolint:<linter> // reason` directive only with a reason. `nolintlint` flags unused directives.
 - **Generated code:** after changing `internal/gen` or the measures list in it, run `make generate` and commit the result. `TestGenerated` fails when a generated file differs from what the generator produces.
@@ -170,7 +172,7 @@ The factor model is multiplicative only. Temperature, with its offsets, has its 
 - Exported identifiers need doc comments that start with the identifier's name, as do package clauses (`revive` enforces both).
 - **Look-alike characters:** U+00B5 and U+03BC look identical, as do ℃ (U+2103) and °C. Wherever the difference matters in code (comparisons, tests), write them as Go escape sequences, as `internal/rates.CanonicalUnit` and the tests do. Comments and the `definitions` arrays keep the readable characters; `TestMeasuresSelfCheck` checks that definitions are canonical. Some editing tools turn escapes into the literal characters when they write a file; check with `grep` afterwards.
 - **Shadowed `time` package:** the `time` subpackage shadows the stdlib one. Import the stdlib package as `builtintime "time"`, as `time.go` and `time_test.go` do.
-- **Renaming exported names** breaks users. Add the new name and keep the old one as an alias with a `// Deprecated: Use X.` paragraph, as `distance.PlankLength` does. Unexported names can change freely.
+- **Renaming exported names** breaks users. Add the new name and keep the old one as an alias with a `// Deprecated: Use X.` paragraph and a `//go:fix inline` directive, as `distance.PlankLength` does: `go fix` then rewrites the callers' code. The directive works on constants and on functions whose body is a single call, such as `MustConvertTo`. Unexported names can change freely.
 - **Generated files** (`*_gen.go`) start with `// Code generated … DO NOT EDIT.`; change the generator instead.
 
 ## Testing conventions
