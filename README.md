@@ -32,7 +32,7 @@ fmt.Println(vel.ConvertTo(velocity.KilometerPerHour)) // 60 km/h
 ## Contents
 
 - [Installation](#installation)
-- [Quick start](#quick-start)
+- [Quick start](#quick-start), and [use cases](USECASES.md) from real-world domains
 - [Usage](#usage): [values and units](#values-and-units), [comparing](#comparing-values), [combining measures](#combining-measures), [formatting](#formatting), [parsing](#parsing), [JSON](#json-and-text-encoding), [temperature](#temperature), [custom measures](#custom-measures), [errors](#errors)
 - [Supported units](#supported-units)
 - [Performance](#performance)
@@ -100,7 +100,9 @@ func main() {
 }
 ```
 
-The `time` subpackage shadows the standard library's `time`. Import the standard one under another name, such as `stdtime "time"`, when you need both.
+The `time` subpackage shadows the standard library's `time`. Import the standard one under another name, such as `builtintime "time"` as the examples do, when you need both.
+
+For complete, real-world scenarios, from a fitness tracker and IoT telemetry to electronics and aviation fuel, see [USECASES.md](USECASES.md).
 
 ## Usage
 

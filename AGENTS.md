@@ -82,6 +82,7 @@ User-defined measures are first-class: they convert, combine, compare, parse and
 | `.github/dependabot.yml`, `.github/pull_request_template.md` | Weekly bumps of the CI actions (into `dev`); the PR checklist |
 | `docs/` | Design documents: `docs/rfc-value-types.md` (ROADMAP 2.1, accepted) and `docs/rfc-temperature.md` (ROADMAP 4.4, accepted) |
 | `CHANGELOG.md`, `MIGRATION.md` | User-visible changes, under `## Unreleased` until the next tag; the upgrade guide from v0.0.4 |
+| `USECASES.md`, `example_usecases_test.go` | Real-world scenarios, each a verified example. `TestUseCasesDoc` (`usecases_test.go`) checks that the document shows the examples' declarations, code and output verbatim |
 | `ROADMAP.md` | Ordered plan of upcoming work. Take steps in order and tick them off when done |
 
 ## How it works
@@ -184,6 +185,7 @@ The factor model is multiplicative only. Temperature, with its offsets, has its 
 - `measure_types_test.go` runs the whole shared API against every measure and against `Quantity` (`testTypedMeasure`, `testGenericMethods`, `testText`, `testUnitPackage`). A new shared method needs a check there.
 - `Example*` functions in `example_test.go` mirror `README.md` and have verified `// Output:` blocks. Keep the README snippets in sync with them.
 - `example_measures_test.go` has an example for each measure, each cross-measure operation, custom measures, temperature and formatting, and the unit packages have their own (`distance/example_test.go`). They are what pkg.go.dev shows; a new measure or cross-measure operation needs one.
+- `example_usecases_test.go` holds the scenarios of `USECASES.md`. Change a scenario there, run it, and copy its code and output into the document: `TestUseCasesDoc` fails until the two match.
 - If a test fails because of a library bug, fix the library or skip the test with `t.Skip("known defect: …")`. Never change expected values to match wrong output.
 - Benchmarks are in `measures_benchmark_test.go` (every measure, custom measures, a sum of mixed distances, error paths, the parser, `Rate`) and `distance_benchmark_test.go` (random data). Keep benchmark names stable, because `make bench-compare` matches them across versions. They loop with `b.Loop()` (`for i := 0; b.Loop(); i++` when an index is needed), which keeps the compiler from optimizing the loop body away, and use the `generateRandom*` helpers, which draw from `math/rand/v2`.
 - Package-level sinks for benchmarks and allocation tests are in `helpers_test.go`, not in `alloc_test.go`, which `-race` builds exclude.

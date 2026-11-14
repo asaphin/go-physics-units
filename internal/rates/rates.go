@@ -88,7 +88,7 @@ var canonical = strings.NewReplacer(
 
 // CanonicalUnit returns unit with its look-alike characters replaced by the
 // forms the tables store: "µm" (MICRO SIGN) and "μm" (GREEK SMALL LETTER MU)
-// denote the same unit, as do "Ω" (OHM SIGN) and "Ω" (GREEK CAPITAL LETTER
+// denote the same unit, as do "Ω" (OHM SIGN) and "Ω" (GREEK CAPITAL LETTER
 // OMEGA). It doesn't allocate unless unit contains one of them.
 func CanonicalUnit(unit string) string {
 	if !strings.ContainsAny(unit, "\u00b5\u2126\u212b\u212a") {

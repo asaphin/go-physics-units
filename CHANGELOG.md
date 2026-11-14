@@ -37,9 +37,10 @@ The entries below describe the changes since v0.0.4.
 - **`fmt.Formatter`** on every value: `%f`, `%e`, `%g` and the other float verbs format the value with the given flags, width and precision and append the unit, so `fmt.Sprintf("%.2f", d)` gives `5.00 km`. `%v` and `%s` print `String()` with width, and `%q` quotes it.
 - **`Time.ToDuration`**, the reverse of `ParseDuration`: it rounds to the nearest nanosecond and fails with `ErrOutOfRange` for NaN or beyond about ±292 years.
 - **Unit packages:** `ParseUnit`, `Units`, and the `Unit` methods `String`, `Factor` and `Valid`.
-- **Look-alike characters** in symbols are accepted as Unicode NFKC maps them: `µ` (MICRO SIGN) for `μ`, `Ω` (OHM SIGN) for `Ω`, `Å` (ANGSTROM SIGN) for `Å` and `K` (KELVIN SIGN) for `K`.
+- **Look-alike characters** in symbols are accepted as Unicode NFKC maps them: `µ` (MICRO SIGN) for `μ`, `Ω` (OHM SIGN) for `Ω`, `Å` (ANGSTROM SIGN) for `Å` and `K` (KELVIN SIGN) for `K`.
 - **`distance.PlanckLength`** and **`time.PlanckTime`**. The misspelled `PlankLength` and `PlankTime` remain as deprecated aliases, which `go fix` replaces.
 - Runnable examples on pkg.go.dev for every measure, every cross-measure operation, custom measures, JSON, parsing and formatting.
+- **[USECASES.md](USECASES.md):** real-world scenarios (a fitness tracker, IoT telemetry, service configuration, importing mixed data, electronics, home energy, aviation fuel, pressure and recipe scaling), each a verified example. The README is reorganised, with a quick start, a guide to every feature and performance figures.
 
 ### Fixed
 
