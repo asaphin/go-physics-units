@@ -1,34 +1,24 @@
 package units_test
 
 import (
+	"errors"
 	"math"
 	"math/rand/v2"
+	"slices"
 	"testing"
 
 	units "github.com/asaphin/go-physics-units"
-	"github.com/asaphin/go-physics-units/conversion"
 	"github.com/asaphin/go-physics-units/distance"
 )
 
-func newDistance(t *testing.T, value float64, unit string) units.Distance {
-	t.Helper()
-
-	d, err := units.NewDistance(value, unit)
-	if err != nil {
-		t.Fatal(err)
-	}
-
-	return d
-}
-
 func TestCompare_SpecialValues(t *testing.T) {
-	nan := newDistance(t, math.NaN(), distance.Kilometer)
-	inf := newDistance(t, math.Inf(1), distance.Kilometer)
-	infM := newDistance(t, math.Inf(1), distance.Meter)
-	negInf := newDistance(t, math.Inf(-1), distance.Meter)
-	zero := newDistance(t, 0, distance.Kilometer)
-	negZero := newDistance(t, math.Copysign(0, -1), distance.Meter)
-	one := newDistance(t, 1, distance.Kilometer)
+	nan := units.NewDistance(math.NaN(), distance.Kilometer)
+	inf := units.NewDistance(math.Inf(1), distance.Kilometer)
+	infM := units.NewDistance(math.Inf(1), distance.Meter)
+	negInf := units.NewDistance(math.Inf(-1), distance.Meter)
+	zero := units.NewDistance(0, distance.Kilometer)
+	negZero := units.NewDistance(math.Copysign(0, -1), distance.Meter)
+	one := units.NewDistance(1, distance.Kilometer)
 
 	cases := []struct {
 		name    string
@@ -63,8 +53,8 @@ func TestCompare_SpecialValues(t *testing.T) {
 }
 
 func TestEqualWithinRel_Tolerance(t *testing.T) {
-	x := newDistance(t, 1000, distance.Meter)
-	near := newDistance(t, 1.000001, distance.Kilometer) // 1 mm more
+	x := units.NewDistance(1000, distance.Meter)
+	near := units.NewDistance(1.000001, distance.Kilometer) // 1 mm more
 
 	for _, c := range []struct {
 		tol  float64
@@ -87,8 +77,8 @@ func TestEqualWithinRel_Tolerance(t *testing.T) {
 // converted to metres. Whatever the outcome, it must not depend on the order of
 // the operands.
 func TestCompare_RoundingIsSymmetric(t *testing.T) {
-	foot := newDistance(t, 1, distance.Feet)
-	inches := newDistance(t, 12, distance.Inch)
+	foot := units.NewDistance(1, distance.Feet)
+	inches := units.NewDistance(12, distance.Inch)
 
 	if foot.Equal(inches) || inches.Equal(foot) {
 		t.Errorf("1 ft and 12 in are equal, but they differ in the last bit in metres; update the test")
@@ -104,21 +94,17 @@ func TestCompare_RoundingIsSymmetric(t *testing.T) {
 }
 
 func TestCompare_Symmetric(t *testing.T) {
-	symbols := getValidUnits(distance.ConversionFactors())
+	all := slices.Collect(distance.Units())
 	rnd := rand.New(rand.NewPCG(1, 2))
 
 	for range 10_000 {
 		// Equal values in two units, nudged apart by a few ulps half the time.
 		v := rnd.Float64() * 1e6
-		a := newDistance(t, v, symbols[rnd.IntN(len(symbols))])
-
-		b, err := a.ConvertTo(symbols[rnd.IntN(len(symbols))])
-		if err != nil {
-			t.Fatal(err)
-		}
+		a := units.NewDistance(v, all[rnd.IntN(len(all))])
+		b := a.ConvertTo(all[rnd.IntN(len(all))])
 
 		if rnd.IntN(2) == 0 {
-			b = newDistance(t, math.Nextafter(b.Value(), math.Inf(1)), b.Unit())
+			b = units.NewDistance(math.Nextafter(b.Value(), math.Inf(1)), b.Unit())
 		}
 
 		if a.Compare(b) != -b.Compare(a) || a.Equal(b) != b.Equal(a) {
@@ -134,7 +120,7 @@ func TestCompareMeasurement(t *testing.T) {
 		t.Fatal(err)
 	}
 
-	m := newDistance(t, 999, distance.Meter)
+	m := units.NewDistance(999, distance.Meter)
 
 	if got, cmpErr := km.CompareMeasurement(m); cmpErr != nil || got != 1 {
 		t.Errorf("1 km vs 999 m = %d, %v; want 1", got, cmpErr)
@@ -144,30 +130,19 @@ func TestCompareMeasurement(t *testing.T) {
 		t.Errorf("999 m vs 1 km = %d, %v; want -1", got, cmpErr)
 	}
 
-	mc := newCurrencyCreator(t)
-	usd := newCurrency(t, mc, 1, "USD")
-	eur := newCurrency(t, mc, 1, "EUR")
+	usd, eur := units.NewQuantity(1, usdUnit), units.NewQuantity(1, eurUnit)
 
 	if got, cmpErr := usd.CompareMeasurement(eur); cmpErr != nil || got != -1 {
 		t.Errorf("1 USD vs 1 EUR = %d, %v; want -1", got, cmpErr)
 	}
 
-	// A measure with the same name and some of the same units, but its own table.
-	other, err := units.NewMeasurementCreator[Currency]("currency", "USD", conversion.Factors{"USD": 1, "GBP": 1.3})
-	if err != nil {
-		t.Fatal(err)
+	// A measure with the same name but its own unit set.
+	gbp := units.NewQuantity(1, units.MustUnitOf[otherCurrency]("GBP"))
+	if got, cmpErr := usd.CompareMeasurement(gbp); !errors.Is(cmpErr, units.ErrIncompatibleMeasures) || got != 0 {
+		t.Errorf("1 USD vs 1 GBP of another set = %d, %v; want 0 and ErrIncompatibleMeasures", got, cmpErr)
 	}
 
-	usd2, err := other.New(2, "USD")
-	if err != nil {
-		t.Fatal(err)
-	}
-
-	if got, cmpErr := usd.CompareMeasurement(usd2); cmpErr != nil || got != -1 {
-		t.Errorf("1 USD vs 2 USD of another table = %d, %v; want -1", got, cmpErr)
-	}
-
-	if got, cmpErr := usd.CompareMeasurement(nil); cmpErr == nil || got != 0 {
-		t.Errorf("CompareMeasurement(nil) = %d, %v; want 0 and an error", got, cmpErr)
+	if got, cmpErr := usd.CompareMeasurement(nil); !errors.Is(cmpErr, units.ErrIncompatibleMeasures) || got != 0 {
+		t.Errorf("CompareMeasurement(nil) = %d, %v; want 0 and ErrIncompatibleMeasures", got, cmpErr)
 	}
 }

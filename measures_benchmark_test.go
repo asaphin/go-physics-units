@@ -29,29 +29,22 @@ func BenchmarkMeasures(b *testing.B) {
 	b.Run("data rate", func(b *testing.B) { benchTypedMeasure(b, dataRateCase) })
 }
 
-func benchTypedMeasure[T typedMeasure[T]](b *testing.B, c typedCase[T]) {
+func benchTypedMeasure[T typedMeasure[T, U], U unitType](b *testing.B, c typedCase[T, U]) {
 	b.Helper()
 
-	x, err := c.newFn(1234.5, c.unitA)
-	if err != nil {
-		b.Fatal(err)
-	}
-
-	y, err := c.newFn(2, c.unitB)
-	if err != nil {
-		b.Fatal(err)
-	}
+	x := c.newFn(1234.5, c.unitA)
+	y := c.newFn(2, c.unitB)
 
 	s := x.String()
 
 	b.Run("New", func(b *testing.B) {
 		for b.Loop() {
-			_, _ = c.newFn(1234.5, c.unitA)
+			_ = c.newFn(1234.5, c.unitA)
 		}
 	})
 	b.Run("ConvertTo", func(b *testing.B) {
 		for b.Loop() {
-			_, _ = x.ConvertTo(c.unitB)
+			_ = x.ConvertTo(c.unitB)
 		}
 	})
 	b.Run("Add", func(b *testing.B) {
@@ -89,32 +82,33 @@ func benchTypedMeasure[T typedMeasure[T]](b *testing.B, c typedCase[T]) {
 // BenchmarkCustomMeasures covers user-defined measures, which must stay as
 // fast as the predefined ones (P1, P3).
 func BenchmarkCustomMeasures(b *testing.B) {
-	mc, err := units.NewMeasurementCreator[Currency]("currency", "USD", currencyFactors())
-	if err != nil {
-		b.Fatal(err)
-	}
-
-	usd, err := mc.New(1, "USD")
-	if err != nil {
-		b.Fatal(err)
-	}
-
-	eur, err := mc.New(1, "EUR")
-	if err != nil {
-		b.Fatal(err)
-	}
-
+	usd, eur := units.NewQuantity(1, usdUnit), units.NewQuantity(1, eurUnit)
 	threeUnits := currencyFactors()
 	distanceUnits := distance.ConversionFactors()
 
-	b.Run("MeasurementCreator.New", func(b *testing.B) {
+	b.Run("NewQuantity", func(b *testing.B) {
 		for b.Loop() {
-			_, _ = mc.New(1, "EUR")
+			_ = units.NewQuantity(1, eurUnit)
 		}
 	})
-	b.Run("MeasurementCreator.ParseString", func(b *testing.B) {
+	b.Run("ParseQuantity", func(b *testing.B) {
 		for b.Loop() {
-			_, _ = mc.ParseString("2.5 EUR")
+			_, _ = units.ParseQuantity[currency]("2.5 EUR")
+		}
+	})
+	b.Run("Add", func(b *testing.B) {
+		for b.Loop() {
+			_ = usd.Add(eur)
+		}
+	})
+	b.Run("ConvertTo", func(b *testing.B) {
+		for b.Loop() {
+			_ = usd.ConvertTo(eurUnit)
+		}
+	})
+	b.Run("Compare", func(b *testing.B) {
+		for b.Loop() {
+			_ = usd.Compare(eur)
 		}
 	})
 	b.Run("AddMeasurement", func(b *testing.B) {
@@ -122,23 +116,38 @@ func BenchmarkCustomMeasures(b *testing.B) {
 			_, _ = usd.AddMeasurement(eur)
 		}
 	})
-	b.Run("NewBaseMeasurement/3 units", func(b *testing.B) {
+	b.Run("NewUnitSet/3 units", func(b *testing.B) {
 		for b.Loop() {
-			_, _ = units.NewBaseMeasurement(1, "USD", threeUnits)
+			_, _ = units.NewUnitSet("currency", "USD", threeUnits)
 		}
 	})
-	b.Run("NewBaseMeasurement/19 units", func(b *testing.B) {
+	b.Run("NewUnitSet/19 units", func(b *testing.B) {
 		for b.Loop() {
-			_, _ = units.NewBaseMeasurement(1, distance.Meter, distanceUnits)
+			_, _ = units.NewUnitSet("long distance", distance.BaseUnit.String(), distanceUnits)
 		}
 	})
+}
+
+// BenchmarkSum adds up mixed distances, the loop the value types were designed
+// for.
+func BenchmarkSum(b *testing.B) {
+	ds := generateRandomDistances(1000)
+
+	for b.Loop() {
+		var total units.Distance
+		for _, d := range ds {
+			total = total.Add(d)
+		}
+
+		sinkDistance = total
+	}
 }
 
 // BenchmarkErrors covers error paths, which P1 keeps cheap too.
 func BenchmarkErrors(b *testing.B) {
 	b.Run("unknown unit", func(b *testing.B) {
 		for b.Loop() {
-			_, _ = units.NewDistance(1, "furlong")
+			_, _ = units.StringToDistance("1 furlong")
 		}
 	})
 	b.Run("unit of another measure", func(b *testing.B) {
@@ -157,7 +166,7 @@ func BenchmarkErrors(b *testing.B) {
 func BenchmarkParser(b *testing.B) {
 	strict, _ := units.NewParser()
 	all, _ := units.NewParser(units.CaseInsensitive(), units.AllowNoSpace(),
-		units.WithAliases(map[string]string{"metres": distance.Meter}))
+		units.WithAliases(map[string]string{"metres": distance.Meter.String()}))
 
 	b.Run("ParseString", func(b *testing.B) {
 		for b.Loop() {
@@ -184,6 +193,6 @@ func BenchmarkParser(b *testing.B) {
 // BenchmarkRate covers the unit packages' Rate functions.
 func BenchmarkRate(b *testing.B) {
 	for b.Loop() {
-		_, _ = distance.Rate(distance.Kilometer, distance.Meter)
+		_ = distance.Rate(distance.Kilometer, distance.Meter)
 	}
 }

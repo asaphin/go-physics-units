@@ -17,6 +17,10 @@ import (
 // ParseString doesn't have: unit aliases, case-insensitive symbols, the form
 // without a space ("10km") and user-defined measures. Build one with NewParser.
 //
+// Like ParseString, Parse returns values of the measure's concrete type: a
+// Distance for "10 km", a Quantity[M] for a unit of a measure added with
+// WithMeasure.
+//
 // A Parser is immutable and safe for concurrent use. It is a small value that
 // refers to data no one can change, so copy it freely. The zero Parser parses
 // exactly like ParseString.
@@ -30,20 +34,12 @@ type parser struct {
 	noSpace bool
 }
 
-// parsedUnit is what a symbol or alias denotes: a unit of a table. If several
-// symbols fold to the same lower-case key, candidates lists them instead.
-type parsedUnit struct {
-	unit       string
-	table      rates.Table
-	candidates string
-}
-
 // ParserOption configures a Parser; see NewParser.
 type ParserOption func(*parserConfig)
 
 type parserConfig struct {
 	aliases         []map[string]string
-	tables          []rates.Table
+	measures        []parsedMeasure
 	caseInsensitive bool
 	noSpace         bool
 	err             error
@@ -55,7 +51,7 @@ type parserConfig struct {
 //	units.WithAliases(map[string]string{"metre": distance.Meter, "kph": velocity.KilometerPerHour})
 //
 // The targets must be predefined symbols, or units of a measure added with
-// WithCreator. An alias must be non-empty, contain no whitespace, and not be a
+// WithMeasure. An alias must be non-empty, contain no whitespace, and not be a
 // symbol or another alias. The map is copied.
 func WithAliases(aliases map[string]string) ParserOption {
 	copied := maps.Clone(aliases)
@@ -84,21 +80,27 @@ func AllowNoSpace() ParserOption {
 	}
 }
 
-// WithCreator makes the parser recognise the units of mc's measure. mc must
-// come from NewMeasurementCreator. Parsed values share mc's conversion table,
-// so they combine and compare with values from mc.New, and they satisfy T.
-// The measure's symbols must not clash with predefined symbols or with those
-// of another creator.
-func WithCreator[T Measurement](mc MeasurementCreator[T]) ParserOption {
+// parsedMeasure is a user-defined measure added with WithMeasure.
+type parsedMeasure struct {
+	set *unitSet
+	box func(float64, uint16) Measurement
+}
+
+// WithMeasure makes the parser recognise the units of the user-defined measure
+// M. Parsed values are of type Quantity[M]. The measure's symbols must not
+// clash with predefined symbols or with those of another measure.
+func WithMeasure[M Measure]() ParserOption {
 	return func(c *parserConfig) {
-		impl, ok := mc.(*measurementCreator[T])
-		if !ok {
-			c.err = cmp.Or(c.err, invalidOption("WithCreator: the creator must come from NewMeasurementCreator"))
+		s, err := setOf[M]()
+		if err != nil {
+			c.err = cmp.Or(c.err, invalidOption("WithMeasure: "+err.Error()))
 
 			return
 		}
 
-		c.tables = append(c.tables, impl.conversionRates)
+		c.measures = append(c.measures, parsedMeasure{set: s, box: func(v float64, u uint16) Measurement {
+			return Quantity[M]{value: v, unit: Unit[M]{i: u}}
+		}})
 	}
 }
 
@@ -118,8 +120,8 @@ func NewParser(options ...ParserOption) (Parser, error) {
 
 	p := &parser{units: maps.Clone(predefinedUnits), noSpace: c.noSpace}
 
-	for _, table := range c.tables {
-		if err := p.addTable(table); err != nil {
+	for _, m := range c.measures {
+		if err := p.addMeasure(m); err != nil {
 			return Parser{}, err
 		}
 	}
@@ -137,14 +139,18 @@ func NewParser(options ...ParserOption) (Parser, error) {
 	return Parser{p: p}, nil
 }
 
-func (p *parser) addTable(table rates.Table) error {
-	for unit := range table.Units() {
-		if prev, ok := p.units[unit]; ok {
-			return invalidOption("unit " + unit + " of measure " + table.Measure() +
-				" is already a unit of measure " + prev.table.Measure())
+func (p *parser) addMeasure(m parsedMeasure) error {
+	for i, symbol := range m.set.symbols {
+		if prev, ok := p.units[symbol]; ok {
+			return invalidOption("unit " + symbol + " of measure " + string(m.set.name) +
+				" is already a unit of measure " + string(prev.set.name))
 		}
 
-		p.units[unit] = parsedUnit{unit: unit, table: table}
+		p.units[symbol] = parsedUnit{
+			set:  m.set,
+			unit: uint16(i),
+			box:  m.box,
+		}
 	}
 
 	return nil
@@ -164,7 +170,7 @@ func (p *parser) addAliases(aliases map[string]string) error {
 		// The target must be a symbol, not another alias: then the result
 		// doesn't depend on the order in which aliases are added.
 		resolved, ok := p.units[rates.CanonicalUnit(target)]
-		if !ok || resolved.unit != rates.CanonicalUnit(target) {
+		if !ok || resolved.set.symbols[resolved.unit] != rates.CanonicalUnit(target) {
 			return invalidOption("alias " + alias + ": " + target + " isn't a unit symbol")
 		}
 
@@ -191,7 +197,7 @@ func (p *parser) fold() {
 		ambiguous := slices.ContainsFunc(keys[1:], func(k string) bool {
 			u := p.units[k]
 
-			return u.unit != first.unit || u.table != first.table
+			return u.unit != first.unit || u.set != first.set
 		})
 		if !ambiguous {
 			p.folded[lower] = first
@@ -206,8 +212,9 @@ func (p *parser) fold() {
 
 // Parse parses a measurement from a string of the form "<value> <unit>", where
 // the unit may be any symbol or alias the parser accepts. The value must be
-// finite. Values of predefined measures have their measure's type, and values
-// of a measure added with WithCreator that measure's.
+// finite. Values of predefined measures have their measure's type, such as
+// Distance, and values of a measure M added with WithMeasure the type
+// Quantity[M].
 func (p Parser) Parse(s string) (Measurement, error) {
 	if p.p == nil {
 		return ParseString(s)
@@ -223,16 +230,15 @@ func (p Parser) Parse(s string) (Measurement, error) {
 		return nil, err
 	}
 
-	bm := baseMeasurement{value: value, unit: resolved.unit, conversionRates: resolved.table}
-
-	return &bm, nil
+	return resolved.box(value, resolved.unit), nil
 }
 
-// Unit returns the unit symbol that symbol denotes: itself, or the symbol an
-// alias or a case variant stands for. Use it with the typed constructors:
+// Unit returns the canonical unit symbol that symbol denotes: itself, or the
+// symbol an alias or a case variant stands for. Use it with the unit
+// packages' ParseUnit:
 //
-//	u, err := p.Unit("metres")
-//	d, err := units.NewDistance(5, u)
+//	symbol, err := p.Unit("metres") // "m"
+//	u, ok := distance.ParseUnit(symbol)
 func (p Parser) Unit(symbol string) (string, error) {
 	if p.p == nil {
 		pu, ok := predefinedUnits[rates.CanonicalUnit(symbol)]
@@ -240,7 +246,7 @@ func (p Parser) Unit(symbol string) (string, error) {
 			return "", unknownUnitError("", symbol)
 		}
 
-		return pu.unit, nil
+		return pu.set.symbols[pu.unit], nil
 	}
 
 	resolved, err := p.p.resolve(symbol)
@@ -248,7 +254,7 @@ func (p Parser) Unit(symbol string) (string, error) {
 		return "", err
 	}
 
-	return resolved.unit, nil
+	return resolved.set.symbols[resolved.unit], nil
 }
 
 func (p *parser) resolve(symbol string) (parsedUnit, error) {
@@ -269,7 +275,7 @@ func (p *parser) resolve(symbol string) (parsedUnit, error) {
 		}
 	}
 
-	return parsedUnit{}, unknownUnitError("", symbol)
+	return parsedUnit{}, unknownSymbolError(symbol)
 }
 
 // lookupFolded looks canonical up in the case-insensitive index. Short ASCII

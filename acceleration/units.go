@@ -1,42 +1,37 @@
-// Package acceleration defines the acceleration unit symbols supported by the units package
+// Package acceleration defines the acceleration units of the units package
 // and their conversion factors to the base unit, the metre per second squared.
 package acceleration
 
-import (
-	"github.com/asaphin/go-physics-units/conversion"
-	"github.com/asaphin/go-physics-units/internal/rates"
-)
+// Unit is an acceleration unit: one of the constants below. String returns its
+// symbol and ParseUnit finds the unit of a symbol.
+//
+// The zero Unit is the base unit, MeterPerSecondSquared. The numbers behind the constants may
+// change between versions: store and exchange units by their symbols.
+type Unit uint8
 
 // BaseUnit is the SI unit of acceleration that all acceleration factors are relative to.
 const BaseUnit = MeterPerSecondSquared
 
-// Acceleration unit symbols.
+// Acceleration units, with their symbols.
 const (
-	CentimeterPerSecondSquared = "cm/s²"
-	FootPerSecondSquared       = "ft/s²"
-	MeterPerSecondSquared      = "m/s²"
-	StandardGravity            = "gₙ" // standard acceleration of gravity, gₙ with U+2099 LATIN SUBSCRIPT SMALL LETTER N; exact by definition (3rd CGPM, 1901)
+	MeterPerSecondSquared      Unit = iota // m/s²
+	CentimeterPerSecondSquared             // cm/s²
+	FootPerSecondSquared                   // ft/s²
+	StandardGravity                        // gₙ: standard acceleration of gravity, gₙ with U+2099 LATIN SUBSCRIPT SMALL LETTER N; exact by definition (3rd CGPM, 1901)
+
+	unitCount // the number of units; keep it last
 )
 
+// definitions holds the symbol of each unit and its factor: how many base
+// units (m/s²) there are in one unit.
+//
 // The factors are exact: defined values, written as constant expressions that Go
 // evaluates exactly before rounding once.
 //
 // Source: NIST SP 811, appendix B.
-var conversionFactors = conversion.Factors{
-	CentimeterPerSecondSquared: 0.01,
-	FootPerSecondSquared:       0.3048,
-	MeterPerSecondSquared:      1,
-	StandardGravity:            9.80665,
-}
-
-// ConversionFactors returns a copy of the acceleration conversion factors: how many
-// base units (m/s²) there are in one unit of each symbol.
-func ConversionFactors() conversion.Factors {
-	return conversion.CopyConversionFactors(conversionFactors)
-}
-
-// Rate returns the multiplier that converts a value in unit from into unit to,
-// and whether both are acceleration units. Both forms of the micro sign are accepted.
-func Rate(from, to string) (float64, bool) {
-	return rates.FactorRate(conversionFactors, from, to)
+var definitions = [unitCount]definition{
+	MeterPerSecondSquared:      {"m/s²", 1},
+	CentimeterPerSecondSquared: {"cm/s²", 0.01},
+	FootPerSecondSquared:       {"ft/s²", 0.3048},
+	StandardGravity:            {"gₙ", 9.80665},
 }

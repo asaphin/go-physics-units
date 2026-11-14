@@ -195,14 +195,12 @@ func checkExportedType(ts *ast.TypeSpec, check func(name string, node ast.Node))
 // TestConcurrentUse runs the public API from many goroutines. Under the race
 // detector (make check, CI) it fails if any shared state is written after init.
 func TestConcurrentUse(t *testing.T) {
-	mc := newCurrencyCreator(t)
-
 	var wg sync.WaitGroup
 
 	for range 8 {
 		wg.Go(func() {
 			for range 100 {
-				useConcurrently(t, mc)
+				useConcurrently(t)
 			}
 		})
 	}
@@ -210,7 +208,7 @@ func TestConcurrentUse(t *testing.T) {
 	wg.Wait()
 }
 
-func useConcurrently(t *testing.T, mc units.MeasurementCreator[Currency]) {
+func useConcurrently(t *testing.T) {
 	t.Helper()
 
 	m, err := units.ParseString("1 km")
@@ -227,7 +225,7 @@ func useConcurrently(t *testing.T, mc units.MeasurementCreator[Currency]) {
 		return
 	}
 
-	if got := d.MustConvertTo(distance.Millimeter).Value(); got != 1e6 {
+	if got := d.ConvertTo(distance.Millimeter).Value(); got != 1e6 {
 		t.Errorf("1 km = %v mm, want 1e6", got)
 	}
 
@@ -237,24 +235,26 @@ func useConcurrently(t *testing.T, mc units.MeasurementCreator[Currency]) {
 
 	// Callers own the factors they get back; changing them affects nothing shared.
 	f := distance.ConversionFactors()
-	f[distance.Millimeter] = 1
+	f[distance.Millimeter.String()] = 1
 
-	if r, ok := distance.Rate(distance.Kilometer, distance.Meter); !ok || r != 1000 {
-		t.Errorf("Rate(km, m) = %v, %v; want 1000, true", r, ok)
+	if r := distance.Rate(distance.Kilometer, distance.Meter); r != 1000 {
+		t.Errorf("Rate(km, m) = %v, want 1000", r)
 	}
 
-	eur, err := mc.New(1, "EUR")
-	if err != nil {
-		t.Error(err)
+	cf := currencyUnits.ConversionFactors()
+	cf["USD"] = 2
 
-		return
+	eur := units.NewQuantity(1, eurUnit)
+
+	if sum, err := eur.AddMeasurement(eur); err != nil || sum.Value() != 2 {
+		t.Errorf("1 EUR + 1 EUR = %v, %v", sum, err)
 	}
 
-	if _, err := eur.AddMeasurement(eur); err != nil {
-		t.Error(err)
+	if got := eur.ConvertTo(usdUnit).Value(); got != 1.1 {
+		t.Errorf("1 EUR = %v USD, want 1.1", got)
 	}
 
-	if _, err := units.NewBaseMeasurement(1, "EUR", currencyFactors()); err != nil {
+	if _, err := units.ParseQuantity[currency]("1 EUR"); err != nil {
 		t.Error(err)
 	}
 }

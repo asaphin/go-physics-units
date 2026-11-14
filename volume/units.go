@@ -1,63 +1,58 @@
-// Package volume defines the volume unit symbols supported by the units package
+// Package volume defines the volume units of the units package
 // and their conversion factors to the base unit, the cubic metre.
 package volume
 
-import (
-	"github.com/asaphin/go-physics-units/conversion"
-	"github.com/asaphin/go-physics-units/internal/rates"
-)
+// Unit is a volume unit: one of the constants below. String returns its
+// symbol and ParseUnit finds the unit of a symbol.
+//
+// The zero Unit is the base unit, CubicMeter. The numbers behind the constants may
+// change between versions: store and exchange units by their symbols.
+type Unit uint8
 
 // BaseUnit is the SI unit of volume that all volume factors are relative to.
 const BaseUnit = CubicMeter
 
-// Volume unit symbols.
+// Volume units, with their symbols.
 const (
-	CubicMillimeter = "mm³"
-	Microliter      = "μL" // U+03BC GREEK SMALL LETTER MU; "µL" (U+00B5 MICRO SIGN) is accepted too
-	CubicCentimeter = "cm³"
-	Milliliter      = "mL"
-	CubicInch       = "in³"
-	Liter           = "L"
-	Pint            = "pt"  // US liquid pint, 1/8 US gallon
-	Quart           = "qt"  // US liquid quart, 1/4 US gallon
-	Gallon          = "gal" // US liquid gallon, 231 in³
-	CubicFoot       = "ft³"
-	Barrel          = "bbl" // oil barrel, 42 US gallons
-	CubicYard       = "yd³"
-	CubicMeter      = "m³"
-	CubicKilometer  = "km³"
+	CubicMeter      Unit = iota // m³
+	CubicMillimeter             // mm³
+	Microliter                  // μL, with U+03BC GREEK SMALL LETTER MU; "µL" (U+00B5 MICRO SIGN) is accepted too
+	CubicCentimeter             // cm³
+	Milliliter                  // mL
+	CubicInch                   // in³
+	Liter                       // L
+	Pint                        // pt: US liquid pint, 1/8 US gallon
+	Quart                       // qt: US liquid quart, 1/4 US gallon
+	Gallon                      // gal: US liquid gallon, 231 in³
+	CubicFoot                   // ft³
+	Barrel                      // bbl: oil barrel, 42 US gallons
+	CubicYard                   // yd³
+	CubicKilometer              // km³
+
+	unitCount // the number of units; keep it last
 )
 
+// definitions holds the symbol of each unit and its factor: how many base
+// units (m³) there are in one unit.
+//
 // The factors are exact: defined values, written as constant expressions that Go
 // evaluates exactly before rounding once.
 //
 // Source: NIST SP 811, appendix B; the inch, foot and yard are the
 // international ones (exactly 0.0254, 0.3048 and 0.9144 m).
-var conversionFactors = conversion.Factors{
-	CubicMillimeter: 1e-9,
-	Microliter:      1e-9,
-	CubicCentimeter: 1e-6,
-	Milliliter:      1e-6,
-	CubicInch:       0.0254 * 0.0254 * 0.0254,
-	Liter:           1e-3,
-	Pint:            231 * 0.0254 * 0.0254 * 0.0254 / 8,
-	Quart:           231 * 0.0254 * 0.0254 * 0.0254 / 4,
-	Gallon:          231 * 0.0254 * 0.0254 * 0.0254,
-	CubicFoot:       0.3048 * 0.3048 * 0.3048,
-	Barrel:          42 * 231 * 0.0254 * 0.0254 * 0.0254,
-	CubicYard:       0.9144 * 0.9144 * 0.9144,
-	CubicMeter:      1,
-	CubicKilometer:  1e9,
-}
-
-// ConversionFactors returns a copy of the volume conversion factors: how many
-// base units (m³) there are in one unit of each symbol.
-func ConversionFactors() conversion.Factors {
-	return conversion.CopyConversionFactors(conversionFactors)
-}
-
-// Rate returns the multiplier that converts a value in unit from into unit to,
-// and whether both are volume units. Both forms of the micro sign are accepted.
-func Rate(from, to string) (float64, bool) {
-	return rates.FactorRate(conversionFactors, from, to)
+var definitions = [unitCount]definition{
+	CubicMeter:      {"m³", 1},
+	CubicMillimeter: {"mm³", 1e-9},
+	Microliter:      {"μL", 1e-9},
+	CubicCentimeter: {"cm³", 1e-6},
+	Milliliter:      {"mL", 1e-6},
+	CubicInch:       {"in³", 0.0254 * 0.0254 * 0.0254},
+	Liter:           {"L", 1e-3},
+	Pint:            {"pt", 231 * 0.0254 * 0.0254 * 0.0254 / 8},
+	Quart:           {"qt", 231 * 0.0254 * 0.0254 * 0.0254 / 4},
+	Gallon:          {"gal", 231 * 0.0254 * 0.0254 * 0.0254},
+	CubicFoot:       {"ft³", 0.3048 * 0.3048 * 0.3048},
+	Barrel:          {"bbl", 42 * 231 * 0.0254 * 0.0254 * 0.0254},
+	CubicYard:       {"yd³", 0.9144 * 0.9144 * 0.9144},
+	CubicKilometer:  {"km³", 1e9},
 }

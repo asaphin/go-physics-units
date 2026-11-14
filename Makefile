@@ -20,7 +20,7 @@ GO_VERSION := $(shell go env GOVERSION)
 # api: a pinned gorelease, run with go run. Keep in sync with .github/workflows/ci.yml.
 GORELEASE := golang.org/x/exp/cmd/gorelease@v0.0.0-20261014143641-f0251eb4aa3e
 
-.PHONY: help check tools api build vet test race allocs bench bench-compare rfc-bench profile cover fuzz lint fmt fmt-check tidy-check golangci-lint-version
+.PHONY: help check tools api build vet test race allocs bench bench-compare generate profile cover fuzz lint fmt fmt-check tidy-check golangci-lint-version
 
 ## check: everything CI runs (go.mod tidiness, formatting, vet, lint, race-enabled tests, allocation guards)
 check: tidy-check fmt-check vet lint race allocs
@@ -67,9 +67,9 @@ bench-compare:
 		-count=$(BENCH_COUNT) -benchtime=$(BENCH_TIME) . > .bench/head.txt
 	go run $(BENCHSTAT) .bench/base.txt .bench/head.txt
 
-## rfc-bench: the value-type prototype of docs/rfc-value-types.md against the current library
-rfc-bench:
-	cd docs/rfc-value-types && go test -run='^$$' -bench=. -benchmem .
+## generate: regenerates the code that every measure shares (internal/gen); TestGenerated fails when it is stale
+generate:
+	go generate ./...
 
 profile:
 	go test -run='^$$' -bench=. -benchmem -cpuprofile=profile.out .

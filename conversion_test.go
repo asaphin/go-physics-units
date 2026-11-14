@@ -1,6 +1,7 @@
 package units_test
 
 import (
+	"fmt"
 	"math"
 	"testing"
 
@@ -84,8 +85,8 @@ func TestConversion_AllUnitPairs(t *testing.T) {
 // equivalences, so that a wrong factor can't go unnoticed.
 func TestConversion_ReferenceValues(t *testing.T) {
 	cases := []struct {
-		from string
-		to   string
+		from fmt.Stringer
+		to   fmt.Stringer
 		want float64 // 1 from = want to
 	}{
 		{distance.Meter, distance.Millimeter, 1000},
@@ -208,12 +209,12 @@ func TestConversion_ReferenceValues(t *testing.T) {
 	}
 
 	for _, c := range cases {
-		m, err := units.NewMeasurement(1, c.from)
+		m, err := units.NewMeasurement(1, c.from.String())
 		if err != nil {
 			t.Fatal(err)
 		}
 
-		got, err := m.ConvertToMeasurement(c.to)
+		got, err := m.ConvertToMeasurement(c.to.String())
 		if err != nil {
 			t.Fatal(err)
 		}
@@ -230,119 +231,72 @@ func TestConversion_MicroSignVariants(t *testing.T) {
 		greekMu   = "\u03bc" // GREEK SMALL LETTER MU
 	)
 
-	for _, unit := range []string{distance.Micrometer, mass.Microgram, time.Microsecond} {
-		if unit[:len(greekMu)] != greekMu {
+	for _, unit := range []fmt.Stringer{distance.Micrometer, mass.Microgram, time.Microsecond} {
+		if unit.String()[:len(greekMu)] != greekMu {
 			t.Errorf("predefined symbol %s doesn't use U+03BC", unit)
 		}
 	}
 
-	d, err := units.NewDistance(1, microSign+"m")
+	if u, ok := distance.ParseUnit(microSign + "m"); !ok || u != distance.Micrometer {
+		t.Errorf("ParseUnit(%sm) = %v, %v; want %v", microSign, u, ok, distance.Micrometer)
+	}
+
+	d, err := units.StringToDistance("1 " + microSign + "m")
 	if err != nil {
 		t.Fatal(err)
 	}
 
-	assertMeasurement(t, d, 1, distance.Micrometer)
+	assertMeasurement(t, d, 1, distance.Micrometer.String())
 
-	nm, err := d.ConvertTo("nm")
+	nm, err := d.ConvertToMeasurement(microSign + "m")
 	if err != nil {
 		t.Fatal(err)
 	}
 
-	assertMeasurement(t, nm, 1000, distance.Nanometer)
+	assertMeasurement(t, nm, 1, distance.Micrometer.String())
 
-	back, err := nm.ConvertTo(microSign + "m")
+	g, err := units.ParseString("5 " + microSign + "g")
 	if err != nil {
 		t.Fatal(err)
 	}
 
-	assertMeasurement(t, back, 1, distance.Micrometer)
-
-	g, err := units.StringToMass("5 " + microSign + "g")
-	if err != nil {
-		t.Fatal(err)
-	}
-
-	assertMeasurement(t, g, 5, mass.Microgram)
-
-	if r, ok := distance.Rate(microSign+"m", distance.Nanometer); !ok || !almostEqual(r, 1000, 1e-12) {
-		t.Errorf("Rate(%sm, nm) = %v, %v; want 1000, true", microSign, r, ok)
-	}
+	assertMeasurement(t, g, 5, mass.Microgram.String())
 
 	if mt := units.DetectMeasureType(microSign + "s"); mt != units.MeasureTime {
 		t.Errorf("DetectMeasureType(\u00b5s) = %s, want %s", mt, units.MeasureTime)
 	}
 }
 
-// TestRate checks each unit package's Rate against its factors and against the
-// examples in its doc comment.
+// TestRate checks each unit package's Rate against the examples that its
+// documentation used to give. testUnitPackage checks every rate against the
+// factors.
 func TestRate(t *testing.T) {
-	rateFuncs := map[units.MeasureType]func(from, to string) (float64, bool){
-		units.MeasureDistance:     distance.Rate,
-		units.MeasureArea:         area.Rate,
-		units.MeasureMass:         mass.Rate,
-		units.MeasureTime:         time.Rate,
-		units.MeasureVelocity:     velocity.Rate,
-		units.MeasureVolume:       volume.Rate,
-		units.MeasureAcceleration: acceleration.Rate,
-		units.MeasureForce:        force.Rate,
-		units.MeasureEnergy:       energy.Rate,
-		units.MeasurePower:        power.Rate,
-		units.MeasurePressure:     pressure.Rate,
-		units.MeasureFrequency:    frequency.Rate,
-		units.MeasureAngle:        angle.Rate,
-		units.MeasureDataSize:     datasize.Rate,
-		units.MeasureDensity:      density.Rate,
-		units.MeasureDataRate:     datarate.Rate,
-	}
-
-	for mt, rate := range rateFuncs {
-		factors := predefinedFactors[mt]
-
-		for from, fromFactor := range factors {
-			for to, toFactor := range factors {
-				if got, ok := rate(from, to); !ok || !almostEqual(got, fromFactor/toFactor, 1e-15) {
-					t.Errorf("%s: Rate(%s, %s) = %v, %v; want %v, true", mt, from, to, got, ok, fromFactor/toFactor)
-				}
-			}
-
-			if got, ok := rate(from, "unknown"); ok || got != 0 {
-				t.Errorf("%s: Rate(%s, unknown) = %v, %v; want 0, false", mt, from, got, ok)
-			}
-
-			if got, ok := rate("unknown", from); ok || got != 0 {
-				t.Errorf("%s: Rate(unknown, %s) = %v, %v; want 0, false", mt, from, got, ok)
-			}
-		}
-	}
-
 	examples := []struct {
 		name string
-		rate func(from, to string) (float64, bool)
-		from string
-		to   string
+		rate float64
 		want float64
 	}{
-		{"distance", distance.Rate, distance.Kilometer, distance.Meter, 1000},
-		{"area", area.Rate, area.SquareKilometer, area.SquareMeter, 1e6},
-		{"mass", mass.Rate, mass.Kilogram, mass.Gram, 1000},
-		{"time", time.Rate, time.Hour, time.Minute, 60},
-		{"velocity", velocity.Rate, velocity.MeterPerSecond, velocity.KilometerPerHour, 3.6},
-		{"volume", volume.Rate, volume.Liter, volume.Milliliter, 1000},
-		{"acceleration", acceleration.Rate, acceleration.StandardGravity, acceleration.MeterPerSecondSquared, 9.80665},
-		{"force", force.Rate, force.Kilonewton, force.Newton, 1000},
-		{"energy", energy.Rate, energy.KilowattHour, energy.Megajoule, 3.6},
-		{"power", power.Rate, power.Kilowatt, power.Watt, 1000},
-		{"pressure", pressure.Rate, pressure.Bar, pressure.Kilopascal, 100},
-		{"frequency", frequency.Rate, frequency.Kilohertz, frequency.Hertz, 1000},
-		{"angle", angle.Rate, angle.Revolution, angle.Degree, 360},
-		{"data size", datasize.Rate, datasize.Kibibyte, datasize.Byte, 1024},
-		{"density", density.Rate, density.KilogramPerLiter, density.KilogramPerCubicMeter, 1000},
-		{"data rate", datarate.Rate, datarate.MegabytePerSecond, datarate.MegabitPerSecond, 8},
+		{"distance", distance.Rate(distance.Kilometer, distance.Meter), 1000},
+		{"area", area.Rate(area.SquareKilometer, area.SquareMeter), 1e6},
+		{"mass", mass.Rate(mass.Kilogram, mass.Gram), 1000},
+		{"time", time.Rate(time.Hour, time.Minute), 60},
+		{"velocity", velocity.Rate(velocity.MeterPerSecond, velocity.KilometerPerHour), 3.6},
+		{"volume", volume.Rate(volume.Liter, volume.Milliliter), 1000},
+		{"acceleration", acceleration.Rate(acceleration.StandardGravity, acceleration.MeterPerSecondSquared), 9.80665},
+		{"force", force.Rate(force.Kilonewton, force.Newton), 1000},
+		{"energy", energy.Rate(energy.KilowattHour, energy.Megajoule), 3.6},
+		{"power", power.Rate(power.Kilowatt, power.Watt), 1000},
+		{"pressure", pressure.Rate(pressure.Bar, pressure.Kilopascal), 100},
+		{"frequency", frequency.Rate(frequency.Kilohertz, frequency.Hertz), 1000},
+		{"angle", angle.Rate(angle.Revolution, angle.Degree), 360},
+		{"data size", datasize.Rate(datasize.Kibibyte, datasize.Byte), 1024},
+		{"density", density.Rate(density.KilogramPerLiter, density.KilogramPerCubicMeter), 1000},
+		{"data rate", datarate.Rate(datarate.MegabytePerSecond, datarate.MegabitPerSecond), 8},
 	}
 
 	for _, e := range examples {
-		if got, ok := e.rate(e.from, e.to); !ok || !almostEqual(got, e.want, 1e-15) {
-			t.Errorf("%s.Rate(%s, %s) = %v, %v; want %v, true", e.name, e.from, e.to, got, ok, e.want)
+		if !almostEqual(e.rate, e.want, 1e-15) {
+			t.Errorf("%s: Rate = %v, want %v", e.name, e.rate, e.want)
 		}
 	}
 }

@@ -1,6 +1,10 @@
 # RFC: value types and typed units
 
-ROADMAP step 2.1. **Status:** proposal, waiting for the author's decision. Written 2026-11-13.
+ROADMAP step 2.1. **Status:** accepted on 2026-11-14 and implemented (ROADMAP 3.1–3.3A). Written 2026-11-13.
+
+> **Decisions (2026-11-14):** Path A with option I (integer units); `Div` and the cross-measure divisions keep returning `ErrZeroDivision`; `NewMeasurementCreator` and `NewBaseMeasurement` are **removed** in the same release rather than deprecated.
+>
+> **As built**, some names differ from this proposal: the unit type of a custom measure is `units.Unit[M]` (here `U[M]`), the constructor is `NewQuantity` (here `New`), `NewUnitSet` takes a base unit like `NewMeasurementCreator` did, `Measure.Units` returns a `UnitSet` value handle rather than a `*UnitSet`, and the generic interface's `Unit()` is `Symbol()`. The prototype module, `docs/rfc-value-types/`, was deleted. The measurements below were taken with the prototype; the library matches them (`BenchmarkMeasures`, `BenchmarkSum`).
 
 ## Summary
 
@@ -169,4 +173,4 @@ The measures added in steps 4.3 (volume through data rate) convert the same way 
 3. **Division by zero:** keep `Div` returning `(X, error)`, or follow IEEE floats and return ±Inf or NaN without an error? This RFC keeps the error, as decided in 0.3; with value types it no longer costs an allocation.
 4. **`NewMeasurementCreator` and `NewBaseMeasurement`:** deprecate them in v0.2.0 and remove them at v1.0.0 (proposed), or remove them in v0.2.0?
 
-The prototype module stays until the decision, then it is deleted.
+The prototype module was deleted after the decision.

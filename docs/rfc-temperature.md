@@ -1,6 +1,8 @@
 # RFC: temperature
 
-ROADMAP step 4.4. **Status:** proposal, waiting for the author's decision. Nothing is implemented. Written 2026-11-13.
+ROADMAP step 4.4. **Status:** accepted on 2026-11-14 and implemented (`temperature.go`, `temperature/`). Written 2026-11-13.
+
+> **Decisions (2026-11-14):** the proposal as written, except decision 2: temperatures below absolute zero are **rejected** with `ErrOutOfRange`, by the constructors, the parsers, `Temperature.Add` and `SubDifference`. NaN is rejected too. `ConvertTo` clamps rounding at absolute zero, so a valid temperature never converts below it. `ParseString` rejects temperature symbols with `ErrIncompatibleMeasures` and a message that points to `StringToTemperature`.
 
 ## Why temperature needs its own design
 

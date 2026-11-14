@@ -1,172 +1,42 @@
 package units
 
 import (
-	"cmp"
-
 	"github.com/asaphin/go-physics-units/area"
 	"github.com/asaphin/go-physics-units/distance"
 	"github.com/asaphin/go-physics-units/velocity"
 	"github.com/asaphin/go-physics-units/volume"
 )
 
-// Distance is a length measurement. Its unit symbols are defined in the
-// distance package.
-type Distance interface {
-	Measurement
-	UnitConverter[Distance]
-	Arithmetics[Distance]
-	Comparer[Distance]
-
-	// DivideByTime returns the velocity d/t in velocity.BaseUnit (m/s).
-	// It fails if t is zero.
-	DivideByTime(t Time) (Velocity, error)
-	// Square returns the area d² in area.BaseUnit (m²).
-	Square() Area
-	// Cube returns the volume d³ in volume.BaseUnit (m³).
-	Cube() Volume
+// Distance is a length: a value in a distance.Unit, such as 10 km. Create one with
+// NewDistance or StringToDistance.
+//
+// A Distance is a small immutable value: every method returns a new value, so
+// copy and share it freely. The zero Distance is 0 m.
+type Distance struct {
+	value float64
+	unit  distance.Unit
 }
 
-// distanceImplementation is the concrete implementation of Distance.
-type distanceImplementation struct {
-	baseMeasurement
-}
-
-// ConvertTo returns the distance expressed in unit.
-func (d *distanceImplementation) ConvertTo(unit string) (Distance, error) {
-	msm, err := d.convertTo(unit)
-	if err != nil {
-		return nil, err
+// DivideByTime returns the velocity d/t (m/s) in velocity.BaseUnit. It fails with
+// ErrZeroDivision if t is zero.
+func (d Distance) DivideByTime(t Time) (Velocity, error) {
+	if t.value == 0 {
+		return Velocity{}, ErrZeroDivision
 	}
 
-	return &distanceImplementation{msm}, nil
+	return Velocity{value: d.baseValue() / t.baseValue(), unit: velocity.BaseUnit}, nil
 }
 
-// MustConvertTo is like ConvertTo but panics if unit isn't a distance unit.
-func (d *distanceImplementation) MustConvertTo(unit string) Distance {
-	msm, err := d.convertTo(unit)
-	if err != nil {
-		panic(err)
-	}
+// Square returns the area d² in area.BaseUnit (m²).
+func (d Distance) Square() Area {
+	base := d.baseValue()
 
-	return &distanceImplementation{msm}
+	return Area{value: base * base, unit: area.BaseUnit}
 }
 
-// ConvertToBaseUnits returns the distance expressed in metres.
-func (d *distanceImplementation) ConvertToBaseUnits() Distance {
-	return &distanceImplementation{d.unsafeConvertTo(distance.BaseUnit)}
-}
+// Cube returns the volume d³ in volume.BaseUnit (m³).
+func (d Distance) Cube() Volume {
+	base := d.baseValue()
 
-func (d *distanceImplementation) valueInBaseUnits() float64 {
-	return d.unsafeGetValueIn(distance.BaseUnit)
-}
-
-func (d *distanceImplementation) valueInUnits(unit string) float64 {
-	return d.unsafeGetValueIn(unit)
-}
-
-// Add returns the sum of the distances, expressed in the receiver's unit.
-func (d *distanceImplementation) Add(other Distance) Distance {
-	return &distanceImplementation{d.withValue(d.value + other.valueInUnits(d.unit))}
-}
-
-// Sub returns the difference of the distances, expressed in the receiver's unit.
-func (d *distanceImplementation) Sub(other Distance) Distance {
-	return &distanceImplementation{d.withValue(d.value - other.valueInUnits(d.unit))}
-}
-
-// Mul returns the distance multiplied by multiplier.
-func (d *distanceImplementation) Mul(multiplier float64) Distance {
-	return &distanceImplementation{d.withValue(d.value * multiplier)}
-}
-
-// Div returns the distance divided by divisor. It fails if divisor is zero.
-func (d *distanceImplementation) Div(divisor float64) (Distance, error) {
-	if divisor == 0 {
-		return nil, ErrZeroDivision
-	}
-
-	return &distanceImplementation{d.withValue(d.value / divisor)}, nil
-}
-
-// DivideByTime returns the velocity d/t in m/s, or an error if t is zero.
-func (d *distanceImplementation) DivideByTime(t Time) (Velocity, error) {
-	if t.Value() == 0 {
-		return nil, ErrZeroDivision
-	}
-
-	return newVelocity(d.valueInBaseUnits()/t.valueInBaseUnits(), velocity.BaseUnit), nil
-}
-
-// Square returns the area d² in m².
-func (d *distanceImplementation) Square() Area {
-	baseD := d.valueInBaseUnits()
-
-	return newArea(baseD*baseD, area.BaseUnit)
-}
-
-// Compare compares the distances; see Comparer.
-func (d *distanceImplementation) Compare(other Distance) int {
-	return cmp.Compare(d.commonValues(other.base()))
-}
-
-// Equal reports whether the distances are equal; see Comparer.
-func (d *distanceImplementation) Equal(other Distance) bool {
-	return d.Compare(other) == 0
-}
-
-// EqualWithinRel reports whether the distances are equal within the relative
-// tolerance tol; see Comparer.
-func (d *distanceImplementation) EqualWithinRel(other Distance, tol float64) bool {
-	x, y := d.commonValues(other.base())
-
-	return equalWithinRel(x, y, tol)
-}
-
-// Cube returns the volume d³ in m³.
-func (d *distanceImplementation) Cube() Volume {
-	baseD := d.valueInBaseUnits()
-
-	return newVolume(baseD*baseD*baseD, volume.BaseUnit)
-}
-
-// NewDistance creates a distance of value in unit, one of the symbols defined in
-// the distance package.
-func NewDistance(value float64, unit string) (Distance, error) {
-	msm, err := newBaseMeasurement(value, unit, distanceRates)
-	if err != nil {
-		return nil, err
-	}
-
-	return &distanceImplementation{msm}, nil
-}
-
-// newDistance is an unchecked constructor for internal use with valid,
-// canonical units.
-func newDistance(value float64, unit string) Distance {
-	return &distanceImplementation{baseMeasurement{value: value, unit: unit, conversionRates: distanceRates}}
-}
-
-const errDistanceConversion incompatibleError = "not a distance measure"
-
-// ToDistance converts m, for example a result of ParseString, into a Distance.
-// It fails if m isn't a distance.
-func ToDistance(m Measurement) (Distance, error) {
-	if m == nil || m.Type() != MeasureDistance {
-		return nil, errDistanceConversion
-	}
-
-	return &distanceImplementation{*m.base()}, nil
-}
-
-// StringToDistance parses a distance from a string such as "10 km".
-// It fails if the unit isn't a distance unit.
-func StringToDistance(s string) (Distance, error) {
-	// Parse and construct directly: one allocation, where ParseString
-	// followed by ToDistance would allocate twice.
-	value, unit, err := parseValueAndUnit(s)
-	if err != nil {
-		return nil, err
-	}
-
-	return NewDistance(value, unit)
+	return Volume{value: base * base * base, unit: volume.BaseUnit}
 }

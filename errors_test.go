@@ -2,6 +2,7 @@ package units_test
 
 import (
 	"errors"
+	"math"
 	"strconv"
 	"testing"
 
@@ -10,6 +11,7 @@ import (
 	"github.com/asaphin/go-physics-units/conversion"
 	"github.com/asaphin/go-physics-units/distance"
 	"github.com/asaphin/go-physics-units/mass"
+	"github.com/asaphin/go-physics-units/temperature"
 	"github.com/asaphin/go-physics-units/time"
 )
 
@@ -35,44 +37,13 @@ func errOf[T any](_ T, err error) error {
 // (exactly one matches, and errors.As finds it) and its message, which must
 // stay as detailed as before the sentinels existed.
 func TestErrors(t *testing.T) {
-	km, err := units.NewDistance(1, distance.Kilometer)
-	if err != nil {
-		t.Fatal(err)
-	}
-
-	kg, err := units.NewMass(1, mass.Kilogram)
-	if err != nil {
-		t.Fatal(err)
-	}
-
-	noTime, err := units.NewTime(0, time.Second)
-	if err != nil {
-		t.Fatal(err)
-	}
-
-	noDistance, err := units.NewDistance(0, distance.Meter)
-	if err != nil {
-		t.Fatal(err)
-	}
-
-	m2, err := units.NewArea(1, area.SquareMeter)
-	if err != nil {
-		t.Fatal(err)
-	}
-
-	mc := newCurrencyCreator(t)
-	usd := newCurrency(t, mc, 1, "USD")
-
-	// A measure with the same name as mc's, but other units.
-	other, err := units.NewMeasurementCreator[Currency]("currency", "GBP", conversion.Factors{"GBP": 1.3})
-	if err != nil {
-		t.Fatal(err)
-	}
-
-	gbp, err := other.New(1, "GBP")
-	if err != nil {
-		t.Fatal(err)
-	}
+	km := units.NewDistance(1, distance.Kilometer)
+	kg := units.NewMass(1, mass.Kilogram)
+	noTime := units.NewTime(0, time.Second)
+	noDistance := units.NewDistance(0, distance.Meter)
+	m2 := units.NewArea(1, area.SquareMeter)
+	usd := units.NewQuantity(1, usdUnit)
+	gbp := units.NewQuantity(1, units.MustUnitOf[otherCurrency]("GBP"))
 
 	cases := []struct {
 		name string
@@ -80,23 +51,35 @@ func TestErrors(t *testing.T) {
 		kind units.Error
 		msg  string
 	}{
-		{"NewDistance", errOf(units.NewDistance(1, "furlong")), units.ErrUnknownUnit, "unknown distance unit furlong"},
-		{"ConvertTo", errOf(km.ConvertTo(mass.Kilogram)), units.ErrUnknownUnit, "unknown distance unit kg"},
+		{"StringToDistance", errOf(units.StringToDistance("1 kg")), units.ErrUnknownUnit, "unknown distance unit kg"},
 		{
-			"ConvertToMeasurement", errOf(km.ConvertToMeasurement(mass.Kilogram)),
+			"ConvertToMeasurement", errOf(km.ConvertToMeasurement(mass.Kilogram.String())),
 			units.ErrUnknownUnit, "unknown distance unit kg",
 		},
-		{"StringToDistance", errOf(units.StringToDistance("1 kg")), units.ErrUnknownUnit, "unknown distance unit kg"},
 		{"NewMeasurement", errOf(units.NewMeasurement(1, "furlong")), units.ErrUnknownUnit, "unknown unit furlong"},
 		{"ParseString", errOf(units.ParseString("1 furlong")), units.ErrUnknownUnit, "unknown unit furlong"},
-		{"creator New", errOf(mc.New(1, "GBP")), units.ErrUnknownUnit, "unknown currency unit GBP"},
+		{"UnitOf", errOf(units.UnitOf[currency]("GBP")), units.ErrUnknownUnit, "unknown currency unit GBP"},
 		{
-			"NewBaseMeasurement", errOf(units.NewBaseMeasurement(1, "B", conversion.Factors{"A": 1})),
-			units.ErrUnknownUnit, "unknown custom unit B",
+			"Quantity.ConvertToMeasurement", errOf(usd.ConvertToMeasurement("GBP")),
+			units.ErrUnknownUnit, "unknown currency unit GBP",
+		},
+		{
+			"AppendText of an invalid unit", errOf(units.NewDistance(1, distance.Unit(200)).MarshalText()),
+			units.ErrUnknownUnit, "unknown distance unit distance.Unit(200)",
+		},
+
+		{
+			"StringToTemperature", errOf(units.StringToTemperature("1 C")),
+			units.ErrUnknownUnit, "unknown temperature unit C",
 		},
 
 		{"ToDistance", errOf(units.ToDistance(kg)), units.ErrIncompatibleMeasures, "not a distance measure"},
+		{
+			"ParseString of a temperature", errOf(units.ParseString("20 °C")), units.ErrIncompatibleMeasures,
+			"unit °C is a temperature unit, and temperatures aren't Measurements: use StringToTemperature",
+		},
 		{"ToArea", errOf(units.ToArea(nil)), units.ErrIncompatibleMeasures, "not an area measure"},
+		{"ToQuantity", errOf(units.ToQuantity[currency](km)), units.ErrIncompatibleMeasures, "not a currency measure"},
 		{
 			"AddMeasurement",
 			errOf(km.AddMeasurement(kg)),
@@ -105,17 +88,31 @@ func TestErrors(t *testing.T) {
 		},
 		{"SubMeasurement nil", errOf(km.SubMeasurement(nil)), units.ErrIncompatibleMeasures, "measurement is nil"},
 		{
+			"AddMeasurement of a measure without units",
+			errOf(km.AddMeasurement(units.NewQuantity(1, units.Unit[noUnits]{}))),
+			units.ErrIncompatibleMeasures,
+			"the measurement's measure has no units: its Units method returns the zero UnitSet",
+		},
+		{
 			"CompareMeasurement", errOf(km.CompareMeasurement(kg)),
 			units.ErrIncompatibleMeasures, "incompatible types distance and mass",
 		},
 		{
 			"AddMeasurement of measures with the same name", errOf(usd.AddMeasurement(gbp)),
-			units.ErrIncompatibleMeasures, "can't convert GBP to USD: the units belong to different currency measures",
+			units.ErrIncompatibleMeasures, "incompatible currency measures: they have different unit sets",
 		},
 
 		{
-			"ToDuration", errOf(mustTime(t, 293, time.Year).ToDuration()),
+			"ToDuration", errOf(units.NewTime(293, time.Year).ToDuration()),
 			units.ErrOutOfRange, "time 293 yr can't be represented as a time.Duration",
+		},
+		{
+			"below absolute zero", errOf(units.NewTemperature(-300, temperature.Celsius)),
+			units.ErrOutOfRange, "temperature -300 °C is below absolute zero, -273.15 °C",
+		},
+		{
+			"MarshalText of NaN", errOf(units.NewDistance(math.NaN(), distance.Meter).MarshalText()),
+			units.ErrOutOfRange, "value NaN m can't be encoded as text: it isn't finite",
 		},
 
 		{
@@ -125,6 +122,10 @@ func TestErrors(t *testing.T) {
 		{
 			"invalid alias", errOf(units.NewParser(units.WithAliases(map[string]string{"fur": "furlong"}))),
 			units.ErrInvalidOption, "alias fur: furlong isn't a unit symbol",
+		},
+		{
+			"measure without units", errOf(units.NewParser(units.WithMeasure[noUnits]())), units.ErrInvalidOption,
+			"WithMeasure: the Units method of the measure returns the zero UnitSet: build it with NewUnitSet",
 		},
 		{
 			"Parser no space",
@@ -137,6 +138,7 @@ func TestErrors(t *testing.T) {
 		{"DivMeasurement", errOf(km.DivMeasurement(0)), units.ErrZeroDivision, "division by zero"},
 		{"DivideByTime", errOf(km.DivideByTime(noTime)), units.ErrZeroDivision, "division by zero"},
 		{"DivideByDistance", errOf(m2.DivideByDistance(noDistance)), units.ErrZeroDivision, "division by zero"},
+		{"Quantity.Div", errOf(usd.Div(0)), units.ErrZeroDivision, "division by zero"},
 
 		{"one field", errOf(units.ParseString("10km")), units.ErrInvalidFormat, "invalid string format: 10km"},
 		{"three fields", errOf(units.StringToMass("1 2 kg")), units.ErrInvalidFormat, "invalid string format: 1 2 kg"},
@@ -150,42 +152,45 @@ func TestErrors(t *testing.T) {
 			units.ErrInvalidFormat,
 			"value +Inf is not a finite number",
 		},
-		{"creator ParseString", errOf(mc.ParseString("USD")), units.ErrInvalidFormat, "invalid string format: USD"},
+		{
+			"ParseQuantity",
+			errOf(units.ParseQuantity[currency]("USD")),
+			units.ErrInvalidFormat,
+			"invalid string format: USD",
+		},
 
 		{
-			"empty factors", errOf(units.NewBaseMeasurement(1, "A", conversion.Factors{})),
-			units.ErrInvalidFactors, "conversion factors are empty",
+			"empty factors", errOf(units.NewUnitSet("currency", "A", conversion.Factors{})),
+			units.ErrInvalidFactors, "provided factors don't contain the base unit A",
 		},
 		{
-			"negative factor", errOf(units.NewBaseMeasurement(1, "A", conversion.Factors{"A": -1})),
+			"negative factor", errOf(units.NewUnitSet("currency", "A", conversion.Factors{"A": -1})),
 			units.ErrInvalidFactors, "conversion factor of unit A must be positive and finite, got -1",
 		},
 		{
-			"creator factors",
-			errOf(units.NewMeasurementCreator[Currency]("currency", "USD", conversion.Factors{"": 1})),
+			"empty symbol",
+			errOf(units.NewUnitSet("currency", "USD", conversion.Factors{"USD": 1, "": 1})),
 			units.ErrInvalidFactors,
 			"unit symbol must not be empty",
 		},
 		{
-			"creator base unit",
-			errOf(units.NewMeasurementCreator[Currency]("currency", "USD", conversion.Factors{"EUR": 1})),
+			"base unit",
+			errOf(units.NewUnitSet("currency", "USD", conversion.Factors{"EUR": 1})),
 			units.ErrInvalidFactors,
-			"provided factors doesn't contain unit USD",
+			"provided factors don't contain the base unit USD",
 		},
 
 		{
-			"empty measure name", errOf(units.NewMeasurementCreator[Currency]("", "USD", currencyFactors())),
+			"empty measure name", errOf(units.NewUnitSet("", "USD", currencyFactors())),
 			units.ErrInvalidMeasure, "measure type must not be empty",
 		},
 		{
-			"predefined measure name", errOf(units.NewMeasurementCreator[Currency]("mass", "USD", currencyFactors())),
+			"predefined measure name", errOf(units.NewUnitSet("mass", "USD", currencyFactors())),
 			units.ErrInvalidMeasure, "measure type mass is reserved for a predefined measure",
 		},
 		{
-			"predefined measure interface",
-			errOf(units.NewMeasurementCreator[units.Distance]("currency", "USD", currencyFactors())),
-			units.ErrInvalidMeasure,
-			"unsupported measurement type units.Distance: it must be satisfied by units.Measurement alone",
+			"measure without units", errOf(units.UnitOf[noUnits]("x")), units.ErrInvalidMeasure,
+			"the Units method of the measure returns the zero UnitSet: build it with NewUnitSet",
 		},
 	}
 
@@ -222,13 +227,7 @@ func TestUnitError(t *testing.T) {
 	}{
 		{"typed measure", errOf(units.StringToDistance("1 kg")), units.MeasureDistance, "kg"},
 		{"no predefined measure", errOf(units.ParseString("1 furlong")), "", "furlong"},
-		{"custom measure", errOf(newCurrencyCreator(t).New(1, "GBP")), "currency", "GBP"},
-		{
-			"NewBaseMeasurement",
-			errOf(units.NewBaseMeasurement(1, "B", conversion.Factors{"A": 1})),
-			units.MeasureCustom,
-			"B",
-		},
+		{"custom measure", errOf(units.UnitOf[currency]("GBP")), "currency", "GBP"},
 	}
 
 	for _, c := range cases {
