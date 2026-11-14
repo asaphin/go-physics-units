@@ -2,6 +2,10 @@
 
 ## Unreleased
 
+## v0.2.0 - 2026-11-14
+
+This release makes the library more scientific: 22 measures, units for science and everyday use in the existing measures, operations between measures, calculators, and two packages, `physics` (formulas) and `constant` (physical constants). Code written for v0.1.0 builds and runs unchanged; the one changed value is `mass.Dalton`, now the CODATA 2022 value.
+
 ### Added
 
 - **22 measures:** `Torque`, `FlowRate`, `MassFlowRate`, `Momentum`, `Pace`, `FuelEconomy`, `FuelConsumption`, `Amount` (of substance), `MolarMass`, `Molarity`, `Radioactivity`, `AbsorbedDose`, `EquivalentDose`, `DoseRate`, `Capacitance`, `Inductance`, `MagneticField`, `Illuminance`, `LuminousFlux`, `SpecificEnergy`, `EnergyDensity` and `Ratio` (%, ‰, bp, ppm, ppb, ppt), each with its unit package, the typed API and a `MeasureType`. The rad of absorbed dose is `rd`, because `rad` is the radian.
