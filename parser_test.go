@@ -27,12 +27,12 @@ func TestParser_ZeroValueIsParseString(t *testing.T) {
 			continue
 		}
 
-		if want != nil && (got.Value() != want.Value() || got.Unit() != want.Unit() || got.Type() != want.Type()) {
+		if want != nil && (got.Value() != want.Value() || got.Symbol() != want.Symbol() || got.Type() != want.Type()) {
 			t.Errorf("Parse(%q) = %v, ParseString = %v", s, got, want)
 		}
 	}
 
-	if u, err := zero.Unit("\u00b5m"); err != nil || u != distance.Micrometer {
+	if u, err := zero.Unit("\u00b5m"); err != nil || u != distance.Micrometer.String() {
 		t.Errorf("zero Unit(\u00b5m) = %q, %v; want %q", u, err, distance.Micrometer)
 	}
 
@@ -42,19 +42,23 @@ func TestParser_ZeroValueIsParseString(t *testing.T) {
 }
 
 func TestParser_Aliases(t *testing.T) {
-	aliases := map[string]string{"metre": distance.Meter, "metres": distance.Meter, "kph": velocity.KilometerPerHour}
+	aliases := map[string]string{
+		"metre":  distance.Meter.String(),
+		"metres": distance.Meter.String(),
+		"kph":    velocity.KilometerPerHour.String(),
+	}
 	p := mustParser(t, units.WithAliases(aliases))
 
 	// Changing the map afterwards has no effect: WithAliases copies it.
-	aliases["kph"] = distance.Kilometer
-	aliases["furlong"] = distance.Meter
+	aliases["kph"] = distance.Kilometer.String()
+	aliases["furlong"] = distance.Meter.String()
 
 	m, err := p.Parse("5 metres")
 	if err != nil {
 		t.Fatal(err)
 	}
 
-	assertMeasurement(t, m, 5, distance.Meter)
+	assertMeasurement(t, m, 5, distance.Meter.String())
 
 	if m.Type() != units.MeasureDistance {
 		t.Errorf("Type() = %s, want distance", m.Type())
@@ -65,13 +69,13 @@ func TestParser_Aliases(t *testing.T) {
 		t.Fatal(err)
 	}
 
-	assertMeasurement(t, v, 100, velocity.KilometerPerHour)
+	assertMeasurement(t, v, 100, velocity.KilometerPerHour.String())
 
 	if _, parseErr := p.Parse("1 furlong"); !errors.Is(parseErr, units.ErrUnknownUnit) {
 		t.Errorf("an alias added after NewParser parsed: %v", parseErr)
 	}
 
-	if u, unitErr := p.Unit("metre"); unitErr != nil || u != distance.Meter {
+	if u, unitErr := p.Unit("metre"); unitErr != nil || u != distance.Meter.String() {
 		t.Errorf("Unit(metre) = %q, %v; want m", u, unitErr)
 	}
 
@@ -86,30 +90,38 @@ func TestParser_Aliases(t *testing.T) {
 	}
 }
 
+// metreMeasure is a user-defined measure with the predefined symbol m.
+type metreMeasure struct{}
+
+var metreUnits = units.MustNewUnitSet("metres", "m", conversion.Factors{"m": 1})
+
+func (metreMeasure) Units() units.UnitSet { return metreUnits }
+
+// dollarMeasure shares the symbol USD with currency.
+type dollarMeasure struct{}
+
+var dollarUnits = units.MustNewUnitSet("dollars", "USD", conversion.Factors{"USD": 1})
+
+func (dollarMeasure) Units() units.UnitSet { return dollarUnits }
+
 func TestParser_InvalidOptions(t *testing.T) {
-	foreign, err := units.NewMeasurementCreator[Currency]("currency", "m", conversion.Factors{"m": 1})
-	if err != nil {
-		t.Fatal(err)
-	}
-
-	mc := newCurrencyCreator(t)
-
 	cases := map[string][]units.ParserOption{
 		"alias of an unknown unit": {units.WithAliases(map[string]string{"furlong": "fur"})},
-		"alias that is a symbol":   {units.WithAliases(map[string]string{"m": distance.Kilometer})},
+		"alias that is a symbol":   {units.WithAliases(map[string]string{"m": distance.Kilometer.String()})},
 		"alias of an alias": {
-			units.WithAliases(map[string]string{"metre": distance.Meter}),
+			units.WithAliases(map[string]string{"metre": distance.Meter.String()}),
 			units.WithAliases(map[string]string{"meter": "metre"}),
 		},
 		"alias defined twice": {
-			units.WithAliases(map[string]string{"metre": distance.Meter}),
-			units.WithAliases(map[string]string{"metre": distance.Meter}),
+			units.WithAliases(map[string]string{"metre": distance.Meter.String()}),
+			units.WithAliases(map[string]string{"metre": distance.Meter.String()}),
 		},
-		"empty alias":                 {units.WithAliases(map[string]string{"": distance.Meter})},
-		"alias with a space":          {units.WithAliases(map[string]string{"square metre": distance.Meter})},
-		"creator unit is predefined":  {units.WithCreator(foreign)},
-		"two creators share a symbol": {units.WithCreator(mc), units.WithCreator(newCurrencyCreator(t))},
-		"creator of another package":  {units.WithCreator[Currency](fakeCreator{})},
+		"empty alias":                 {units.WithAliases(map[string]string{"": distance.Meter.String()})},
+		"alias with a space":          {units.WithAliases(map[string]string{"square metre": distance.Meter.String()})},
+		"measure unit is predefined":  {units.WithMeasure[metreMeasure]()},
+		"two measures share a symbol": {units.WithMeasure[currency](), units.WithMeasure[dollarMeasure]()},
+		"measure added twice":         {units.WithMeasure[currency](), units.WithMeasure[currency]()},
+		"measure without units":       {units.WithMeasure[noUnits]()},
 	}
 
 	for name, options := range cases {
@@ -122,17 +134,11 @@ func TestParser_InvalidOptions(t *testing.T) {
 	}
 }
 
-// fakeCreator implements MeasurementCreator outside the package.
-type fakeCreator struct{}
-
-func (fakeCreator) New(float64, string) (Currency, error) { return nil, errors.New("fake") }
-func (fakeCreator) ParseString(string) (Currency, error)  { return nil, errors.New("fake") }
-
 func TestParser_CaseInsensitive(t *testing.T) {
 	p := mustParser(
 		t,
 		units.CaseInsensitive(),
-		units.WithAliases(map[string]string{"Metre": distance.Meter, "KM": distance.Kilometer}),
+		units.WithAliases(map[string]string{"Metre": distance.Meter.String(), "KM": distance.Kilometer.String()}),
 	)
 
 	cases := []struct {
@@ -140,13 +146,13 @@ func TestParser_CaseInsensitive(t *testing.T) {
 		value float64
 		unit  string
 	}{
-		{"10 KM", 10, distance.Kilometer},
-		{"10 Km", 10, distance.Kilometer},
-		{"1 kn", 1, velocity.Knot},    // exact matches win
-		{"1 kN", 1, force.Kilonewton}, // exact matches win
-		{"3 METRE", 3, distance.Meter},
-		{"2 kwh", 2, energy.KilowattHour},
-		{"4 \u00e5", 4, distance.Angstrom}, // non-ASCII: å folds to Å
+		{"10 KM", 10, distance.Kilometer.String()},
+		{"10 Km", 10, distance.Kilometer.String()},
+		{"1 kn", 1, velocity.Knot.String()},    // exact matches win
+		{"1 kN", 1, force.Kilonewton.String()}, // exact matches win
+		{"3 METRE", 3, distance.Meter.String()},
+		{"2 kwh", 2, energy.KilowattHour.String()},
+		{"4 \u00e5", 4, distance.Angstrom.String()}, // non-ASCII: å folds to Å
 	}
 
 	for _, c := range cases {
@@ -183,12 +189,12 @@ func TestParser_AllowNoSpace(t *testing.T) {
 		value float64
 		unit  string
 	}{
-		{"10km", 10, distance.Kilometer},
-		{"  -2.5m ", -2.5, distance.Meter},
-		{"1.5e3eV", 1500, energy.Electronvolt},
-		{"10eV", 10, energy.Electronvolt}, // "10e" isn't a number
-		{"3e2 km", 300, distance.Kilometer},
-		{"10 km", 10, distance.Kilometer},
+		{"10km", 10, distance.Kilometer.String()},
+		{"  -2.5m ", -2.5, distance.Meter.String()},
+		{"1.5e3eV", 1500, energy.Electronvolt.String()},
+		{"10eV", 10, energy.Electronvolt.String()}, // "10e" isn't a number
+		{"3e2 km", 300, distance.Kilometer.String()},
+		{"10 km", 10, distance.Kilometer.String()},
 	}
 
 	for _, c := range cases {
@@ -224,22 +230,21 @@ func TestParser_AllowNoSpace(t *testing.T) {
 	}
 }
 
-func TestParser_WithCreator(t *testing.T) {
-	mc := newCurrencyCreator(t)
-	p := mustParser(t, units.WithCreator(mc), units.WithAliases(map[string]string{"dollars": "USD"}))
+func TestParser_WithMeasure(t *testing.T) {
+	p := mustParser(t, units.WithMeasure[currency](), units.WithAliases(map[string]string{"dollars": "USD"}))
 
 	m, err := p.Parse("10 dollars")
 	if err != nil {
 		t.Fatal(err)
 	}
 
-	usd, ok := m.(Currency)
-	if !ok || usd.Type() != "currency" {
-		t.Fatalf("Parse(10 dollars) = %v of type %s; want a Currency", m, m.Type())
+	usd, ok := m.(Money)
+	if !ok || usd != units.NewQuantity(10, usdUnit) {
+		t.Fatalf("Parse(10 dollars) = %v of type %T; want 10 USD of type Money", m, m)
 	}
 
-	// Parsed values share the creator's table.
-	eur := newCurrency(t, mc, 10, "EUR")
+	// Parsed values belong to the measure's unit set.
+	eur := units.NewQuantity(10, eurUnit)
 
 	sum, err := eur.AddMeasurement(usd)
 	if err != nil {
@@ -251,6 +256,15 @@ func TestParser_WithCreator(t *testing.T) {
 	if c, err := usd.CompareMeasurement(eur); err != nil || c != -1 {
 		t.Errorf("10 USD vs 10 EUR = %d, %v; want -1", c, err)
 	}
+
+	if u, err := p.Unit("dollars"); err != nil || u != "USD" {
+		t.Errorf("Unit(dollars) = %q, %v; want USD", u, err)
+	}
+
+	// Predefined symbols still parse.
+	if d, err := p.Parse("2 km"); err != nil || d != units.NewDistance(2, distance.Kilometer) {
+		t.Errorf("Parse(2 km) = %v, %v", d, err)
+	}
 }
 
 func TestParser_ConcurrentUse(t *testing.T) {
@@ -258,7 +272,7 @@ func TestParser_ConcurrentUse(t *testing.T) {
 		t,
 		units.CaseInsensitive(),
 		units.AllowNoSpace(),
-		units.WithAliases(map[string]string{"metre": distance.Meter}),
+		units.WithAliases(map[string]string{"metre": distance.Meter.String()}),
 	)
 
 	var wg sync.WaitGroup

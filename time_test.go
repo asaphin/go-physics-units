@@ -14,14 +14,14 @@ import (
 func TestParseDuration(t *testing.T) {
 	tm := units.ParseDuration(90*builtintime.Minute + 500*builtintime.Millisecond)
 
-	assertMeasurement(t, tm, 5400.5, time.BaseUnit)
-	assertMeasurement(t, tm.MustConvertTo(time.Hour), 5400.5/3600, time.Hour)
+	assertMeasurement(t, tm, 5400.5, time.BaseUnit.String())
+	assertMeasurement(t, tm.ConvertTo(time.Hour), 5400.5/3600, time.Hour.String())
 }
 
 func TestTime_ToDuration(t *testing.T) {
 	cases := []struct {
 		value float64
-		unit  string
+		unit  time.Unit
 		want  builtintime.Duration
 	}{
 		{1.5, time.Hour, 90 * builtintime.Minute},
@@ -37,11 +37,7 @@ func TestTime_ToDuration(t *testing.T) {
 	}
 
 	for _, c := range cases {
-		tm, err := units.NewTime(c.value, c.unit)
-		if err != nil {
-			t.Fatal(err)
-		}
-
+		tm := units.NewTime(c.value, c.unit)
 		if got, err := tm.ToDuration(); err != nil || got != c.want {
 			t.Errorf("%v: ToDuration() = %v, %v; want %v", tm, got, err, c.want)
 		}
@@ -51,11 +47,11 @@ func TestTime_ToDuration(t *testing.T) {
 func TestTime_ToDuration_OutOfRange(t *testing.T) {
 	for _, tm := range []units.Time{
 		units.ParseDuration(math.MaxInt64), // 2⁶³-1 ns rounds to 2⁶³ ns in float64
-		mustTime(t, 293, time.Year),
-		mustTime(t, -293, time.Year),
-		mustTime(t, math.NaN(), time.Second),
-		mustTime(t, math.Inf(1), time.Second),
-		mustTime(t, math.Inf(-1), time.Hour),
+		units.NewTime(293, time.Year),
+		units.NewTime(-293, time.Year),
+		units.NewTime(math.NaN(), time.Second),
+		units.NewTime(math.Inf(1), time.Second),
+		units.NewTime(math.Inf(-1), time.Hour),
 	} {
 		if d, err := tm.ToDuration(); !errors.Is(err, units.ErrOutOfRange) || d != 0 {
 			t.Errorf("%v: ToDuration() = %v, %v; want 0 and ErrOutOfRange", tm, d, err)
@@ -80,15 +76,4 @@ func TestTime_ToDurationRoundTrip(t *testing.T) {
 			t.Fatalf("ParseDuration(%v).ToDuration() = %v, %v", d, got, err)
 		}
 	}
-}
-
-func mustTime(t *testing.T, value float64, unit string) units.Time {
-	t.Helper()
-
-	tm, err := units.NewTime(value, unit)
-	if err != nil {
-		t.Fatal(err)
-	}
-
-	return tm
 }

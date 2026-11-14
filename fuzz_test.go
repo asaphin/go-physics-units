@@ -1,6 +1,7 @@
 package units_test
 
 import (
+	"encoding"
 	"fmt"
 	"math"
 	"testing"
@@ -30,8 +31,8 @@ func FuzzParseString(f *testing.F) {
 			t.Fatalf("ParseString(%q) returned a non-finite value %v", s, m.Value())
 		}
 
-		if mt := units.DetectMeasureType(m.Unit()); mt != m.Type() {
-			t.Fatalf("ParseString(%q): Type() = %s, but unit %s belongs to %s", s, m.Type(), m.Unit(), mt)
+		if mt := units.DetectMeasureType(m.Symbol()); mt != m.Type() {
+			t.Fatalf("ParseString(%q): Type() = %s, but unit %s belongs to %s", s, m.Type(), m.Symbol(), mt)
 		}
 
 		//nolint:gocritic // deliberately formats through fmt, to compare Format with String
@@ -44,8 +45,18 @@ func FuzzParseString(f *testing.F) {
 			t.Fatalf("re-parsing %q (from %q): %v", m.String(), s, err)
 		}
 
-		if again.Value() != m.Value() || again.Unit() != m.Unit() {
+		if again != m {
 			t.Fatalf("String() doesn't round-trip: %q -> %v -> %v", s, m, again)
+		}
+
+		marshaler, ok := m.(encoding.TextMarshaler)
+		if !ok {
+			t.Fatalf("%T isn't an encoding.TextMarshaler", m)
+		}
+
+		text, err := marshaler.MarshalText()
+		if err != nil || string(text) != m.String() {
+			t.Fatalf("MarshalText of %v = %q, %v; want String()", m, text, err)
 		}
 	})
 }
@@ -84,13 +95,12 @@ func FuzzParser(f *testing.F) {
 			t.Fatalf("Parse(%q) returned a non-finite value %v", s, m.Value())
 		}
 
-		if strict, strictErr := units.ParseString(s); strictErr == nil &&
-			(strict.Value() != m.Value() || strict.Unit() != m.Unit()) {
+		if strict, strictErr := units.ParseString(s); strictErr == nil && strict != m {
 			t.Fatalf("Parse(%q) = %v, but ParseString gives %v", s, m, strict)
 		}
 
 		again, err := p.Parse(m.String())
-		if err != nil || again.Value() != m.Value() || again.Unit() != m.Unit() {
+		if err != nil || again != m {
 			t.Fatalf("String() doesn't round-trip: %q -> %v -> %v, %v", s, m, again, err)
 		}
 	})

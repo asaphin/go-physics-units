@@ -23,13 +23,15 @@ func (e Error) Error() string {
 
 // The sentinel errors. Use errors.Is to test for them.
 const (
-	// ErrUnknownUnit: the unit doesn't belong to the measure, or, for
-	// NewMeasurement and ParseString, to any predefined measure. These errors are
-	// *UnitError values, which carry the measure and the unit.
+	// ErrUnknownUnit: the unit symbol doesn't belong to the measure, as in
+	// StringToDistance("1 kg") or UnitOf, or, for NewMeasurement and
+	// ParseString, to any predefined measure. These errors are *UnitError
+	// values, which carry the measure and the unit.
 	ErrUnknownUnit Error = "unknown unit"
 	// ErrIncompatibleMeasures: the measurements belong to different measures, as
 	// in ToDistance on a mass or AddMeasurement of a distance and a mass, or one
-	// of them is nil.
+	// of them is nil. Two user-defined measures with the same name but different
+	// unit sets are different measures.
 	ErrIncompatibleMeasures Error = "incompatible measures"
 	// ErrZeroDivision: the divisor is zero, as in Div(0) or DivideByTime with a
 	// zero time.
@@ -42,11 +44,12 @@ const (
 	// symbol or a factor that isn't positive and finite, have two symbols that
 	// differ only in the micro sign, or lack the base unit.
 	ErrInvalidFactors Error = "invalid conversion factors"
-	// ErrInvalidMeasure: NewMeasurementCreator got an empty or predefined measure
-	// name, or a type parameter that Measurement alone doesn't satisfy.
+	// ErrInvalidMeasure: NewUnitSet got an empty or predefined measure name, or
+	// a user-defined measure's Units method returns the zero UnitSet.
 	ErrInvalidMeasure Error = "invalid measure"
 	// ErrOutOfRange: the value can't be represented in the target type, as in
-	// Time.ToDuration of NaN or of more than about 292 years.
+	// Time.ToDuration of NaN or of more than about 292 years, or MarshalText of
+	// a value that isn't finite.
 	ErrOutOfRange Error = "value out of range"
 	// ErrAmbiguousUnit: a case-insensitive Parser got a unit that matches
 	// several symbols differing only in case, such as "KN" for kN and kn.

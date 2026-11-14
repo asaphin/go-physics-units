@@ -1,38 +1,42 @@
-// Package distance defines the distance (length) unit symbols supported by the
-// units package and their conversion factors to the base unit, the metre.
+// Package distance defines the distance (length) units of the units package and
+// their conversion factors to the base unit, the metre.
 package distance
 
-import (
-	"math"
+import "math"
 
-	"github.com/asaphin/go-physics-units/conversion"
-	"github.com/asaphin/go-physics-units/internal/rates"
-)
+// Unit is a distance unit: one of the constants below. String returns its
+// symbol and ParseUnit finds the unit of a symbol.
+//
+// The zero Unit is the base unit, Meter. The numbers behind the constants may
+// change between versions: store and exchange units by their symbols.
+type Unit uint8
 
 // BaseUnit is the SI unit of length that all distance factors are relative to.
 const BaseUnit = Meter
 
-// Distance unit symbols.
+// Distance units, with their symbols.
 const (
-	PlanckLength     = "lp"
-	Femtometer       = "fm"
-	Picometer        = "pm"
-	Angstrom         = "Å"
-	Nanometer        = "nm"
-	Micrometer       = "μm" // U+03BC GREEK SMALL LETTER MU; "µm" (U+00B5 MICRO SIGN) is accepted too
-	Millimeter       = "mm"
-	Centimeter       = "cm"
-	Decimeter        = "dm"
-	Meter            = "m"
-	Kilometer        = "km"
-	Inch             = "in"
-	Feet             = "ft"
-	Yard             = "yd"
-	Mile             = "mi"
-	NauticalMile     = "nmi"
-	AstronomicalUnit = "AU"
-	LightYear        = "ly"
-	Parsec           = "pc"
+	Meter            Unit = iota // m
+	PlanckLength                 // lp
+	Femtometer                   // fm
+	Picometer                    // pm
+	Angstrom                     // Å
+	Nanometer                    // nm
+	Micrometer                   // μm, with U+03BC GREEK SMALL LETTER MU; "µm" (U+00B5 MICRO SIGN) is accepted too
+	Millimeter                   // mm
+	Centimeter                   // cm
+	Decimeter                    // dm
+	Kilometer                    // km
+	Inch                         // in
+	Feet                         // ft
+	Yard                         // yd
+	Mile                         // mi
+	NauticalMile                 // nmi
+	AstronomicalUnit             // AU
+	LightYear                    // ly
+	Parsec                       // pc
+
+	unitCount // the number of units; keep it last
 )
 
 // PlankLength is a misspelled alias of PlanckLength.
@@ -46,37 +50,26 @@ const (
 	julianYear       = 31557600       // s, 365.25 days
 )
 
-var conversionFactors = conversion.Factors{
-	PlanckLength:     1.616255e-35, // CODATA 2018
-	Femtometer:       1e-15,
-	Picometer:        1e-12,
-	Angstrom:         1e-10,
-	Nanometer:        1e-9,
-	Micrometer:       1e-6,
-	Millimeter:       0.001,
-	Centimeter:       0.01,
-	Decimeter:        0.1,
-	Meter:            1,
-	Kilometer:        1000,
-	Inch:             0.0254,
-	Feet:             0.3048,
-	Yard:             0.9144,
-	Mile:             1609.344,
-	NauticalMile:     1852,
-	AstronomicalUnit: astronomicalUnit,
-	LightYear:        speedOfLight * julianYear,           // exact (IAU)
-	Parsec:           astronomicalUnit * 648000 / math.Pi, // exact by definition (IAU 2015)
-}
-
-// ConversionFactors returns a copy of the distance conversion factors: how many
-// base units (m) there are in one unit of each symbol.
-func ConversionFactors() conversion.Factors {
-	return conversion.CopyConversionFactors(conversionFactors)
-}
-
-// Rate returns the multiplier that converts a value in unit from into unit to,
-// and whether both are distance units. For example, Rate(Kilometer, Meter) is 1000.
-// Both forms of the micro sign are accepted.
-func Rate(from, to string) (float64, bool) {
-	return rates.FactorRate(conversionFactors, from, to)
+// definitions holds the symbol of each unit and its factor: how many base
+// units (m) there are in one unit.
+var definitions = [unitCount]definition{
+	Meter:            {"m", 1},
+	PlanckLength:     {"lp", 1.616255e-35}, // CODATA 2018
+	Femtometer:       {"fm", 1e-15},
+	Picometer:        {"pm", 1e-12},
+	Angstrom:         {"Å", 1e-10},
+	Nanometer:        {"nm", 1e-9},
+	Micrometer:       {"μm", 1e-6},
+	Millimeter:       {"mm", 0.001},
+	Centimeter:       {"cm", 0.01},
+	Decimeter:        {"dm", 0.1},
+	Kilometer:        {"km", 1000},
+	Inch:             {"in", 0.0254},
+	Feet:             {"ft", 0.3048},
+	Yard:             {"yd", 0.9144},
+	Mile:             {"mi", 1609.344},
+	NauticalMile:     {"nmi", 1852},
+	AstronomicalUnit: {"AU", astronomicalUnit},
+	LightYear:        {"ly", speedOfLight * julianYear},           // exact (IAU)
+	Parsec:           {"pc", astronomicalUnit * 648000 / math.Pi}, // exact by definition (IAU 2015)
 }

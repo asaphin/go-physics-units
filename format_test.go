@@ -9,10 +9,7 @@ import (
 )
 
 func TestFormat(t *testing.T) {
-	d, err := units.NewDistance(5, distance.Kilometer)
-	if err != nil {
-		t.Fatal(err)
-	}
+	d := units.NewDistance(5, distance.Kilometer)
 
 	m, err := units.ParseString("1234.5678 m")
 	if err != nil {
@@ -38,9 +35,9 @@ func TestFormat(t *testing.T) {
 		{"%x", d, "0x1.4p+02 km"},
 		{"%.3g", m, "1.23e+03 m"},
 		{"%.2f", m, "1234.57 m"},
-		{"%#v", d, `units.Measurement{Value:5, Unit:"km", Type:"distance"}`},
-		{"%#v", m, `units.Measurement{Value:1234.5678, Unit:"m", Type:"distance"}`},
-		{"%d", d, "%!d(units.Measurement=5 km)"},
+		{"%#v", d, `units.Distance{Value:5, Unit:"km"}`},
+		{"%#v", m, `units.Distance{Value:1234.5678, Unit:"m"}`},
+		{"%d", d, "%!d(units.Distance=5 km)"},
 		{"%v", []units.Distance{d, d}, "[5 km 5 km]"},
 	}
 

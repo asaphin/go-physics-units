@@ -3,12 +3,29 @@ package units_test
 import (
 	"math"
 	"math/rand/v2"
+	"slices"
 	"testing"
+	builtintime "time"
 
 	units "github.com/asaphin/go-physics-units"
-	"github.com/asaphin/go-physics-units/conversion"
 	"github.com/asaphin/go-physics-units/distance"
 	"github.com/asaphin/go-physics-units/time"
+)
+
+// Sinks keep the compiler from optimizing the measured calls away.
+var (
+	sinkDistance    units.Distance
+	sinkVelocity    units.Velocity
+	sinkMeasurement units.Measurement
+	sinkMoney       Money
+	sinkUnit        distance.Unit
+	sinkString      string
+	sinkBytes       []byte
+	sinkRate        float64
+	sinkOK          bool
+	sinkInt         int
+	sinkDuration    builtintime.Duration
+	errSink         error
 )
 
 // almostEqual reports whether a and b are equal within the relative error epsilon.
@@ -37,8 +54,8 @@ func assertMeasurement(t *testing.T, m units.Measurement, value float64, unit st
 		t.Fatalf("measurement is nil, want %v %s", value, unit)
 	}
 
-	if m.Unit() != unit {
-		t.Errorf("unit is %s, want %s", m.Unit(), unit)
+	if m.Symbol() != unit {
+		t.Errorf("unit is %s, want %s", m.Symbol(), unit)
 	}
 
 	if !almostEqual(m.Value(), value, 1e-12) {
@@ -59,15 +76,6 @@ func assertPanics(t *testing.T, f func()) {
 	f()
 }
 
-func getValidUnits(factors conversion.Factors) []string {
-	keys := make([]string, 0, len(factors))
-	for key := range factors {
-		keys = append(keys, key)
-	}
-
-	return keys
-}
-
 func randFloat(lo, hi float64) float64 {
 	return lo + rand.Float64()*(hi-lo)
 }
@@ -82,7 +90,7 @@ func randFloats(lo, hi float64, n int) []float64 {
 	return floats
 }
 
-func randStringElement(arr []string) string {
+func randElement[T any](arr []T) T {
 	if len(arr) == 0 {
 		panic("empty array")
 	}
@@ -91,34 +99,22 @@ func randStringElement(arr []string) string {
 }
 
 func generateRandomDistances(n int) []units.Distance {
-	validDistanceUnits := getValidUnits(distance.ConversionFactors())
-
+	all := slices.Collect(distance.Units())
 	distances := make([]units.Distance, n)
 
 	for i := range n {
-		dist, err := units.NewDistance(randFloat(-100, 100), randStringElement(validDistanceUnits))
-		if err != nil {
-			panic(err)
-		}
-
-		distances[i] = dist
+		distances[i] = units.NewDistance(randFloat(-100, 100), randElement(all))
 	}
 
 	return distances
 }
 
 func generateRandomTimes(n int) []units.Time {
-	validTimeUnits := getValidUnits(time.ConversionFactors())
-
+	all := slices.Collect(time.Units())
 	times := make([]units.Time, n)
 
 	for i := range n {
-		tm, err := units.NewTime(randFloat(-100, 100), randStringElement(validTimeUnits))
-		if err != nil {
-			panic(err)
-		}
-
-		times[i] = tm
+		times[i] = units.NewTime(randFloat(-100, 100), randElement(all))
 	}
 
 	return times

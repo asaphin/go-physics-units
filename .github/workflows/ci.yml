@@ -35,9 +35,8 @@ jobs:
         run: go test -count=1 -run='^TestAllocations$' .
       - name: fuzz ParseString
         run: go test -run='^$' -fuzz=FuzzParseString -fuzztime=20s .
-      - name: RFC prototype (a separate module, docs/rfc-value-types)
-        working-directory: docs/rfc-value-types
-        run: go vet ./... && go test -count=1 ./...
+      - name: fuzz Parser
+        run: go test -run='^$' -fuzz=FuzzParser -fuzztime=20s .
 
   lint:
     runs-on: ubuntu-latest

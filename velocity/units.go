@@ -1,44 +1,36 @@
-// Package velocity defines the velocity (speed) unit symbols supported by the
-// units package and their conversion factors to the base unit, metres per second.
+// Package velocity defines the velocity (speed) units of the units package and
+// their conversion factors to the base unit, the metre per second.
 package velocity
 
-import (
-	"github.com/asaphin/go-physics-units/conversion"
-	"github.com/asaphin/go-physics-units/internal/rates"
-)
+// Unit is a velocity unit: one of the constants below. String returns its
+// symbol and ParseUnit finds the unit of a symbol.
+//
+// The zero Unit is the base unit, MeterPerSecond. The numbers behind the constants may
+// change between versions: store and exchange units by their symbols.
+type Unit uint8
 
 // BaseUnit is the SI unit of velocity that all velocity factors are relative to.
 const BaseUnit = MeterPerSecond
 
-// Velocity unit symbols.
+// Velocity units, with their symbols.
 const (
-	KilometerPerHour = "km/h"
-	FeetPerSecond    = "ft/s"
-	MilePerHour      = "mph"
-	Knot             = "kn"
-	MeterPerSecond   = "m/s"
-	SpeedOfLight     = "c"
+	MeterPerSecond   Unit = iota // m/s
+	KilometerPerHour             // km/h
+	FeetPerSecond                // ft/s
+	MilePerHour                  // mph
+	Knot                         // kn
+	SpeedOfLight                 // c
+
+	unitCount // the number of units; keep it last
 )
 
-var conversionFactors = conversion.Factors{
-	KilometerPerHour: 1000.0 / 3600,
-	FeetPerSecond:    0.3048,
-	MilePerHour:      0.44704,
-	Knot:             1852.0 / 3600, // one nautical mile per hour
-	MeterPerSecond:   1,
-	SpeedOfLight:     299792458, // exact by definition
-}
-
-// ConversionFactors returns a copy of the velocity conversion factors: how many
-// base units (m/s) there are in one unit of each symbol.
-func ConversionFactors() conversion.Factors {
-	return conversion.CopyConversionFactors(conversionFactors)
-}
-
-// Rate returns the multiplier that converts a value in unit from into unit to,
-// and whether both are velocity units. For example, Rate(MeterPerSecond,
-// KilometerPerHour) is 3.6, up to floating-point rounding.
-// Both forms of the micro sign are accepted.
-func Rate(from, to string) (float64, bool) {
-	return rates.FactorRate(conversionFactors, from, to)
+// definitions holds the symbol of each unit and its factor: how many base
+// units (m/s) there are in one unit.
+var definitions = [unitCount]definition{
+	MeterPerSecond:   {"m/s", 1},
+	KilometerPerHour: {"km/h", 1000.0 / 3600},
+	FeetPerSecond:    {"ft/s", 0.3048},
+	MilePerHour:      {"mph", 0.44704},
+	Knot:             {"kn", 1852.0 / 3600}, // one nautical mile per hour
+	SpeedOfLight:     {"c", 299792458},      // exact by definition
 }

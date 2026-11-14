@@ -4,6 +4,7 @@ import (
 	"testing"
 
 	units "github.com/asaphin/go-physics-units"
+	"github.com/asaphin/go-physics-units/distance"
 )
 
 func BenchmarkDistance_AddSub(b *testing.B) {
@@ -131,7 +132,7 @@ func BenchmarkDistance_ParseString(b *testing.B) {
 func BenchmarkDistance_Creation(b *testing.B) {
 	b.Run("NewDistanceMeters", func(b *testing.B) {
 		for b.Loop() {
-			_, _ = units.NewDistance(10.0, "m")
+			sinkDistance = units.NewDistance(10.0, distance.Meter)
 		}
 	})
 }
@@ -139,7 +140,7 @@ func BenchmarkDistance_Creation(b *testing.B) {
 func BenchmarkDistance_ErrorHandling(b *testing.B) {
 	b.Run("NewDistanceUnknownUnit", func(b *testing.B) {
 		for b.Loop() {
-			_, _ = units.NewDistance(10.0, "unk")
+			_, _ = units.StringToDistance("10 unk")
 		}
 	})
 }
