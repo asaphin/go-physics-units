@@ -254,6 +254,10 @@ func (s *unitSet) operand(m Measurement) (genericValue, error) {
 		return o, nil
 	}
 
+	if o.set == nil {
+		return genericValue{}, errNoUnits
+	}
+
 	if o.set.name == s.name {
 		return genericValue{}, newError(ErrIncompatibleMeasures,
 			"incompatible "+string(s.name)+" measures: they have different unit sets", nil)

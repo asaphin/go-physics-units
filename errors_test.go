@@ -88,6 +88,12 @@ func TestErrors(t *testing.T) {
 		},
 		{"SubMeasurement nil", errOf(km.SubMeasurement(nil)), units.ErrIncompatibleMeasures, "measurement is nil"},
 		{
+			"AddMeasurement of a measure without units",
+			errOf(km.AddMeasurement(units.NewQuantity(1, units.Unit[noUnits]{}))),
+			units.ErrIncompatibleMeasures,
+			"the measurement's measure has no units: its Units method returns the zero UnitSet",
+		},
+		{
 			"CompareMeasurement", errOf(km.CompareMeasurement(kg)),
 			units.ErrIncompatibleMeasures, "incompatible types distance and mass",
 		},
