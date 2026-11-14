@@ -1,9 +1,8 @@
-// Package units provides physical measurements (distance, area, volume, mass,
-// time, velocity, acceleration, force, energy, power, pressure, frequency,
-// angle, angular velocity, data size, density, data rate, temperature,
-// electric current, voltage, electric charge and resistance) with unit
-// conversion, arithmetic, comparison, parsing and text encoding, plus
-// user-defined measures such as currencies.
+// Package units provides physical measurements, with unit conversion,
+// arithmetic, comparison, parsing and text encoding: 43 predefined measures,
+// from distance, time and mass to torque, molar concentration, radiation dose
+// and luminous flux, plus temperature and user-defined measures such as
+// currencies.
 //
 // # Values and units
 //
@@ -24,6 +23,15 @@
 // unit; arithmetic keeps the receiver's unit. Operations that combine
 // measures, such as Distance.DivideByTime, return results in the SI base unit
 // of the result.
+//
+// # Combining measures, calculators and formulas
+//
+// Methods combine measures, in the SI base unit of the result: Distance.DivideByTime
+// gives a Velocity, Torque.MultiplyByAngularVelocity a Power. Others are
+// formulas of one value, such as Volume.CubeEdge, Mass.RestEnergy and
+// Velocity.LorentzFactor, and Ratio divides two values of one measure. The
+// physics package has formulas with several inputs, such as
+// physics.EscapeVelocity, and the constant package physical constants.
 //
 // # Parsing and generic code
 //
