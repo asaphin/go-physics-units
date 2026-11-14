@@ -94,7 +94,10 @@ func (*UnitError) Unwrap() error {
 // own. Its values are constants, so returning one doesn't allocate.
 type incompatibleError string
 
-const errNilMeasurement incompatibleError = "measurement is nil"
+const (
+	errNilMeasurement incompatibleError = "measurement is nil"
+	errNoUnits        incompatibleError = "the measurement's measure has no units: its Units method returns the zero UnitSet"
+)
 
 func (e incompatibleError) Error() string {
 	return string(e)

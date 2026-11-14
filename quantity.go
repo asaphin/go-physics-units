@@ -20,7 +20,9 @@ import (
 //
 //	type Money = units.Quantity[currency]
 //
-// Any type can be a marker; an empty struct costs nothing.
+// Any type can be a marker; an empty struct costs nothing. UnitOf and
+// ParseQuantity fail if Units returns the zero UnitSet, and the methods of a
+// Quantity of such a measure panic.
 type Measure interface {
 	Units() UnitSet
 }
@@ -130,16 +132,17 @@ func ParseQuantity[M Measure](s string) (Quantity[M], error) {
 }
 
 // ToQuantity returns m as a Quantity[M]. It fails with ErrIncompatibleMeasures
-// if m isn't one.
+// if m isn't one, and with ErrInvalidMeasure if M's Units method returns the
+// zero UnitSet.
 func ToQuantity[M Measure](m Measurement) (Quantity[M], error) {
 	q, ok := m.(Quantity[M])
 	if !ok {
-		var mt MeasureType
-		if s, err := setOf[M](); err == nil {
-			mt = s.name
+		s, err := setOf[M]()
+		if err != nil {
+			return Quantity[M]{}, err
 		}
 
-		return Quantity[M]{}, newError(ErrIncompatibleMeasures, "not a "+string(mt)+" measure", nil)
+		return Quantity[M]{}, newError(ErrIncompatibleMeasures, "not a "+string(s.name)+" measure", nil)
 	}
 
 	return q, nil

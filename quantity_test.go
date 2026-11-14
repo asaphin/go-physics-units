@@ -132,8 +132,14 @@ func TestQuantity_DifferentSetsWithTheSameName(t *testing.T) {
 		t.Errorf("ToQuantity of another measure: %v, want ErrIncompatibleMeasures", err)
 	}
 
-	if _, err := units.ToQuantity[noUnits](gbp); !errors.Is(err, units.ErrIncompatibleMeasures) {
-		t.Errorf("ToQuantity to a measure without units: %v, want ErrIncompatibleMeasures", err)
+	if _, err := units.ToQuantity[noUnits](gbp); !errors.Is(err, units.ErrInvalidMeasure) {
+		t.Errorf("ToQuantity to a measure without units: %v, want ErrInvalidMeasure", err)
+	}
+
+	// A quantity of a measure without units is an operand error, not a panic.
+	broken := units.NewQuantity(1, units.Unit[noUnits]{})
+	if _, err := usd.AddMeasurement(broken); !errors.Is(err, units.ErrIncompatibleMeasures) {
+		t.Errorf("adding a quantity of a measure without units: %v, want ErrIncompatibleMeasures", err)
 	}
 }
 
